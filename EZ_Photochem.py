@@ -1,4 +1,4 @@
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import numpy as np
 import os,sys,shutil,subprocess
 from astropy.io import ascii
@@ -146,7 +146,7 @@ def plot_dists_b4andafter(nz, nq, npar, dz, atmosfile1='./atmos/PHOTOCHEM/OUTPUT
 
 
 ### Easy wrapper to just run 1 photochem run
-def run_photochem_1instance(CleanMake=False, InputCopy=False, OutPath='./'):
+def run_photochem_1instance(CleanMake=True, InputCopy=False, OutPath='/gscratch/vsm/gialluca/VPLModelingTools_Dev/ModelRunOutputs/'):
 
     # If you have new input files to use, give 'InputCopy' the dir path
     if InputCopy != False:
@@ -245,7 +245,7 @@ def basic_params(Prms='./atmos/PHOTOCHEM/OUTPUT/out.params'):
     return fstl
 
 ### Take the PT profile output from photochem and degrade it to a specified number of layers
-def degrade_PT(nlayer, Prof='./atmos/PHOTOCHEM/OUTPUT/profile.pt', outputunits='Bar', outputpath='./DataFiles_forSMART/', outputname='PT_profile_T1c1bar.pt'):
+def degrade_PT(nlayer, Prof='/gscratch/vsm/gialluca/VPLModelingTools_Dev/atmos/PHOTOCHEM/OUTPUT/profile.pt', outputunits='Bar', outputpath='/gscratch/vsm/gialluca/VPLModelingTools_Dev/AtmProfiles/', outputname='PT_profile_T1c1bar.pt'):
     atm = ascii.read(Prof, delimiter=' ')
     alt = atm['Alt']
     pres = atm['Press']
@@ -262,7 +262,7 @@ def degrade_PT(nlayer, Prof='./atmos/PHOTOCHEM/OUTPUT/profile.pt', outputunits='
     ascii.write(dat, outputpath+outputname, overwrite=True)
 
 ### Make pressure increase in the column (reverse all columns) for smart
-def prep_p_rmix_files_smart(Prof='./atmos/PHOTOCHEM/OUTPUT/profile.pt', outputpath='./DataFiles_forSMART/', outputname='MixingRs_T1c1bar.dat'):
+def prep_p_rmix_files_smart(Prof='/gscratch/vsm/gialluca/VPLModelingTools_Dev/atmos/PHOTOCHEM/OUTPUT/profile.pt', outputpath='/gscratch/vsm/gialluca/VPLModelingTools_Dev/AtmProfiles/', outputname='MixingRs_T1c1bar.dat'):
     atm = ascii.read(Prof, delimiter=' ')
     datfortab = [atm['Press'][::-1]]
     namesfortab = ['Press']
