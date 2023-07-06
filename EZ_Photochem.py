@@ -166,40 +166,40 @@ def run_photochem_1instance(CleanMake=True, InputCopy=False, OutPath='/gscratch/
                     sys.exit('User doesnt follow instructions, terminating')
 
         # Remove old input files if they exist
-        subprocess.run('rm ./atmos/PHOTOCHEM/INPUTFILES/input_photchem.dat', shell=True)
-        subprocess.run('rm ./atmos/PHOTOCHEM/INPUTFILES/parameters.inc', shell=True)
+        subprocess.run('rm /gscratch/vsm/gialluca/VPLModelingTools_Dev/atmos/PHOTOCHEM/INPUTFILES/input_photchem.dat', shell=True)
+        subprocess.run('rm /gscratch/vsm/gialluca/VPLModelingTools_Dev/atmos/PHOTOCHEM/INPUTFILES/parameters.inc', shell=True)
         #subprocess.run('rm ./atmos/PHOTOCHEM/INPUTFILES/params.dat', shell=True)
-        subprocess.run('rm ./atmos/PHOTOCHEM/INPUTFILES/PLANET.dat', shell=True)
-        subprocess.run('rm ./atmos/PHOTOCHEM/INPUTFILES/reactions.rx', shell=True)
-        subprocess.run('rm ./atmos/PHOTOCHEM/INPUTFILES/species.dat', shell=True)
-        subprocess.run('rm ./atmos/PHOTOCHEM/in.dist', shell=True)
+        subprocess.run('rm /gscratch/vsm/gialluca/VPLModelingTools_Dev/atmos/PHOTOCHEM/INPUTFILES/PLANET.dat', shell=True)
+        subprocess.run('rm /gscratch/vsm/gialluca/VPLModelingTools_Dev/atmos/PHOTOCHEM/INPUTFILES/reactions.rx', shell=True)
+        subprocess.run('rm /gscratch/vsm/gialluca/VPLModelingTools_Dev/atmos/PHOTOCHEM/INPUTFILES/species.dat', shell=True)
+        subprocess.run('rm /gscratch/vsm/gialluca/VPLModelingTools_Dev/atmos/PHOTOCHEM/in.dist', shell=True)
 
         # Copy new input files to the right places
-        subprocess.run('cp '+InputCopy+'input_photchem.dat ./atmos/PHOTOCHEM/INPUTFILES/', shell=True)
-        subprocess.run('cp '+InputCopy+'parameters.inc ./atmos/PHOTOCHEM/INPUTFILES/', shell=True)
+        subprocess.run('cp '+InputCopy+'input_photchem.dat /gscratch/vsm/gialluca/VPLModelingTools_Dev/atmos/PHOTOCHEM/INPUTFILES/', shell=True)
+        subprocess.run('cp '+InputCopy+'parameters.inc /gscratch/vsm/gialluca/VPLModelingTools_Dev/atmos/PHOTOCHEM/INPUTFILES/', shell=True)
         #subprocess.run('cp '+InputCopy+'params.dat ./atmos/PHOTOCHEM/INPUTFILES/', shell=True)
-        subprocess.run('cp '+InputCopy+'PLANET.dat ./atmos/PHOTOCHEM/INPUTFILES/', shell=True)
-        subprocess.run('cp '+InputCopy+'reactions.rx ./atmos/PHOTOCHEM/INPUTFILES/', shell=True)
-        subprocess.run('cp '+InputCopy+'species.dat ./atmos/PHOTOCHEM/INPUTFILES/', shell=True)
-        subprocess.run('cp '+InputCopy+'in.dist ./atmos/PHOTOCHEM/', shell=True)
+        subprocess.run('cp '+InputCopy+'PLANET.dat /gscratch/vsm/gialluca/VPLModelingTools_Dev/atmos/PHOTOCHEM/INPUTFILES/', shell=True)
+        subprocess.run('cp '+InputCopy+'reactions.rx /gscratch/vsm/gialluca/VPLModelingTools_Dev/atmos/PHOTOCHEM/INPUTFILES/', shell=True)
+        subprocess.run('cp '+InputCopy+'species.dat /gscratch/vsm/gialluca/VPLModelingTools_Dev/atmos/PHOTOCHEM/INPUTFILES/', shell=True)
+        subprocess.run('cp '+InputCopy+'in.dist /gscratch/vsm/gialluca/VPLModelingTools_Dev/atmos/PHOTOCHEM/', shell=True)
 
     # Clear the outputs
-    subprocess.run('rm -rf ./atmos/PHOTOCHEM/OUTPUT/*', shell=True)
-    subprocess.run('rm -rf ./atmos/PHOTOCHEM/PTZ_mixingratios_in.dist', shell=True)
+    subprocess.run('rm -rf /gscratch/vsm/gialluca/VPLModelingTools_Dev/atmos/PHOTOCHEM/OUTPUT/*', shell=True)
+    subprocess.run('rm -rf /gscratch/vsm/gialluca/VPLModelingTools_Dev/atmos/PHOTOCHEM/PTZ_mixingratios_in.dist', shell=True)
 
     # Clean make, if requested
     if CleanMake:
         fmake = open(OutPath+'photochem_make_output.txt', 'w')
-        os.chdir('./atmos/')
+        os.chdir('/gscratch/vsm/gialluca/VPLModelingTools_Dev/atmos/')
         subprocess.run('make -f ./PhotoMake clean', shell=True)
         subprocess.run('make -f ./PhotoMake', shell=True, stdout=fmake)
-        os.chdir('../')
+        os.chdir('/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/')
 
     # Run photochem
     f = open(OutPath+'photochem_run_output.run', 'w')
-    os.chdir('./atmos')
+    os.chdir('/gscratch/vsm/gialluca/VPLModelingTools_Dev/atmos/')
     subprocess.run('./Photo.run', shell=True, stdout=f)
-    os.chdir('../')
+    os.chdir('/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/')
 
 ### Plot the P-T profile and alt vs pressure
 def pt_profile(Prof='./atmos/PHOTOCHEM/OUTPUT/profile.pt'):
