@@ -201,6 +201,13 @@ def run_photochem_1instance(CleanMake=True, InputCopy=False, OutPath='/gscratch/
     subprocess.run('./Photo.run', shell=True, stdout=f)
     os.chdir('/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/')
 
+### Run LBLABC for a given runscript (just useful to get the output w/e)
+def run_lblabc(runscript, outfile='lblabc_run_output.run', outpath='/gscratch/vsm/gialluca/VPLModelingTools_Dev/ModelRunOutputs/'):
+    f = open(outpath+outfile, 'w')
+    subprocess.run('/gscratch/vsm/gialluca/VPLModelingTools_Dev/lblabc/lblabc < '+runscript, shell=True, stdout=f)
+
+
+
 ### Plot the P-T profile and alt vs pressure
 def pt_profile(Prof='./atmos/PHOTOCHEM/OUTPUT/profile.pt'):
     atm = ascii.read(Prof, delimiter=' ')
