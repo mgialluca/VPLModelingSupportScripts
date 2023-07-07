@@ -11,7 +11,7 @@
 0			No Jacobians for First Absorber
 1			Number of Absorption Coefficient Types
 3			Cross Sections
-/home/mgialluca/Nextcloud/VPL_Modeling/Atmos_Dev/xsecdata/uvxsec/h2oxsec.dat
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/xsec/h2oxsec.dat
 3			List Directed
 /gscratch/vsm/gialluca/VPLModelingTools_Dev/AtmProfiles/MixingRs_T1c1bar.dat
 1			Lines to Skip at Top of File
@@ -23,7 +23,7 @@
 0			No Jacobians for Second Absorber
 1			Number of Absorption Coefficient Types
 3			Cross Sections
-/home/mgialluca/Nextcloud/VPL_Modeling/Atmos_Dev/xsecdata/uvxsec/co2xsec.dat
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/xsec/co2xsec.dat
 3			List Directed
 /gscratch/vsm/gialluca/VPLModelingTools_Dev/AtmProfiles/MixingRs_T1c1bar.dat
 1			Lines to Skip at Top of File
@@ -35,7 +35,7 @@
 0			No Jacobians for Third Absorber
 1			Number of Absorption Coefficient Types
 3			Cross Sections
-/home/mgialluca/Nextcloud/VPL_Modeling/Atmos_Dev/xsecdata/uvxsec/o3xsec.dat
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/xsec/o3xsec.dat
 3			List Directed
 /gscratch/vsm/gialluca/VPLModelingTools_Dev/AtmProfiles/MixingRs_T1c1bar.dat
 1			Lines to Skip at Top of File
@@ -47,7 +47,7 @@
 0			No Jacobians for Fourth Absorber
 1			Number of Absorption Coefficient Types
 3			Cross Sections
-/home/mgialluca/Nextcloud/VPL_Modeling/Atmos_Dev/xsecdata/uvxsec/n2oxsec.dat
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/xsec/n2oxsec.dat
 3			List Directed
 /gscratch/vsm/gialluca/VPLModelingTools_Dev/AtmProfiles/MixingRs_T1c1bar.dat
 1			Lines to Skip at Top of File
@@ -59,7 +59,7 @@
 0			No Jacobians for Fifth Absorber
 1			Number of Absorption Coefficient Types
 3			Cross Sections
-/home/mgialluca/Nextcloud/VPL_Modeling/Atmos_Dev/xsecdata/uvxsec/coxsec.dat
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/xsec/coxsec.dat
 3			List Directed
 /gscratch/vsm/gialluca/VPLModelingTools_Dev/AtmProfiles/MixingRs_T1c1bar.dat
 1			Lines to Skip at Top of File
@@ -71,7 +71,7 @@
 0			No Jacobians for First Absorber
 1			Number of Absorption Coefficient Types
 3			Cross Sections
-/home/mgialluca/Nextcloud/VPL_Modeling/Atmos_Dev/xsecdata/uvxsec/ch4_uv_vis_nir_xsec.dat
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/xsec/ch4xsec.dat
 3			List Directed
 /gscratch/vsm/gialluca/VPLModelingTools_Dev/AtmProfiles/MixingRs_T1c1bar.dat
 1			Lines to Skip at Top of File
@@ -83,7 +83,7 @@
 0			No Jacobians for First Absorber
 1			Number of Absorption Coefficient Types
 3			Cross Sections
-/home/mgialluca/Nextcloud/VPL_Modeling/Atmos_Dev/xsecdata/uvxsec/o2xsec.dat
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/xsec/o2xsec.dat
 3			List Directed
 /gscratch/vsm/gialluca/VPLModelingTools_Dev/AtmProfiles/MixingRs_T1c1bar.dat
 1			Lines to Skip at Top of File
@@ -95,7 +95,7 @@
 0			No Jacobians for First Absorber
 1			Number of Absorption Coefficient Types
 3			Cross Sections
-/home/mgialluca/Nextcloud/VPL_Modeling/Atmos_Dev/xsecdata/uvxsec/no2xsec.dat
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/xsec/no2xsec.dat
 3			List Directed
 /gscratch/vsm/gialluca/VPLModelingTools_Dev/AtmProfiles/MixingRs_T1c1bar.dat
 1			Lines to Skip at Top of File
@@ -107,7 +107,7 @@
 0			No Jacobians for First Absorber
 1			Number of Absorption Coefficient Types
 3			Cross Sections
-/home/mgialluca/Nextcloud/VPL_Modeling/Atmos_Dev/xsecdata/uvxsec/hno3xsec.dat
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/xsec/hno3xsec.dat
 3			List Directed
 /gscratch/vsm/gialluca/VPLModelingTools_Dev/AtmProfiles/MixingRs_T1c1bar.dat
 1			Lines to Skip at Top of File
@@ -119,7 +119,7 @@
 0			No Jacobians for First Absorber
 1			Number of Absorption Coefficient Types
 3			Cross Sections
-/home/mgialluca/Nextcloud/VPL_Modeling/Atmos_Dev/xsecdata/uvxsec/so2xsec.dat
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/xsec/so2xsec.dat
 3			List Directed
 /gscratch/vsm/gialluca/VPLModelingTools_Dev/AtmProfiles/MixingRs_T1c1bar.dat
 1			Lines to Skip at Top of File
@@ -166,5 +166,5 @@
 0.15		g Error
 0.02		Albedo Error
 1			Output Format (ascii)
-T1c_1barO2_onlycrosssec
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/Spectra/T1c_1barO2_onlycrosssec
 2			Overwrite
