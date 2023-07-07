@@ -5,11 +5,13 @@
 1			Lines to Skip at Top of File
 1,2			Columns of P,T
 100000			Pressure Scaling Factor
-400 		Surface Temperature
+388.92 		Surface Temperature
 10			Number of Gas Absorbers
 1			Gas Code for First Absorber
 0			No Jacobians for First Absorber
-1			Number of Absorption Coefficient Types
+2			Number of Absorption Coefficient Types
+1			Line Absorbers
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/LinebyLine_absFiles/T1cFiducial1barO2_h2o_hitran16_50_1e5cm-1.abs
 3			Cross Sections
 /gscratch/vsm/gialluca/VPLModelingTools_Dev/xsec/h2oxsec.dat
 3			List Directed
@@ -21,7 +23,9 @@
 100000,1.0		P and rMix Scaling Factors
 2			Gas Code for Second Absorber
 0			No Jacobians for Second Absorber
-1			Number of Absorption Coefficient Types
+2			Number of Absorption Coefficient Types
+1			Line Absorbers
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/LinebyLine_absFiles/T1cFiducial1barO2_co2_hitran16_50_1e5cm-1.abs
 3			Cross Sections
 /gscratch/vsm/gialluca/VPLModelingTools_Dev/xsec/co2xsec.dat
 3			List Directed
@@ -33,7 +37,9 @@
 100000,1.0		P and rMix Scaling Factors
 3			Gas Code for Third Absorber
 0			No Jacobians for Third Absorber
-1			Number of Absorption Coefficient Types
+2			Number of Absorption Coefficient Types
+1			Line Absorbers
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/LinebyLine_absFiles/T1cFiducial1barO2_o3_hitran16_50_1e5cm-1.abs
 3			Cross Sections
 /gscratch/vsm/gialluca/VPLModelingTools_Dev/xsec/o3xsec.dat
 3			List Directed
@@ -45,7 +51,9 @@
 100000,1.0		P and rMix Scaling Factors
 4			Gas Code for Fourth Absorber
 0			No Jacobians for Fourth Absorber
-1			Number of Absorption Coefficient Types
+2			Number of Absorption Coefficient Types
+1			Line Absorbers
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/LinebyLine_absFiles/T1cFiducial1barO2_n2o_hitran16_50_1e5cm-1.abs
 3			Cross Sections
 /gscratch/vsm/gialluca/VPLModelingTools_Dev/xsec/n2oxsec.dat
 3			List Directed
@@ -57,7 +65,9 @@
 100000,1.0		P and rMix Scaling Factors
 5			Gas Code for Fifth Absorber
 0			No Jacobians for Fifth Absorber
-1			Number of Absorption Coefficient Types
+2			Number of Absorption Coefficient Types
+1			Line Absorbers
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/LinebyLine_absFiles/T1cFiducial1barO2_co_hitran16_50_1e5cm-1.abs
 3			Cross Sections
 /gscratch/vsm/gialluca/VPLModelingTools_Dev/xsec/coxsec.dat
 3			List Directed
@@ -69,7 +79,9 @@
 100000,1.0		P and rMix Scaling Factors
 6			Gas Code for Sixth Absorber
 0			No Jacobians for First Absorber
-1			Number of Absorption Coefficient Types
+2			Number of Absorption Coefficient Types
+1			Line Absorbers
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/LinebyLine_absFiles/T1cFiducial1barO2_ch4_hitran16_50_1e5cm-1.abs
 3			Cross Sections
 /gscratch/vsm/gialluca/VPLModelingTools_Dev/xsec/ch4xsec.dat
 3			List Directed
@@ -81,7 +93,9 @@
 100000,1.0		P and rMix Scaling Factors
 7			Gas Code for Seventh Absorber
 0			No Jacobians for First Absorber
-1			Number of Absorption Coefficient Types
+2			Number of Absorption Coefficient Types
+1			Line Absorbers
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/LinebyLine_absFiles/T1cFiducial1barO2_o2_hitran16_50_1e5cm-1.abs
 3			Cross Sections
 /gscratch/vsm/gialluca/VPLModelingTools_Dev/xsec/o2xsec.dat
 3			List Directed
@@ -93,7 +107,9 @@
 100000,1.0		P and rMix Scaling Factors
 10			Gas Code for Eighth Absorber
 0			No Jacobians for First Absorber
-1			Number of Absorption Coefficient Types
+2			Number of Absorption Coefficient Types
+1			Line Absorbers
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/LinebyLine_absFiles/T1cFiducial1barO2_no2_hitran16_50_1e5cm-1.abs
 3			Cross Sections
 /gscratch/vsm/gialluca/VPLModelingTools_Dev/xsec/no2xsec.dat
 3			List Directed
@@ -105,7 +121,9 @@
 100000,1.0		P and rMix Scaling Factors
 12			Gas Code for Ninth Absorber
 0			No Jacobians for First Absorber
-1			Number of Absorption Coefficient Types
+2			Number of Absorption Coefficient Types
+1			Line Absorbers
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/LinebyLine_absFiles/T1cFiducial1barO2_hno3_hitran16_50_1e5cm-1.abs
 3			Cross Sections
 /gscratch/vsm/gialluca/VPLModelingTools_Dev/xsec/hno3xsec.dat
 3			List Directed
@@ -117,7 +135,9 @@
 100000,1.0		P and rMix Scaling Factors
 9			Gas Code for Tenth Absorber
 0			No Jacobians for First Absorber
-1			Number of Absorption Coefficient Types
+2			Number of Absorption Coefficient Types
+1			Line Absorbers
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/LinebyLine_absFiles/T1cFiducial1barO2_so2_hitran16_50_1e5cm-1.abs
 3			Cross Sections
 /gscratch/vsm/gialluca/VPLModelingTools_Dev/xsec/so2xsec.dat
 3			List Directed
@@ -140,7 +160,7 @@
 0.0158   	Distance from Star (AU)
 10.65			Surface Gravity [m/s*s]
 6996.7757	    Planetary Radius [km]
-29.0		Mean Molecular Weight of Atmosphere
+31.532209762503985		Mean Molecular Weight of Atmosphere
 1			Number of Rayleigh Scatterers
 1			Rayleigh Scatter Index
 1.0			Volume Mixing Ratio
@@ -166,5 +186,5 @@
 0.15		g Error
 0.02		Albedo Error
 1			Output Format (ascii)
-/gscratch/vsm/gialluca/VPLModelingTools_Dev/Spectra/T1c_1barO2_onlycrosssec
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/Spectra/T1c_1barO2_xsecAndLBL_noSED
 2			Overwrite
