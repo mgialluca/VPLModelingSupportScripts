@@ -13,7 +13,7 @@
 1,8                                     columns of p and rmix
 1                                       type - volume mixing ratio (mass = 2)
 100000,1.0                              p, rmix scaling factors
-10                                       read HITRAN 2016 .par formatted file
+10                                       read HITRAN 2020 .par formatted file
 /gscratch/vsm/gialluca/VPLModelingTools_Dev/HITRAN_Data/HITRAN2020.par
 10.65                                   gravitational acceleration
 6996.7757                               planet radius
