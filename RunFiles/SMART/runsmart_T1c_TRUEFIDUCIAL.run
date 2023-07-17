@@ -186,5 +186,5 @@
 0.15		g Error
 0.02		Albedo Error
 1			Output Format (ascii)
-/gscratch/vsm/gialluca/VPLModelingTools_Dev/Spectra/T1c_1barO2_xsecAndLBL_withSED_hitran2020
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/Spectra/T1c_1barO2-500ppmCO2
 2			Overwrite
