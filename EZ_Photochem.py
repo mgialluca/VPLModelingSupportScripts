@@ -424,6 +424,8 @@ def go_go_hyak_do_it(case, mmw, new_scripts=True, run_scripts=True):
 
         run_smart_1instance(smartrunscriptpath+'runsmart_'+case+'.run', case)
 
+go_go_hyak_do_it('T1c0-1barO2-500ppmCO2', mmw=33.88746929274456, new_scripts=False)
+
 ### Write a new smart run script for a new case with a template file for moderate guidance
 ### Template file should be everything u want but the [required input] absorber descriptions, PT profile, ...
 ### ... [optional input] pressure scaling, pressure column, temp column in pt prof, surf temp, albedo file, ...
