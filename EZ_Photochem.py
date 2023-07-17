@@ -197,16 +197,16 @@ def basic_params(Prms='./atmos/PHOTOCHEM/OUTPUT/out.params'):
 ## Inputs:
 # nlayer - number of layers you want in your degraded atmosphere
 # casename - name of case on your grid you're doing
-# Prof - profile.pt WITH PATH output by photochem
+# Prof - PTZ_mixingratios_out WITH PATH output by photochem
 # outputunits - can do Bar or Pa, Megan stick with bar for the forseeable forever
 # outputpath - path to output new PT profile to
 ##
-def degrade_PT(nlayer, casename, Prof='/gscratch/vsm/gialluca/VPLModelingTools_Dev/atmos/PHOTOCHEM/OUTPUT/profile.pt', 
+def degrade_PT(nlayer, casename, Prof='/gscratch/vsm/gialluca/VPLModelingTools_Dev/atmos/PHOTOCHEM/OUTPUT/PTZ_mixingratios_out.dist', 
                outputunits='Bar', outputpath='/gscratch/vsm/gialluca/VPLModelingTools_Dev/AtmProfiles/'):
     atm = ascii.read(Prof, delimiter=' ')
-    alt = atm['Alt']
-    pres = atm['Press']
-    temp = atm['Temp']
+    alt = atm['ALT']
+    pres = atm['PRESS']
+    temp = atm['TEMP']
 
     new_grid = np.linspace(alt[0], alt[len(alt)-1], nlayer)
     new_temp = np.interp(new_grid, alt, temp)
@@ -222,18 +222,18 @@ def degrade_PT(nlayer, casename, Prof='/gscratch/vsm/gialluca/VPLModelingTools_D
 ##
 ## Inputs:
 # casename - name of the atmosphere case on your grid 
-# Prof - profile.pt WITH PATH that was output by photochem
+# Prof - PTZ_mixingratios_out WITH PATH that was output by photochem
 # outputpath - path to write new mixing ratio file to
 ##
-def prep_p_rmix_files_smart(casename, Prof='/gscratch/vsm/gialluca/VPLModelingTools_Dev/atmos/PHOTOCHEM/OUTPUT/profile.pt', 
-                            outputpath='/gscratch/vsm/gialluca/VPLModelingTools_Dev/AtmProfiles/'):
-    atm = ascii.read(Prof, delimiter=' ')
-    datfortab = [atm['Press'][::-1]]
+def prep_p_rmix_files_smart(casename, Prof='/gscratch/vsm/gialluca/VPLModelingTools_Dev/atmos/PHOTOCHEM/OUTPUT/PTZ_mixingratios_out.dist', 
+                            outputpath='/gscratch/vsm/gialluca/VPLModelingTools_Dev/AtmProfiles/', 
+                            gases=['O2', 'H2O', 'O3', 'CO2', 'CO', 'SO2', 'H2SO4', 'N2', 'NO2', 'HNO3']):
+    atm = ascii.read(Prof)
+    datfortab = [atm['PRESS'][::-1]]
     namesfortab = ['Press']
-    for i in list(atm.columns):
-        if i not in ['Alt', 'Temp', 'Den', 'Press']:
-            datfortab.append(atm[i][::-1])
-            namesfortab.append(i)
+    for i in gases:
+        datfortab.append(atm[i][::-1])
+        namesfortab.append(i)
 
     dat = Table(datfortab, names=namesfortab)
     ascii.write(dat, outputpath+'MixingRs_'+casename+'.dat', overwrite=True)
