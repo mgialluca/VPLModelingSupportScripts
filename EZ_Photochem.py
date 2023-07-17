@@ -178,7 +178,7 @@ def run_lblabc_1instance(runscript, casename, outpath='/gscratch/vsm/gialluca/VP
 # outpath - path to put run output in
 ##
 def run_smart_1instance(runscript, casename, outpath='/gscratch/vsm/gialluca/VPLModelingTools_Dev/ModelRunOutputs/'):
-    subprocess.run('/gscratch/vsm/gialluca/smart/smart_spectra < '+runscript+' > '+outpath+'smart_run_output_'+casename+'.run', shell=True)
+    subprocess.run('/gscratch/vsm/gialluca/VPLModelingTools_Dev/smart/smart_spectra < '+runscript+' > '+outpath+'smart_run_output_'+casename+'.run', shell=True)
 
 ### Get the NZ, NQ, NQ1, NSP2, NR, KJ, NP from out.params
 def basic_params(Prms='./atmos/PHOTOCHEM/OUTPUT/out.params'):
@@ -397,6 +397,31 @@ def smart_script_change_case_quick(template, casename, Tsurf='same', AlbdedoFi='
             out.write(l[i])
     out.close()
 
+
+# Function to edit to just call on hyak lol
+def go_go_hyak_do_it(case):
+    flag = True
+    if flag == True:
+        # O2
+        lblabc_script_change_case('/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/LBLABC/T1cFidO21bar500ppmCO2_hitran2020/runlblabc_O2_T1cFidO21bar_hitran2020.script', 'T1c0-1barO2-500ppmCO2', 'o2', MMW=33.887469292744562, rmix_col=2)
+        # H2O
+        lblabc_script_change_case('/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/LBLABC/T1cFidO21bar500ppmCO2_hitran2020/runlblabc_H2O_T1cFidO21bar_hitran2020.script', 'T1c0-1barO2-500ppmCO2', 'h2o', MMW=33.887469292744562, rmix_col=3)
+        # O3
+        lblabc_script_change_case('/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/LBLABC/T1cFidO21bar500ppmCO2_hitran2020/runlblabc_O3_T1cFidO21bar_hitran2020.script', 'T1c0-1barO2-500ppmCO2', 'o3', MMW=33.887469292744562, rmix_col=4)
+        # CO2
+        lblabc_script_change_case('/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/LBLABC/T1cFidO21bar500ppmCO2_hitran2020/runlblabc_CO2_T1cFidO21bar_hitran2020.script', 'T1c0-1barO2-500ppmCO2', 'co2', MMW=33.887469292744562, rmix_col=5)
+        # CO
+        lblabc_script_change_case('/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/LBLABC/T1cFidO21bar500ppmCO2_hitran2020/runlblabc_CO_T1cFidO21bar_hitran2020.script', 'T1c0-1barO2-500ppmCO2', 'co', MMW=33.887469292744562, rmix_col=6)
+        # SO2
+        lblabc_script_change_case('/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/LBLABC/T1cFidO21bar500ppmCO2_hitran2020/runlblabc_SO2_T1cFidO21bar_hitran2020.script', 'T1c0-1barO2-500ppmCO2', 'so2', MMW=33.887469292744562, rmix_col=7)
+        # N2O
+        lblabc_script_change_case('/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/LBLABC/T1cFidO21bar500ppmCO2_hitran2020/runlblabc_N2O_T1cFidO21bar_hitran2020.script', 'T1c0-1barO2-500ppmCO2', 'n2o', MMW=33.887469292744562, rmix_col=9)
+        # NO2
+        lblabc_script_change_case('/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/LBLABC/T1cFidO21bar500ppmCO2_hitran2020/runlblabc_NO2_T1cFidO21bar_hitran2020.script', 'T1c0-1barO2-500ppmCO2', 'no2', MMW=33.887469292744562, rmix_col=10)
+        # HNO3
+        lblabc_script_change_case('/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/LBLABC/T1cFidO21bar500ppmCO2_hitran2020/runlblabc_HNO3_T1cFidO21bar_hitran2020.script', 'T1c0-1barO2-500ppmCO2', 'hno3', MMW=33.887469292744562, rmix_col=11)
+
+        smart_script_change_case_quick('/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/SMART/runsmart_T1c_TRUEFIDUCIAL.run', 'T1c0-1barO2-500ppmCO2', MMW=33.887469292744562)
 
 ### Write a new smart run script for a new case with a template file for moderate guidance
 ### Template file should be everything u want but the [required input] absorber descriptions, PT profile, ...
