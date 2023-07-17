@@ -166,9 +166,12 @@ def run_photochem_1instance(casename, CleanMake=True, InputCopy=False, OutPath='
 # casename - name of case you're running (to name output file)
 # outpath - path to put run output in
 ##
-def run_lblabc_1instance(runscript, casename, outpath='/gscratch/vsm/gialluca/VPLModelingTools_Dev/ModelRunOutputs/'):
-    f = open(outpath+'lblabc_run_output_'+casename+'.run', 'w')
+def run_lblabc_1instance(runscript, casename, molecule, outpath='/gscratch/vsm/gialluca/VPLModelingTools_Dev/ModelRunOutputs/'):
+    f = open(outpath+'lblabc_run_output_'+molecule+'_'+casename+'.run', 'w')
+    workdir = os.getcwd()
+    os.chdir('/gscratch/vsm/gialluca/VPLModelingTools_Dev/lblabc/')
     subprocess.run('/gscratch/vsm/gialluca/VPLModelingTools_Dev/lblabc/lblabc < '+runscript, shell=True, stdout=f)
+    os.chdir(workdir)
 
 ### Run SMART for a given runscript (just useful to get the output or be fully in python w/e)
 ##
@@ -178,7 +181,10 @@ def run_lblabc_1instance(runscript, casename, outpath='/gscratch/vsm/gialluca/VP
 # outpath - path to put run output in
 ##
 def run_smart_1instance(runscript, casename, outpath='/gscratch/vsm/gialluca/VPLModelingTools_Dev/ModelRunOutputs/'):
+    workdir = os.getcwd()
+    os.chdir('/gscratch/vsm/gialluca/VPLModelingTools_Dev/smart/')
     subprocess.run('/gscratch/vsm/gialluca/VPLModelingTools_Dev/smart/smart_spectra < '+runscript+' > '+outpath+'smart_run_output_'+casename+'.run', shell=True)
+    os.chdir(workdir)
 
 ### Get the NZ, NQ, NQ1, NSP2, NR, KJ, NP from out.params
 def basic_params(Prms='./atmos/PHOTOCHEM/OUTPUT/out.params'):
@@ -399,19 +405,24 @@ def smart_script_change_case_quick(template, casename, Tsurf='same', AlbdedoFi='
 
 
 # Function to edit to just call on hyak lol
-def go_go_hyak_do_it(case, mmw):
-    flag = True
-    if flag == True:
-        lblrunscriptpath = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/LBLABC/'
-        smartrunscriptpath = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/SMART/'
-        gases = ['o2', 'h2o', 'o3', 'co2', 'co', 'so2', 'n2o', 'no2', 'hno3']
-        gases_capp = ['O2', 'H2O', 'O3', 'CO2', 'CO', 'SO2', 'N2O', 'NO2', 'HNO3']
-        rmixcols = [2, 3, 4, 5, 6, 7, 9, 10, 11]
+def go_go_hyak_do_it(case, mmw, new_scripts=True, run_scripts=True):
+    lblrunscriptpath = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/LBLABC/'
+    smartrunscriptpath = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/SMART/'
+    gases = ['o2', 'h2o', 'o3', 'co2', 'co', 'so2', 'n2o', 'no2', 'hno3']
+    gases_capp = ['O2', 'H2O', 'O3', 'CO2', 'CO', 'SO2', 'N2O', 'NO2', 'HNO3']
+    rmixcols = [2, 3, 4, 5, 6, 7, 9, 10, 11]
 
+    if new_scripts == True:
         for i in range(len(gases)):
             lblabc_script_change_case(lblrunscriptpath+'T1cFidO21bar500ppmCO2_hitran2020/runlblabc_'+gases_capp[i]+'_T1cFidO21bar_hitran2020.script', case, gases[i], MMW=mmw, rmix_col=rmixcols[i])
 
         smart_script_change_case_quick(smartrunscriptpath+'runsmart_T1c_TRUEFIDUCIAL.run', case, MMW=mmw)
+
+    if run_scripts == True:
+        for i in range(len(gases)):
+            run_lblabc_1instance(lblrunscriptpath+'runlblabc_'+gases[i]+'_'+case+'_hitran2020.script', case, gases[i])
+
+        run_smart_1instance(smartrunscriptpath+'runsmart_'+case+'.run', case)
 
 ### Write a new smart run script for a new case with a template file for moderate guidance
 ### Template file should be everything u want but the [required input] absorber descriptions, PT profile, ...
