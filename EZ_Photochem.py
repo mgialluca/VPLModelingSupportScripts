@@ -227,7 +227,7 @@ def degrade_PT(nlayer, casename, Prof='/gscratch/vsm/gialluca/VPLModelingTools_D
 ##
 def prep_p_rmix_files_smart(casename, Prof='/gscratch/vsm/gialluca/VPLModelingTools_Dev/atmos/PHOTOCHEM/OUTPUT/PTZ_mixingratios_out.dist', 
                             outputpath='/gscratch/vsm/gialluca/VPLModelingTools_Dev/AtmProfiles/', 
-                            gases=['O2', 'H2O', 'O3', 'CO2', 'CO', 'SO2', 'H2SO4', 'N2', 'NO2', 'HNO3']):
+                            gases=['O2', 'H2O', 'O3', 'CO2', 'CO', 'SO2', 'H2SO4', 'N2O', 'NO2', 'HNO3']):
     atm = ascii.read(Prof)
     datfortab = [atm['PRESS'][::-1]]
     namesfortab = ['Press']
