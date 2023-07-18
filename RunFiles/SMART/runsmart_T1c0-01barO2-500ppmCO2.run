@@ -1,0 +1,190 @@
+0			No Pressure Jacobians
+0			No Jacobians for Temperature
+3			Formatted Atmospheric Structure File
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/AtmProfiles/PT_profile_T1c0-01barO2-500ppmCO2.pt
+1			Lines to Skip at Top of File
+1,2			Columns of P,T
+100000			Pressure Scaling Factor
+388.92 		Surface Temperature
+9			Number of Gas Absorbers
+1			Gas Code for First Absorber
+0			No Jacobians for First Absorber
+2			Number of Absorption Coefficient Types
+1			Line Absorbers
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/LinebyLine_absFiles/T1c0-01barO2-500ppmCO2_h2o_hitran20_50_1e5cm-1.abs
+3			Cross Sections
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/xsec/h2oxsec.dat
+3			List Directed
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/AtmProfiles/MixingRs_T1c0-01barO2-500ppmCO2.dat
+1			Lines to Skip at Top of File
+1			Pressure Coordinate
+1,3			Columns of P and rMix
+1			Volume Mixing Ratio
+100000,1.0		P and rMix Scaling Factors
+2			Gas Code for Second Absorber
+0			No Jacobians for Second Absorber
+3			Number of Absorption Coefficient Types
+1			Line Absorbers
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/LinebyLine_absFiles/T1c0-01barO2-500ppmCO2_co2_hitran20_50_1e5cm-1.abs
+2			Collisionally induced absorption
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/xsec/co2-co2_abs.cia
+3			Cross Sections
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/xsec/co2xsec.dat
+3			List Directed
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/AtmProfiles/MixingRs_T1c0-01barO2-500ppmCO2.dat
+1			Lines to Skip at Top of File
+1			Pressure Coordinate
+1,5			Columns of P and rMix
+1			Volume Mixing Ratio
+100000,1.0		P and rMix Scaling Factors
+3			Gas Code for Third Absorber
+0			No Jacobians for Third Absorber
+2			Number of Absorption Coefficient Types
+1			Line Absorbers
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/LinebyLine_absFiles/T1c0-01barO2-500ppmCO2_o3_hitran20_50_1e5cm-1.abs
+3			Cross Sections
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/xsec/o3xsec.dat
+3			List Directed
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/AtmProfiles/MixingRs_T1c0-01barO2-500ppmCO2.dat
+1			Lines to Skip at Top of File
+1			Pressure Coordinate
+1,4			Columns of P and rMix
+1			Volume Mixing Ratio
+100000,1.0		P and rMix Scaling Factors
+4			Gas Code for Fourth Absorber
+0			No Jacobians for Fourth Absorber
+2			Number of Absorption Coefficient Types
+1			Line Absorbers
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/LinebyLine_absFiles/T1c0-01barO2-500ppmCO2_n2o_hitran20_50_1e5cm-1.abs
+3			Cross Sections
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/xsec/n2oxsec.dat
+3			List Directed
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/AtmProfiles/MixingRs_T1c0-01barO2-500ppmCO2.dat
+1			Lines to Skip at Top of File
+1			Pressure Coordinate
+1,9			Columns of P and rMix
+1			Volume Mixing Ratio
+100000,1.0		P and rMix Scaling Factors
+5			Gas Code for Fifth Absorber
+0			No Jacobians for Fifth Absorber
+2			Number of Absorption Coefficient Types
+1			Line Absorbers
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/LinebyLine_absFiles/T1c0-01barO2-500ppmCO2_co_hitran20_50_1e5cm-1.abs
+3			Cross Sections
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/xsec/coxsec.dat
+3			List Directed
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/AtmProfiles/MixingRs_T1c0-01barO2-500ppmCO2.dat
+1			Lines to Skip at Top of File
+1			Pressure Coordinate
+1,6			Columns of P and rMix
+1			Volume Mixing Ratio
+100000,1.0		P and rMix Scaling Factors
+7			Gas Code for Seventh Absorber
+0			No Jacobians for First Absorber
+3			Number of Absorption Coefficient Types
+1			Line Absorbers
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/LinebyLine_absFiles/T1c0-01barO2-500ppmCO2_o2_hitran20_50_1e5cm-1.abs
+2			Collisionally Induced Absorption
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/xsec/o2-o2_abs.cia
+3			Cross Sections
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/xsec/o2xsec.dat
+3			List Directed
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/AtmProfiles/MixingRs_T1c0-01barO2-500ppmCO2.dat
+1			Lines to Skip at Top of File
+1			Pressure Coordinate
+1,2			Columns of P and rMix
+1			Volume Mixing Ratio
+100000,1.0		P and rMix Scaling Factors
+10			Gas Code for Eighth Absorber
+0			No Jacobians for First Absorber
+2			Number of Absorption Coefficient Types
+1			Line Absorbers
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/LinebyLine_absFiles/T1c0-01barO2-500ppmCO2_no2_hitran20_50_1e5cm-1.abs
+3			Cross Sections
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/xsec/no2xsec.dat
+3			List Directed
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/AtmProfiles/MixingRs_T1c0-01barO2-500ppmCO2.dat
+1			Lines to Skip at Top of File
+1			Pressure Coordinate
+1,10			Columns of P and rMix
+1			Volume Mixing Ratio
+100000,1.0		P and rMix Scaling Factors
+12			Gas Code for Ninth Absorber
+0			No Jacobians for First Absorber
+2			Number of Absorption Coefficient Types
+1			Line Absorbers
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/LinebyLine_absFiles/T1c0-01barO2-500ppmCO2_hno3_hitran20_50_1e5cm-1.abs
+3			Cross Sections
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/xsec/hno3xsec.dat
+3			List Directed
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/AtmProfiles/MixingRs_T1c0-01barO2-500ppmCO2.dat
+1			Lines to Skip at Top of File
+1			Pressure Coordinate
+1,11			Columns of P and rMix
+1			Volume Mixing Ratio
+100000,1.0		P and rMix Scaling Factors
+9			Gas Code for Tenth Absorber
+0			No Jacobians for First Absorber
+2			Number of Absorption Coefficient Types
+1			Line Absorbers
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/LinebyLine_absFiles/T1c0-01barO2-500ppmCO2_so2_hitran20_50_1e5cm-1.abs
+3			Cross Sections
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/xsec/so2xsec.dat
+3			List Directed
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/AtmProfiles/MixingRs_T1c0-01barO2-500ppmCO2.dat
+1			Lines to Skip at Top of File
+1			Pressure Coordinate
+1,7			Columns of P and rMix
+1			Volume Mixing Ratio
+100000,1.0		P and rMix Scaling Factors
+0			Number of Aerosols
+0           Lambert Reflection
+0           No Jacobians
+3           List Directed
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/albedo/Const_p25_albedo.dat
+1          Lines to Skip
+1,2         Columns of wl and albedo
+1           Wavelength Grid Type
+1.0         Wavelength Scaling
+1.0         Albedo Scaling
+0.0158   	Distance from Star (AU)
+10.65			Surface Gravity [m/s*s]
+6996.7757	    Planetary Radius [km]
+58.94941667271572		Mean Molecular Weight
+1			Number of Rayleigh Scatterers
+1			Rayleigh Scatter Index
+1.0			Volume Mixing Ratio
+8			Number of Streams
+3			Source - Solar
+3			File Format - List Directed
+/gscratch/vsm/gialluca/StellarSpectra/TRAPPIST-1_2020.dat
+10			Lines to Skip
+2			Units solar flux
+1			Solar spectral units
+1.0			Micron Conversion Factor
+1,2 		Columns of wn and Flux
+1			Number of Solar Zenith Angles
+60,0			Zenith and Azimuth Angles
+0.01			Convergence Criterion
+9			Output Format
+2           Ray Tracing Transit
+0.09        Stellar Radius (Rsun)
+0.          Impact Parameter (Rstar)
+1           Include Refraction
+0           No Limb Darkening
+1			Number of Azimuth Angles
+0.			Azimuth Angles
+1			Top of Atmosphere only
+2			Output Radiance Units [W/m*m/sr/micron]
+50.,100000.	Min and Max Wavenumber
+2			Type of Grid (slit)
+2			Triangular Spectral Response Function
+1.0			FWHM
+1.0			Sampling Resolution [per cm]
+0.25		Error for tau Binning
+0.15		Error for pi0 Binning
+0.15		g Error
+0.02		Albedo Error
+1			Output Format (ascii)
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/Spectra/T1c0-01barO2-500ppmCO2
+2			Overwrite
