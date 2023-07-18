@@ -10,7 +10,7 @@ VENUS    = PLANET, string naming planet type
 0        = IRESET
 33       = MSUN
 0        = IHZSCALE (set to 1 for SED-dep scaling)
-0.46E5   = DZGRID [cm]
+0.415E5  = DZGRID [cm]
 
 
 
