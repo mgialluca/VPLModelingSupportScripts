@@ -424,6 +424,9 @@ def go_go_hyak_do_it(case, mmw, new_scripts=True, run_scripts=True):
 
         run_smart_1instance(smartrunscriptpath+'runsmart_'+case+'.run', case)
 
+
+degrade_PT(65, 'T1c0-01barO2-500ppmCO2')
+prep_p_rmix_files_smart('T1c0-01barO2-500ppmCO2')
 go_go_hyak_do_it('T1c0-01barO2-500ppmCO2', mmw=58.949416672715721)
 
 ### Write a new smart run script for a new case with a template file for moderate guidance
