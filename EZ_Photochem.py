@@ -104,7 +104,7 @@ def read_indist(atmosfile,nz,nq,npar,ncol=10):
 # InputCopy - the path to the input photochem files, if false assumes they are already in the PHOTOCHEM/INPUTS directory
 # OutPath - path to write model make and run outputs to
 ##
-def run_photochem_1instance(casename, CleanMake=True, InputCopy=False, OutPath='/gscratch/vsm/gialluca/VPLModelingTools_Dev/ModelRunOutputs/'):
+def run_photochem_1instance(casename, CleanMake=True, InputCopy=False, trynum=1, OutPath='/gscratch/vsm/gialluca/VPLModelingTools_Dev/ModelRunOutputs/'):
 
     # If you have new input files to use, give 'InputCopy' the dir path
     if InputCopy != False:
@@ -147,14 +147,20 @@ def run_photochem_1instance(casename, CleanMake=True, InputCopy=False, OutPath='
 
     # Clean make, if requested
     if CleanMake:
-        fmake = open(OutPath+'photochem_make_output_'+casename+'.txt', 'w')
+        if trynum == 1:
+            fmake = open(OutPath+'photochem_make_output_'+casename+'.txt', 'w')
+        else:
+            fmake = open(OutPath+'photochem_make_output_'+casename+'_Try'+str(trynum)+'.txt', 'w')
         os.chdir('/gscratch/vsm/gialluca/VPLModelingTools_Dev/atmos/')
         subprocess.run('make -f ./PhotoMake clean', shell=True)
         subprocess.run('make -f ./PhotoMake', shell=True, stdout=fmake)
         os.chdir('/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/')
 
     # Run photochem
-    f = open(OutPath+'photochem_run_output_'+casename+'.run', 'w')
+    if trynum == 1:
+        f = open(OutPath+'photochem_run_output_'+casename+'.run', 'w')
+    else:
+        f = open(OutPath+'photochem_run_output_'+casename+'_Try'+str(trynum)+'.run', 'w')
     os.chdir('/gscratch/vsm/gialluca/VPLModelingTools_Dev/atmos/')
     subprocess.run('./Photo.run', shell=True, stdout=f)
     os.chdir('/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/')
@@ -425,9 +431,42 @@ def go_go_hyak_do_it(case, mmw, new_scripts=True, run_scripts=True):
         run_smart_1instance(smartrunscriptpath+'runsmart_'+case+'.run', case)
 
 
-degrade_PT(65, 'T1c0-01barO2-500ppmCO2')
-prep_p_rmix_files_smart('T1c0-01barO2-500ppmCO2')
-go_go_hyak_do_it('T1c0-01barO2-500ppmCO2', mmw=58.949416672715721)
+
+#cases = ['T1c1barO2-1ppmCO2', 'T1c1barO2-10ppmCO2', 'T1c1barO2-100ppmCO2', 'T1c0-1barO2-1ppmCO2', 'T1c0-1barO2-10ppmCO2', 'T1c0-1barO2-100ppmCO2', 'T1c0-01barO2-1ppmCO2', 'T1c0-01barO2-10ppmCO2', 'T1c0-01barO2-100ppmCO2']
+#tries = [2, 2, 2,   2, 1, 2,   1, 1, 2]
+
+#MMWs = []
+#for i in range(len(cases)):
+#    if tries[i] != 1:
+#        f = open('/gscratch/vsm/gialluca/VPLModelingTools_Dev/ModelRunOutputs/photochem_run_output_'+cases[i]+'_Try'+str(tries[i])+'.run', 'r')
+#    else:
+#        f = open('/gscratch/vsm/gialluca/VPLModelingTools_Dev/ModelRunOutputs/photochem_run_output_'+cases[i]+'.run', 'r')
+#    l = f.readlines()
+#    f.close()
+#    for k in range(len(l)):
+#        currl = l[k].split()
+#        if currl[0] == 'Molecular' and currl[1] == 'weight':
+#            currmmw = float(currl[len(currl)-1])
+#            MMWs.append(currmmw)
+#            break
+
+#print('MMWs of remaining Cases: ')
+#print(MMWs)
+
+#if len(MMWs) != len(cases):
+#    print('MMWs were not retrieved successfully, terminating.')
+#    sys.exit()
+
+#for i in range(len(cases)):
+#    degrade_PT(65, cases[i], Prof='/gscratch/vsm/gialluca/VPLModelingTools_Dev/Save_Photochem_Output/'+cases[i]+'/PTZ_mixingratios_out.dist')
+#    prep_p_rmix_files_smart(cases[i], Prof='/gscratch/vsm/gialluca/VPLModelingTools_Dev/Save_Photochem_Output/'+cases[i]+'/PTZ_mixingratios_out.dist')
+#    go_go_hyak_do_it(cases[i], mmw=MMWs[i])
+
+
+
+#degrade_PT(65, 'T1c0-01barO2-500ppmCO2')
+#prep_p_rmix_files_smart('T1c0-01barO2-500ppmCO2')
+#go_go_hyak_do_it('T1c0-01barO2-500ppmCO2', mmw=58.949416672715721)
 
 ### Write a new smart run script for a new case with a template file for moderate guidance
 ### Template file should be everything u want but the [required input] absorber descriptions, PT profile, ...
