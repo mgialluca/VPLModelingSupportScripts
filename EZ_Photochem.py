@@ -430,36 +430,39 @@ def go_go_hyak_do_it(case, mmw, new_scripts=True, run_scripts=True):
 
         run_smart_1instance(smartrunscriptpath+'runsmart_'+case+'.run', case)
 
+    subprocess.run('mkdir '+lblrunscriptpath+case+'_hitran2020/', shell=True)
+    subprocess.run('mv '+lblrunscriptpath+'/runlblabc*'+case+'* '+lblrunscriptpath+case+'_hitran2020/', shell=True)
 
-#cases = ['T1c1barO2-1ppmCO2', 'T1c1barO2-10ppmCO2', 'T1c1barO2-100ppmCO2', 'T1c0-1barO2-1ppmCO2', 'T1c0-1barO2-10ppmCO2', 'T1c0-1barO2-100ppmCO2', 'T1c0-01barO2-1ppmCO2', 'T1c0-01barO2-10ppmCO2', 'T1c0-01barO2-100ppmCO2']
-#tries = [2, 2, 2,   2, 1, 2,   1, 1, 2]
 
-#MMWs = []
-#for i in range(len(cases)):
-#    if tries[i] != 1:
-#        f = open('/gscratch/vsm/gialluca/VPLModelingTools_Dev/ModelRunOutputs/photochem_run_output_'+cases[i]+'_Try'+str(tries[i])+'.run', 'r')
-#    else:
-#        f = open('/gscratch/vsm/gialluca/VPLModelingTools_Dev/ModelRunOutputs/photochem_run_output_'+cases[i]+'.run', 'r')
-#    l = f.readlines()
-#    f.close()
-#    for k in range(len(l)):
-#        currl = l[k].split()
-#        if currl[0] == 'Molecular' and currl[1] == 'weight':
-#            currmmw = float(currl[len(currl)-1])
-#            MMWs.append(currmmw)
-#            break
+cases = ['T1c1barO2-1ppmCO2', 'T1c1barO2-10ppmCO2', 'T1c1barO2-100ppmCO2', 'T1c0-1barO2-1ppmCO2', 'T1c0-1barO2-10ppmCO2', 'T1c0-1barO2-100ppmCO2', 'T1c0-01barO2-1ppmCO2', 'T1c0-01barO2-10ppmCO2', 'T1c0-01barO2-100ppmCO2']
+tries = [3, 2, 2, 4, 1, 2, 1, 1, 2]
 
-#print('MMWs of remaining Cases: ')
-#print(MMWs)
+MMWs = []
+for i in range(len(cases)):
+    if tries[i] != 1:
+        f = open('/gscratch/vsm/gialluca/VPLModelingTools_Dev/ModelRunOutputs/photochem_run_output_'+cases[i]+'_Try'+str(tries[i])+'.run', 'r')
+    else:
+        f = open('/gscratch/vsm/gialluca/VPLModelingTools_Dev/ModelRunOutputs/photochem_run_output_'+cases[i]+'.run', 'r')
+    l = f.readlines()
+    f.close()
+    for k in range(len(l)):
+        currl = l[k].split()
+        if currl[0] == 'Molecular' and currl[1] == 'weight':
+            currmmw = float(currl[len(currl)-1])
+            MMWs.append(currmmw)
+            break
 
-#if len(MMWs) != len(cases):
-#    print('MMWs were not retrieved successfully, terminating.')
-#    sys.exit()
+print('MMWs of remaining Cases: ')
+print(MMWs)
 
-#for i in range(len(cases)):
-#    degrade_PT(65, cases[i], Prof='/gscratch/vsm/gialluca/VPLModelingTools_Dev/Save_Photochem_Output/'+cases[i]+'/PTZ_mixingratios_out.dist')
-#    prep_p_rmix_files_smart(cases[i], Prof='/gscratch/vsm/gialluca/VPLModelingTools_Dev/Save_Photochem_Output/'+cases[i]+'/PTZ_mixingratios_out.dist')
-#    go_go_hyak_do_it(cases[i], mmw=MMWs[i])
+if len(MMWs) != len(cases):
+    print('MMWs were not retrieved successfully, terminating.')
+    sys.exit()
+
+for i in range(len(cases)):
+    degrade_PT(65, cases[i], Prof='/gscratch/vsm/gialluca/VPLModelingTools_Dev/Save_Photochem_Output/'+cases[i]+'/PTZ_mixingratios_out.dist')
+    prep_p_rmix_files_smart(cases[i], Prof='/gscratch/vsm/gialluca/VPLModelingTools_Dev/Save_Photochem_Output/'+cases[i]+'/PTZ_mixingratios_out.dist')
+    go_go_hyak_do_it(cases[i], mmw=MMWs[i])
 
 
 
