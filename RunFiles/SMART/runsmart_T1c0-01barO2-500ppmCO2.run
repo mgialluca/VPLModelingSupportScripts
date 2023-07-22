@@ -168,7 +168,7 @@
 0.01			Convergence Criterion
 9			Output Format
 2           Ray Tracing Transit
-0.09        Stellar Radius (Rsun)
+0.1192      Stellar Radius (Rsun)
 0.          Impact Parameter (Rstar)
 1           Include Refraction
 0           No Limb Darkening
