@@ -192,6 +192,17 @@ def run_smart_1instance(runscript, casename, outpath='/gscratch/vsm/gialluca/VPL
     subprocess.run('/gscratch/vsm/gialluca/VPLModelingTools_Dev/smart/smart_spectra < '+runscript+' > '+outpath+'smart_run_output_'+casename+'.run', shell=True)
     os.chdir(workdir)
 
+### Run VPL Climate for a given runscript/executable
+##
+## Inputs:
+# runscript - name of VPL Climate runscript WITH PATH
+# casename - name of case you're running (to name output file)
+# exec - the VPL Climate executable to use WITH PATH
+# outpath - path to put run output in
+##
+def run_climate_1instance(runscript, casename, exec, outpath='/gscratch/vsm/gialluca/VPLModelingTools_Dev/ModelRunOutputs/'):
+    subprocess.run(exec+' < '+runscript+' > '+outpath+'vpl_climate_output_'+casename+'.run', shell=True)
+
 ### Get the NZ, NQ, NQ1, NSP2, NR, KJ, NP from out.params
 def basic_params(Prms='./atmos/PHOTOCHEM/OUTPUT/out.params'):
     prms = open(Prms, 'r')
