@@ -40,8 +40,6 @@ False			Include conductive heating rates
 0.0002			Surface roughness height [m]
 0			No. condensibles
 1			Generate fluxes using SMART
-3			1) ASCII 3) binary no header
-vpl_climate
 2			******NO. ABSORBING GASES******
 7			************HITRAN GAS CODE [o2]*************
 0			Mixing ratio jacobians [0 = None; 1 = Radiance; 2 = Flux]
