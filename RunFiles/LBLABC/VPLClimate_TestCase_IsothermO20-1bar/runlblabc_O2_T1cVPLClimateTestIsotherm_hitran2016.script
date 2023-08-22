@@ -21,7 +21,7 @@
 50,100000                               min, max wavenumber
 200.                                    maximum line width
 1.e-5                                   minimum column optical depth
-/gscratch/vsm/gialluca/VPLModelingTools_Dev/lblabc/fundamentl2016.dat
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/lblabc/fundamntl2016.dat
 /gscratch/vsm/gialluca/VPLModelingTools_Dev/LinebyLine_absFiles/isotherm_vplclimatetest_o2.abs
 2                                       overwrite existing files
 
