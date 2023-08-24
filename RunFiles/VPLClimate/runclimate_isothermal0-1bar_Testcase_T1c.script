@@ -26,7 +26,7 @@ False			Include conductive heating rates
 1.0			Solar tolerance [0-1]
 0.03			Thermal tolerance [0-1]
 3			List directed input
-/gscratch/vsm/gialluca/VPLModelingTools_Dev/AtmProfiles/Isothermal_0-1bar.atm
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/AtmProfiles/Isotherm_0-1bar_try2.atm
 1			Lines to skip
 1,2			columns of P,T
 1.			Scale to Pa
@@ -52,7 +52,7 @@ False			Include conductive heating rates
 3			UV-VIS absorption cross sections
 /gscratch/vsm/gialluca/VPLModelingTools_Dev/xsec/o2xsec.dat
 3			List directed input
-/gscratch/vsm/gialluca/VPLModelingTools_Dev/AtmProfiles/Isothermal_0-1bar.atm
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/AtmProfiles/Isotherm_0-1bar_try2.atm
 1 			Lines to skip
 1			Use pressure coordinate
 1,4			columns of P,rmix
@@ -67,7 +67,7 @@ False			Include conductive heating rates
 3			UV-VIS absorption cross sections
 /gscratch/vsm/gialluca/VPLModelingTools_Dev/xsec/o3xsec.dat
 3			List directed input
-/gscratch/vsm/gialluca/VPLModelingTools_Dev/AtmProfiles/Isothermal_0-1bar.atm
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/AtmProfiles/Isotherm_0-1bar_try2.atm
 1			Lines to skip
 1			Use pressure coordinate
 1,5			columns of P,rmix
@@ -109,5 +109,5 @@ False			Include conductive heating rates
 0.35			Asymmetry parameter error
 0.25			Albedo error
 3			1)ASCII 3) binary no header output
-vpl_climate_testcase_isothermo20-1bar
+vpl_climate_testcase_isothermo20-1bar_try2TheQuestForConvergence
 2			Overwrite existing files
