@@ -306,7 +306,8 @@ def prep_p_rmix_files_smart(casename, Prof='/gscratch/vsm/gialluca/VPLModelingTo
 ## *** Note also, this is easiest to run when just using the lblabc script for the molecule as a template...
 ##     ... but if you want to make it a new molecule this is easily done with the gas code and rmix col options
 def lblabc_script_change_case(template, casename, molecule, MMW='same', hitran_gas_code='same', rmix_col='same', 
-                              outpath='/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/LBLABC/'):
+                              outpath='/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/LBLABC/', 
+                              absoutpath='/gscratch/vsm/gialluca/VPLModelingTools_Dev/LinebyLine_absFiles/'):
     f = open(template, 'r')
     l = f.readlines()
     f.close()
@@ -328,7 +329,7 @@ def lblabc_script_change_case(template, casename, molecule, MMW='same', hitran_g
             elif MMW != 'same' and len(l[i].split('mol. wgt.')) > 1:
                 out.write(str(MMW)+'                      mol. wgt. of atmosphere (kg/kmole)\n')
             elif len(l[i].split('/LinebyLine_absFiles/')) > 1:
-                out.write('/gscratch/vsm/gialluca/VPLModelingTools_Dev/LinebyLine_absFiles/'+casename+'_'+molecule+'_hitran20_50_1e5cm-1.abs\n')
+                out.write(absoutpath+casename+'_'+molecule+'_hitran20_50_1e5cm-1.abs\n')
             else:
                 out.write(l[i])
     out.close()
