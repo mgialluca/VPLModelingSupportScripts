@@ -37,10 +37,19 @@ nlevel_coarse = 70
 # atmosDir - Path to the atmos/ dir
 # OutPath - path to write model make and run outputs to
 ##
-def run_photochem_1instance(casename, CleanMake=True, InputCopy=False, trynum=1, 
-                            photochemDir='/gscratch/vsm/gialluca/VPLModelingTools_Dev/atmos/PHOTOCHEM/', 
-                            atmosDir='/gscratch/vsm/gialluca/VPLModelingTools_Dev/atmos/', 
-                            OutPath='/gscratch/vsm/gialluca/VPLModelingTools_Dev/ModelRunOutputs/'):
+
+#def run_photochem_1instance(casename, CleanMake=True, InputCopy=False, trynum=1, 
+#                            photochemDir='/gscratch/vsm/gialluca/VPLModelingTools_Dev/atmos/PHOTOCHEM/', 
+#                            atmosDir='/gscratch/vsm/gialluca/VPLModelingTools_Dev/atmos/', 
+#                            OutPath='/gscratch/vsm/gialluca/VPLModelingTools_Dev/ModelRunOutputs/'):
+def run_photochem_1instance(casename, CleanMake=True, 
+                            #InputCopy='/home/mgialluca/Nextcloud/VPL_Modeling/Atmos_Dev/atmos/PHOTOCHEM/INPUTFILES/TEMPLATES/ModernEarth/', 
+                            #InputCopy='/home/mgialluca/Nextcloud/VPL_Modeling/Atmos_Dev/atmos/PHOTOCHEM/INPUTFILES/TEMPLATES/Venus/',
+                            InputCopy='/home/mgialluca/Nextcloud/VPL_Modeling/VPLModelingSupportScripts/Bodies/T1c/T1cOutgas_Testing/',
+                            trynum=1, 
+                            photochemDir='/home/mgialluca/Nextcloud/VPL_Modeling/Atmos_Dev/atmos/PHOTOCHEM/', 
+                            atmosDir='/home/mgialluca/Nextcloud/VPL_Modeling/Atmos_Dev/atmos/', 
+                            OutPath='/home/mgialluca/Nextcloud/VPL_Modeling/JWSTObserving_TestOutgassing/'):
 
     # If you have new input files to use, give 'InputCopy' the dir path
     if InputCopy != False:
@@ -87,19 +96,21 @@ def run_photochem_1instance(casename, CleanMake=True, InputCopy=False, trynum=1,
             fmake = open(OutPath+'photochem_make_output_'+casename+'.txt', 'w')
         else:
             fmake = open(OutPath+'photochem_make_output_'+casename+'_Try'+str(trynum)+'.txt', 'w')
+        workdir = os.getcwd()
         os.chdir(atmosDir)
         subprocess.run('make -f ./PhotoMake clean', shell=True)
         subprocess.run('make -f ./PhotoMake', shell=True, stdout=fmake)
-        os.chdir('/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/')
+        os.chdir(workdir)
 
     # Run photochem
     if trynum == 1:
         f = open(OutPath+'photochem_run_output_'+casename+'.run', 'w')
     else:
         f = open(OutPath+'photochem_run_output_'+casename+'_Try'+str(trynum)+'.run', 'w')
+    workdir = os.getcwd()
     os.chdir(atmosDir)
     subprocess.run('./Photo.run', shell=True, stdout=f)
-    os.chdir('/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/')
+    os.chdir(workdir)
 
 ### Run VPL Climate for a given runscript/executable
 ##

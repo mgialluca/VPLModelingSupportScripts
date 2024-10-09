@@ -1,0 +1,76 @@
+H2O       O1D       OH        OH                2BODY     1.63E-10    60.                    ! JPL-15
+H2        O1D       OH        H                 2BODY     1.2E-10     0.                     ! JPL-15
+H2        O         OH        H                 WEIRD     6.34E-12*exp(-4000/T(i)) + 1.46e-9*exp(-9650/T(i)) ! NIST 2005
+H2        OH        H2O       H                 2BODY     2.8E-12     -1800.                 ! JPL-15
+H         O3        OH        O2                2BODY     1.4E-10     -470.                  ! JPL-15                                          
+H         O2        HO2                         3BODY     4.4D-32     7.5D-11    1.3D0 -0.2  ! JPL-15  (see also H+SO+M->HSO+M)
+H         HO2       H2        O2                2BODY     6.90E-12    0.                     ! JPL-15 
+H         HO2       H2O       O                 2BODY     1.60E-12    0.                     ! JPL-15 
+H         HO2       OH        OH                2BODY     7.20E-11    0.                     ! JPL-15 
+OH        O         H         O2                2BODY     1.8E-11     180.                   ! JPL-15                                          
+OH        HO2       H2O       O2                2BODY     4.8E-11     250.                   ! JPL-15
+OH        O3        HO2       O2                2BODY     1.7E-12     -940.                  ! JPL-15
+OH        H2O2      HO2       H2O               2BD3P     2.47E-13    627.       2.1         ! CUSTOM FIT TO NIST COMPILED DATA APL FOR MAXIMUM TEMPERATURE RELEVANCE
+HO2       O         OH        O2                2BODY     3.0E-11     200.                   ! JPL-15                                          
+HO2       O3        OH        O2        O2      2BD3P     1.0E-14     -490.      0.          ! Gao... see src   !1.97E-16    693.       4.57        ! JPL-15; APL WEIRD FROM FIT IN NIST REVIEWS
+HO2       HO2       H2O2      O2                WEIRD     3.0E-13*EXP(460./T(I)) + 2.1E-33*EXP(920./T(I))*DEN(I) ! JPL-15
+O         O         O2                          3BD3P     1.2E-32     0.         -2.0        ! JPL-90 per Nair et al. [1994] ! WEIRD IS FROM O+O2->O3
+O         O2        O3                          3BODY     6.D-34      1.E000     2.4D0 0.D0  ! JPL-15 ! APL CHECK : WEIRD IS FIT TO NIST
+O         O3        O2        O2                2BODY     8.0E-12     -2060.                 ! JPL-15                                          
+O1D       O3        O2        O2                2BODY     1.2E-10                            ! JPL-15 
+O1D       O3        O         O         O2      2BODY     1.2E-10                            ! JPL-15 
+OH        OH        H2O       O                 2BODY     1.8E-12     0.                     ! JPL-15
+O1D       O2        O         O2                2BODY     3.3E-11     55.                    ! JPL-15                                                           
+O3        O3        O2        O2        O2      2BODY     7.47E-12    -9310.                 ! NIST Pshezhetskii+ 1959 APL
+O3        HV        O2        O                 2BODY     7.16E-10    -11200.                ! NIST; Heimerl+Coffee 1979 APL
+H         CO        HCO                         3BD3P     1.0E-33     -629.      0.          ! Using combination of reviews on NIST APL
+H         HCO       H2        CO                2BODY     1.8E-10     0.                     ! NIST 2005 - not too certain                                                            
+OH        HCO       H2O       CO                2BODY     1.0E-10     0.                     ! NIST 2005 - not too certain                                                           
+O         HCO       H         CO2               2BODY     5.0E-11     0.                     ! NIST 2005
+O         HCO       OH        CO                2BODY     5.0E-11     0.                     ! NIST 2005
+CO        OH        CO2       H                 2BD3P     1.6E-16     0.         0.6         ! 3BODY     1.5E-13     2.1E+09    0.    6.1   ! JPL-15 ! 
+CO        O         CO2                         3BD3P     1.6E-32     -2184.     0.          ! Gao et al [2015]
+H2CO      H         H2        HCO               2BD3P     2.14E-12    -1090.     1.62        ! NIST 2005 Baulch et al [2002] 
+H         H         H2                          WEIRD                                        ! Tsang and Hampson [1986]
+HCO       O2        HO2       CO                2BODY     5.2E-12     0.                     ! JPL-15
+H2CO      OH        H2O       HCO               2BODY     5.5E-12     125.                   ! JPL-15
+H         OH        H2O                         3BD3P     6.9E-31     0.         -2.         ! NIST 2005 Baulch et al [2002]
+OH        OH        H2O2                        3BODY     6.9D-31     2.6D-11    1.0   0.0   ! JPL-15
+H2CO      O         HCO       OH                2BODY     3.4E-11     -1600.                 ! JPL-15                                                           
+H2O2      O         OH        HO2               2BODY     1.4E-12     -2000.                 ! JPL-15
+H2O2      H         OH        H2O               2BODY     1.69E-11    -1800.                 ! NIST Baulch+ 1992 APL
+H2O2      H         H2        HO2               2BODY     2.81E-12    -1890.                 ! NIST Baulch+ 1992 APL
+CO        O1D       CO        O                 2BODY     7.00E-11    0.                     ! NIST       
+CO2       O1D       CO2       O                 2BODY     7.5E-11     115.0                  ! JPL-15
+C         OH        CO        H                 2BD3P     1.15E-10    -3.39      0.108                           ! Zanchet et al [2009] KIDA
+C         O2        CO        O                 2BD3P     4.9E-11     0.         -0.32                           ! Geppert et al. [2000] NIST/KIDA
+C         NO        CO        N                 2BD3P     4.01E-11    -7.3       -0.2        ! Andersson et al. [2003] theory combined temperatures
+C         O         CO                          2BD3P     9.74E-18    -136.      0.705       ! Gustafsson et al. [2015] theory
+O2        HV        O         O1D               PHOTO                                        !
+O2        HV        O         O                 PHOTO                                        ! this line must follow O2+hv->O+O1D
+H2O       HV        H         OH                PHOTO                                                                                               
+O3        HV        O2        O1D               PHOTO                                                                                               
+O3        HV        O2        O                 PHOTO                                        ! this line must follow O3+hv->O2+O1D
+O3        HV        O         O         O       PHOTO                                        ! this line must follow O3+hv->O2+O ! APL REQUIRES LGRID=2
+H2O2      HV        OH        OH                PHOTO
+CO2       HV        CO        O1D               PHOTO                                        ! this line must follow CO2+hv->CO+O
+CO2       HV        CO        O                 PHOTO
+H2CO      HV        H         H         CO      PHOTO                                        ! APL REQUIRES LGRID=2
+H2CO      HV        H2        CO                PHOTO                                        ! this line must follow H2CO+hv->2H+CO                                                    
+H2CO      HV        HCO       H                 PHOTO                                        ! this line must follow H2CO+hv->H2+CO
+HO2       HV        OH        O                 PHOTO                                                                                               
+HNO       HV        NO        H                 PHOTO                                        ! APL requires LGRID=2
+HNO2      HV        NO        OH                PHOTO                                        ! APL requires LGRID=2
+HNO3      HV        NO2       OH                PHOTO
+HNO3      HV        HNO2      O                 PHOTO                                        ! must follow HNO3 + HV ! APL requires LGRID=2
+HNO3      HV        HNO2      O1D               PHOTO                                        ! must follow HNO3 + HV ! APL requires LGRID=2                               
+NO        HV        N         O                 PHOTO                                                                                               
+NO2       HV        NO        O1D               PHOTO                                        ! APL requires LGRID=2                                                       
+NO2       HV        NO        O                 PHOTO                                        ! must follow NO2 + HV -> NO + O1D                     
+NO3       HV        NO        O2                PHOTO
+NO3       HV        NO2       O                 PHOTO     ! this line must follow NO3+hv->NO+O2
+N2O       HV        N2        O1D               PHOTO
+HO2NO2    HV        HO2       NO2               PHOTO
+HO2NO2    HV        OH        NO3               PHOTO   ! this line must follow HO2NO2+hv->HO2+NO2
+N2O5      HV        NO3       NO2               PHOTO 
+N2O5      HV        NO3       NO        O       PHOTO   ! this line must follow N2O5+hv->NO3+NO2

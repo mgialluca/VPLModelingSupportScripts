@@ -15,9 +15,23 @@ import pandas as pd
 ##
 ################################
 
-# Molecule dict example:
+# Input Molecule dict example:
 # molecules_I_want = {'O2':7, 'O3':3}
 # where 7 and 3 are the HITRAN gas codes for O2 and O3, respectively
+
+def createmoldic():
+    moldic = {}
+    moldic['O2'] = 7
+    moldic['O3'] = 3
+    moldic['CO'] = 5
+    moldic['CO2'] = 2
+    moldic['H2O'] = 1
+    moldic['HNO3'] = 12
+    moldic['N2O'] = 4
+    moldic['NO2'] = 10
+    moldic['SO2'] = 9
+
+    return moldic
 
 class VPLModelingPipeline:
 
@@ -39,6 +53,7 @@ class VPLModelingPipeline:
         # The climate executable:
         self.vplclimate_executable = 'something_Beta17?' # The VPL Climate executable you want to use WITH FULL PATH
 
+        self.HITRAN_year = hitran_year
         # Set the appropriate HITRAN variables
         if hitran_year == '2020':
             self.HITRAN_FundamentalFile = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/lblabc/fundamental2020.dat'
@@ -76,6 +91,40 @@ class VPLModelingPipeline:
         # MOLECULES MUST BE ALL CAPITAL LETTERS AS THEY WILL PRINT OUT FROM PHOTOCHEM
 
     ######################################################### Support Functions
+
+    ### Switch paths to Megan's local dev environment if off of hyak
+    ##
+    ## Attribute Dependencies: NONE
+    #
+    ## Fxn-Specific Inputs: NONE
+    ##
+    def switch_to_local_dev(self):
+        self.photochemDir = '/home/mgialluca/Nextcloud/VPL_Modeling/Atmos_Dev/atmos/PHOTOCHEM/' # path to PHOTOCHEM/ dir
+        self.atmosDir = '/home/mgialluca/Nextcloud/VPL_Modeling/Atmos_Dev/atmos/' # path to atmos/ dir
+        self.lblabcDir = '/home/mgialluca/Nextcloud/VPL_Modeling/LBLABC_Dev/lblabc/' # path to lblabc/ dir (such that lblabcDir/lblabc is the executable to call)
+        self.OutPath = '/home/mgialluca/Nextcloud/VPL_Modeling/RunOutputs/' # path for the raw model run outputs (NOT for created data products like dictionaries)
+        self.DataOutPath = '/home/mgialluca/Nextcloud/VPL_Modeling/RunOutputs/' # path for created data products like dictionaries
+        self.AtmProfPath = '/home/mgialluca/Nextcloud/VPL_Modeling/AtmProfiles/' # path to put atmospheric profile files (.pt files really)
+        self.photochemBackupDir = '/home/mgialluca/Nextcloud/VPL_Modeling/RunOutputs/Photochem_Backup_dir/'+self.casename+'/' # path to save output from each photochem run
+        self.LBLABC_AbsFilesDir = '/home/mgialluca/Nextcloud/VPL_Modeling/RunOutputs/LBL_Abs_Files/'+self.casename+'/' # path to put the created lbl .abs files in 
+        self.lblabc_RunScriptDir = '/home/mgialluca/Nextcloud/VPL_Modeling/VPLModelingSupportScripts/RunFiles/LBLABC/'+self.casename+'/' # path to put lbl runscripts in
+        self.vplclimate_RunScriptDir = '/home/mgialluca/Nextcloud/VPL_Modeling/VPLModelingSupportScripts/RunFiles/VPLClimate/'+self.casename+'/' # path to put vpl climate runscripts in
+        self.photochem_InputsDir = '/home/mgialluca/Nextcloud/VPL_Modeling/VPLModelingSupportScripts/Bodies/'+self.casename+'/' # The path to create new photochem inputs in
+
+        # The climate executable:
+        self.vplclimate_executable = 'something_Beta17?' # The VPL Climate executable you want to use WITH FULL PATH
+
+        # Set the appropriate HITRAN variables
+        if self.HITRAN_year == '2020':
+            self.HITRAN_FundamentalFile = '/home/mgialluca/Nextcloud/VPL_Modeling/LBLABC_Dev/lblabc/fundamental2020.dat'
+            self.HITRAN_parFile = '/home/mgialluca/Nextcloud/VPL_Modeling/LBLABC_Dev/HITRAN/HITRAN2020.par'
+            self.HITRAN_parFileOptionNumber = '10'
+            self.lblabc_qtxt_dir = '/home/mgialluca/Nextcloud/VPL_Modeling/LBLABC_Dev/lblabc/hitranQtips2020/' # For the hitran distribution you want
+        elif self.HITRAN_year == '2016':
+            self.HITRAN_FundamentalFile = '/home/mgialluca/Nextcloud/VPL_Modeling/LBLABC_Dev/lblabc/fundamntl2016.dat'
+            self.HITRAN_parFile = '/home/mgialluca/Nextcloud/VPL_Modeling/LBLABC_Dev/HITRAN/HITRAN2016.par'
+            self.HITRAN_parFileOptionNumber = '9'
+            self.lblabc_qtxt_dir = '/home/mgialluca/Nextcloud/VPL_Modeling/LBLABC_Dev/lblabc/hitranQtips/'
 
     ### Prepare the hyak environment with ifort, python, and the HITRAN you want to use
     ##
@@ -586,7 +635,7 @@ class VPLModelingPipeline:
         if not os.path.exists(self.photochem_InputsDir):
             os.mkdir(self.photochem_InputsDir)
         # Prepare the Hyak environment
-        self.prepare_hyak_env()
+        #self.prepare_hyak_env()
 
         # Start loop to find global convergence with photochem + lblabc + vpl climate
         while self.global_convergence == False:
@@ -600,21 +649,23 @@ class VPLModelingPipeline:
             if self.num_photochem_runs == 1: # If this is the first time, user defined input path, dont need to check global convergence
                 self.run_photochem_1instance(CleanMake=True, InputCopy=self.photochemInitial, trynum=self.num_photochem_runs)
             else:
-                self.run_photochem_1instance(CleanMake=True, InputCopy='WHEREVER NEW INPUTS ARE CREATED', trynum=self.num_photochem_runs)
+                self.run_photochem_1instance(CleanMake=True, InputCopy=self.photochem_InputsDir, trynum=self.num_photochem_runs)
             
             ### If this is the first run, Retrieve the surf gravity and radius of the planet from PLANET.dat
             if self.num_photochem_runs == 1:
                 planet = open(self.photochemDir+'INPUTFILES/PLANET.dat', 'r')
                 planet_lines = planet.readlines()
                 planet.close()
-                grav = float(planet_lines[0].split()[0])*1e-2 # Get the gravity from the first line of PLANET.dat and convert to m/s**2 (should be originally cm/s**2)
-                # Get the radius
+                grav = None
+                rad = None
                 for i in planet_lines:
-                    hold = i.split()
-                    if len(hold) > 4:
-                        if hold[3] == 'radius':
-                            rad = float(hold[0])*1e-5 # Get radius from PLANET.dat and convert from cm to km
-                            break
+                    if len(i.split('= G')) > 1:
+                        grav = float(i.split()[0])*1e-2 # Get the gravity from the first line of PLANET.dat and convert to m/s**2 (should be originally cm/s**2)
+                    elif len(i.split('= R0')) > 1:
+                        rad = float(i.split()[0])*1e-5 # Get radius from PLANET.dat and convert from cm to km
+                    elif grav != None and rad != None:
+                        break
+                    
                 # Set object values
                 self.planetary_gravity = grav
                 self.planetary_radius = rad
@@ -626,7 +677,7 @@ class VPLModelingPipeline:
             # If photochem did not converge, try try again
             while local_photochem_conv == False:
                 subprocess.run('rm -rf '+self.photochemDir+'in.dist', shell=True)
-                subprocess.run('cp '+self.photochemDir+'OUTPUTS/out.dist '+self.photochemDir+'in.dist', shell=True)
+                subprocess.run('cp '+self.photochemDir+'OUTPUT/out.dist '+self.photochemDir+'in.dist', shell=True)
                 self.run_photochem_1instance(CleanMake=False, InputCopy=False, trynum=self.num_photochem_runs)
                 photochem_subtries += 1
                 local_photochem_conv, grosserr, l2err, finaltime = self.check_photochem_conv()
@@ -687,9 +738,7 @@ class VPLModelingPipeline:
             self.num_lblabc_runs += 1
 
             ### Run LBLABC section end -------------------------------------
-
+            self.global_convergence = True
             ### Run VPL Climate section start ------------------------------
-
-
 
 

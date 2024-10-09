@@ -1,0 +1,26 @@
+3                                       format list directed
+/home/mgialluca/Nextcloud/VPL_Modeling/AtmProfiles/PT_profile_T1b1e-1barO2_1percentH2O.pt
+1                                       # records to skip at TOF
+1,2                                     columns of p and t
+100000                                  pressure scaling factor
+1                                       number of t profiles
+2                                       hitran gas index
+0                                       # of foreign broadening gases
+3                                       format  (list directed)
+/home/mgialluca/Nextcloud/VPL_Modeling/Atmos_Dev/atmos/PHOTOCHEM/OUTPUT/PTZ_mixingratios_out.dist
+1                                       # records to skip at TOF
+1                                       vert coordinate (pres)
+1,40                                     columns of p and rmix
+1                                       type - volume mixing ratio (mass = 2)
+100000,1.0                              p, rmix scaling factors
+10                                       read HITRAN .par formatted file
+/home/mgialluca/Nextcloud/VPL_Modeling/LBLABC_Dev/HITRAN/HITRAN2020.par
+10.8                                   gravitational acceleration
+7110.000000000001                               planet radius
+31.85756669312928                      mol. wgt. of atmosphere (kg/kmole)
+50,100000                               min, max wavenumber
+200.                                    maximum line width
+1.e-5                                   minimum column optical depth
+/home/mgialluca/Nextcloud/VPL_Modeling/LBLABC_Dev/lblabc/fundamental2020.dat
+/home/mgialluca/Nextcloud/VPL_Modeling/RunOutputs/LBL_Abs_Files/T1b1e-1barO2_1percentH2O/CO2_T1b1e-1barO2_1percentH2O.abs
+2                                       overwrite existing files
