@@ -161,15 +161,9 @@ lblabc_inputs = [['EarthLikeOutgasT1c', molecule] for molecule in constituents]
 with Pool() as p:
     runlblabc = p.map(run_lblabc_1instance, lblabc_inputs)
 
+# Run climate 
 
-
-
-
-
-
-
-
-
-
+climaterunscript = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/VPLClimate/runclimate_EarthLikeOutgasT1c.script'
+subprocess.run('/gscratch/vsm/gialluca/VPLModelingTools_Dev/vpl_climate_py/vpl_climate_twocol_beta17 < '+climaterunscript+' > '+use_path+'vpl_climate_output_EarthLikeOutgasT1c.run', shell=True)
 
 
