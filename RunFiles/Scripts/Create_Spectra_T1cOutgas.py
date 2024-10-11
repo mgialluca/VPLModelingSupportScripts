@@ -70,7 +70,7 @@ def lblabc_script_change_case(template, casename, molecule, MMW='same', hitran_g
 # PressUnits - can do Bar or Pa, Megan stick with bar for the forseeable forever
 # AtmProfPath - path to output new PT profile to
 ##
-def degrade_PT(casename, nlevel_new=70, ptzFile='/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/Bodies/T1c/T1cOutgas_Testing/PTZ_mixingratios_out.dist', 
+def degrade_PT(casename, nlevel_new=65, ptzFile='/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/Bodies/T1c/T1cOutgas_Testing/PTZ_mixingratios_out.dist', 
                PressUnits='Bar', AtmProfPath=use_path):
     atm = ascii.read(ptzFile, delimiter=' ')
     alt = atm['ALT']
