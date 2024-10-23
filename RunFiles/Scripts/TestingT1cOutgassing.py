@@ -7,11 +7,11 @@ import os, sys, subprocess
 from multiprocessing import Pool
 
 
-use_path = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/T1cOutgassing_Cycle4/'
+use_path = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/T1cOutgassing_Cycle4/Debug/'
 lblabc_template_path = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/LBLABC/T1c0-01barO2-1ppmCO2_hitran2020/'
-lblabc_newscripts_path = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/LBLABC/T1c0-1barO2_EarthH2OOutgass_hitran2020/'
+lblabc_newscripts_path = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/LBLABC/T1c0-1barO2_EarthH2OOutgass_hitran2020/Debug/'
 
-mmw_t1c = 31.990937387608859
+mmw_t1c = 31.995902507889991
 
 # Taken from EZ_Photochem
 #
@@ -70,7 +70,7 @@ def lblabc_script_change_case(template, casename, molecule, MMW='same', hitran_g
 # PressUnits - can do Bar or Pa, Megan stick with bar for the forseeable forever
 # AtmProfPath - path to output new PT profile to
 ##
-def degrade_PT(casename, nlevel_new=70, ptzFile='/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/Bodies/T1c/T1cOutgas_Testing/PTZ_mixingratios_out.dist', 
+def degrade_PT(casename, nlevel_new=70, ptzFile='/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/Bodies/T1c/T1cOutgas_Testing/PTZ_mixingratios_out_fordebug.dist', 
                PressUnits='Bar', AtmProfPath=use_path):
     atm = ascii.read(ptzFile, delimiter=' ')
     alt = atm['ALT']
@@ -94,7 +94,7 @@ def degrade_PT(casename, nlevel_new=70, ptzFile='/gscratch/vsm/gialluca/VPLModel
 # Prof - PTZ_mixingratios_out WITH PATH that was output by photochem
 # outputpath - path to write new mixing ratio file to
 ##
-def prep_p_rmix_files_smart(casename, Prof='/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/Bodies/T1c/T1cOutgas_Testing/PTZ_mixingratios_out.dist', 
+def prep_p_rmix_files_smart(casename, Prof='/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/Bodies/T1c/T1cOutgas_Testing/PTZ_mixingratios_out_fordebug.dist', 
                             outputpath=use_path, 
                             gases=['O2', 'H2O', 'OH', 'H2', 'HO2', 'H2O2', 'CO', 'O3']):
     atm = ascii.read(Prof)
@@ -130,40 +130,40 @@ def run_lblabc_1instance(inputs):
 
 # Make PT prof and mixing ratios for lblabc, climate & smart preferences
 
-degrade_PT('EarthLikeOutgasT1c')
-prep_p_rmix_files_smart('EarthLikeOutgasT1c')
+degrade_PT('EarthLikeOutgasT1c_debug')
+prep_p_rmix_files_smart('EarthLikeOutgasT1c_debug')
 
 # make lblabc runscripts for relevant constituents
 
 constituents = ['h2o', 'o2', 'co', 'o3', 'oh', 'h2', 'ho2', 'h2o2']
 
-lblabc_script_change_case(lblabc_template_path+'runlblabc_h2o_T1c0-01barO2-1ppmCO2_hitran2020.script', 'EarthLikeOutgasT1c', 
+lblabc_script_change_case(lblabc_template_path+'runlblabc_h2o_T1c0-01barO2-1ppmCO2_hitran2020.script', 'EarthLikeOutgasT1c_debug', 
                           'h2o', MMW=mmw_t1c, rmix_col=3)
-lblabc_script_change_case(lblabc_template_path+'runlblabc_o2_T1c0-01barO2-1ppmCO2_hitran2020.script', 'EarthLikeOutgasT1c', 
+lblabc_script_change_case(lblabc_template_path+'runlblabc_o2_T1c0-01barO2-1ppmCO2_hitran2020.script', 'EarthLikeOutgasT1c_debug', 
                           'o2', MMW=mmw_t1c, rmix_col=2)
-lblabc_script_change_case(lblabc_template_path+'runlblabc_co_T1c0-01barO2-1ppmCO2_hitran2020.script', 'EarthLikeOutgasT1c', 
+lblabc_script_change_case(lblabc_template_path+'runlblabc_co_T1c0-01barO2-1ppmCO2_hitran2020.script', 'EarthLikeOutgasT1c_debug', 
                           'co', MMW=mmw_t1c, rmix_col=8)
-lblabc_script_change_case(lblabc_template_path+'runlblabc_o3_T1c0-01barO2-1ppmCO2_hitran2020.script', 'EarthLikeOutgasT1c', 
+lblabc_script_change_case(lblabc_template_path+'runlblabc_o3_T1c0-01barO2-1ppmCO2_hitran2020.script', 'EarthLikeOutgasT1c_debug', 
                           'o3', MMW=mmw_t1c, rmix_col=9)
 
-lblabc_script_change_case(lblabc_template_path+'runlblabc_o3_T1c0-01barO2-1ppmCO2_hitran2020.script', 'EarthLikeOutgasT1c', 
+lblabc_script_change_case(lblabc_template_path+'runlblabc_o3_T1c0-01barO2-1ppmCO2_hitran2020.script', 'EarthLikeOutgasT1c_debug', 
                           'oh', MMW=mmw_t1c, hitran_gas_code=13, rmix_col=4)
-lblabc_script_change_case(lblabc_template_path+'runlblabc_o3_T1c0-01barO2-1ppmCO2_hitran2020.script', 'EarthLikeOutgasT1c', 
+lblabc_script_change_case(lblabc_template_path+'runlblabc_o3_T1c0-01barO2-1ppmCO2_hitran2020.script', 'EarthLikeOutgasT1c_debug', 
                           'h2', MMW=mmw_t1c, hitran_gas_code=45, rmix_col=5)
-lblabc_script_change_case(lblabc_template_path+'runlblabc_o3_T1c0-01barO2-1ppmCO2_hitran2020.script', 'EarthLikeOutgasT1c', 
+lblabc_script_change_case(lblabc_template_path+'runlblabc_o3_T1c0-01barO2-1ppmCO2_hitran2020.script', 'EarthLikeOutgasT1c_debug', 
                           'ho2', MMW=mmw_t1c, hitran_gas_code=33, rmix_col=6)
-lblabc_script_change_case(lblabc_template_path+'runlblabc_o3_T1c0-01barO2-1ppmCO2_hitran2020.script', 'EarthLikeOutgasT1c', 
+lblabc_script_change_case(lblabc_template_path+'runlblabc_o3_T1c0-01barO2-1ppmCO2_hitran2020.script', 'EarthLikeOutgasT1c_debug', 
                           'h2o2', MMW=mmw_t1c, hitran_gas_code=25, rmix_col=7)
 
 # Run lblabc for relevant constituents
 
-lblabc_inputs = [['EarthLikeOutgasT1c', molecule] for molecule in constituents]
+lblabc_inputs = [['EarthLikeOutgasT1c_debug', molecule] for molecule in constituents]
 with Pool() as p:
     runlblabc = p.map(run_lblabc_1instance, lblabc_inputs)
 
 # Run climate 
 
-climaterunscript = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/VPLClimate/runclimate_EarthLikeOutgasT1c.script'
-subprocess.run('/gscratch/vsm/gialluca/VPLModelingTools_Dev/vpl_climate_py/vpl_climate_twocol_beta17 < '+climaterunscript+' > '+use_path+'vpl_climate_output_EarthLikeOutgasT1c.run', shell=True)
+climaterunscript = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/VPLClimate/runclimate_EarthLikeOutgasT1c_debug.script'
+subprocess.run('/gscratch/vsm/gialluca/VPLModelingTools_Dev/vpl_climate_py/vpl_climate_twocol_beta17 < '+climaterunscript+' > '+use_path+'vpl_climate_output_EarthLikeOutgasT1c_debug.run', shell=True)
 
 
