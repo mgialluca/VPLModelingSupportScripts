@@ -118,8 +118,8 @@ def prep_p_rmix_files_smart(casename, Prof='/gscratch/vsm/gialluca/VPLModelingTo
 ##
 def run_lblabc_1instance(inputs):
     casename, molecule = inputs
-    outpath='/gscratch/vsm/gialluca/VPLModelingTools_Dev/T1cOutgassing_Cycle4/'
-    scriptpath = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/LBLABC/T1c0-1barO2_EarthH2OOutgass_hitran2020/'
+    outpath='/gscratch/vsm/gialluca/VPLModelingTools_Dev/T1cOutgassing_Cycle4/Debug/'
+    scriptpath = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/LBLABC/T1c0-1barO2_EarthH2OOutgass_hitran2020/Debug/'
     runscript = scriptpath+'runlblabc_'+molecule+'_'+casename+'_hitran2020.script'
 
     f = open(outpath+'lblabc_run_output_'+molecule+'_'+casename+'.run', 'w')
