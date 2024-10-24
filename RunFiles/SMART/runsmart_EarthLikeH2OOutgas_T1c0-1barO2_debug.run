@@ -6,7 +6,7 @@
 1,2			Columns of P,T
 100000			Pressure Scaling Factor
 333.4 		Surface Temperature
-4			Number of Gas Absorbers
+3			Number of Gas Absorbers
 1			Gas Code for First Absorber
 0			No Jacobians for First Absorber
 2			Number of Absorption Coefficient Types
@@ -33,20 +33,6 @@
 1			Lines to Skip at Top of File
 1			Pressure Coordinate
 1,9			Columns of P and rMix
-1			Volume Mixing Ratio
-100000,1.0		P and rMix Scaling Factors
-5			Gas Code for Third Absorber
-0			No Jacobians for Third Absorber
-2			Number of Absorption Coefficient Types
-1			Line Absorbers
-/gscratch/vsm/gialluca/VPLModelingTools_Dev/T1cOutgassing_Cycle4/Debug/EarthLikeOutgasT1c_debug_co_hitran20_50_1e5cm-1.abs
-3			Cross Sections
-/gscratch/vsm/gialluca/VPLModelingTools_Dev/xsec/coxsec.dat
-3			List Directed
-/gscratch/vsm/gialluca/VPLModelingTools_Dev/T1cOutgassing_Cycle4/Debug/MixingRs_EarthLikeOutgasT1c_debug.dat
-1			Lines to Skip at Top of File
-1			Pressure Coordinate
-1,8			Columns of P and rMix
 1			Volume Mixing Ratio
 100000,1.0		P and rMix Scaling Factors
 7			Gas Code for Fourth Absorber
@@ -114,5 +100,5 @@
 0.15		g Error
 0.02		Albedo Error
 1			Output Format (ascii)
-/gscratch/vsm/gialluca/VPLModelingTools_Dev/T1cOutgassing_Cycle4/Debug/EarthLikeOutgasT1c_smartdebug_RemovedHSpecies
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/T1cOutgassing_Cycle4/Debug/EarthLikeOutgasT1c_smartdebug_AndrewAtm
 2			Overwrite

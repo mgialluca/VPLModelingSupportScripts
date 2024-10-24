@@ -70,12 +70,15 @@ def lblabc_script_change_case(template, casename, molecule, MMW='same', hitran_g
 # PressUnits - can do Bar or Pa, Megan stick with bar for the forseeable forever
 # AtmProfPath - path to output new PT profile to
 ##
-def degrade_PT(casename, nlevel_new=68, ptzFile='/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/Bodies/T1c/T1cOutgas_Testing/PTZ_mixingratios_out_fordebug.dist', 
+def degrade_PT(casename, nlevel_new=68, ptzFile='/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/Bodies/T1c/T1cOutgas_Testing/01bar.atm', 
                PressUnits='Bar', AtmProfPath=use_path):
     atm = ascii.read(ptzFile, delimiter=' ')
-    alt = atm['ALT']
-    pres = atm['PRESS']
-    temp = atm['TEMP']
+    #alt = atm['ALT']
+    #pres = atm['PRESS']
+    #temp = atm['TEMP']
+    alt = atm['Alt[km]']
+    pres = atm['P[Pa]']*1e-5
+    temp = atm['T[K]']
 
     new_grid = np.linspace(alt[0], alt[len(alt)-1], nlevel_new)
     new_temp = np.interp(new_grid, alt, temp)
@@ -84,7 +87,8 @@ def degrade_PT(casename, nlevel_new=68, ptzFile='/gscratch/vsm/gialluca/VPLModel
     if PressUnits == 'Pa':
         new_pres = new_pres*u.bar.to(u.Pa)
 
-    dat = Table([new_pres[::-1], new_temp[::-1]], names=('Press', 'Temp'))
+    #dat = Table([new_pres[::-1], new_temp[::-1]], names=('Press', 'Temp'))
+    dat = Table([new_pres, new_temp], names=('Press', 'Temp'))
     ascii.write(dat, AtmProfPath+'PT_profile_'+casename+'.pt', overwrite=True)
 
 ### Make pressure increase in the column (reverse all columns) for smart
@@ -94,14 +98,15 @@ def degrade_PT(casename, nlevel_new=68, ptzFile='/gscratch/vsm/gialluca/VPLModel
 # Prof - PTZ_mixingratios_out WITH PATH that was output by photochem
 # outputpath - path to write new mixing ratio file to
 ##
-def prep_p_rmix_files_smart(casename, Prof='/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/Bodies/T1c/T1cOutgas_Testing/PTZ_mixingratios_out_fordebug.dist', 
+def prep_p_rmix_files_smart(casename, Prof='/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/Bodies/T1c/T1cOutgas_Testing/01bar.atm', 
                             outputpath=use_path, 
-                            gases=['O2', 'H2O', 'OH', 'H2', 'HO2', 'H2O2', 'CO', 'O3']):
+                            gases=['O2', 'H2O', 'O3']): # 'OH', 'H2', 'HO2', 'H2O2', 'CO', 'O3']):
     atm = ascii.read(Prof)
-    datfortab = [atm['PRESS'][::-1]]
+    #datfortab = [atm['PRESS'][::-1]]
+    datfortab = [atm['P[Pa]']*1e-5]
     namesfortab = ['Press']
     for i in gases:
-        datfortab.append(atm[i][::-1])
+        datfortab.append(atm[i])#[::-1])
         namesfortab.append(i)
 
     dat = Table(datfortab, names=namesfortab)
@@ -138,7 +143,7 @@ def run_lblabc_1instance(inputs):
 def run_smart_1instance(runscript, casename, outpath=use_path):
     workdir = os.getcwd()
     os.chdir('/gscratch/vsm/gialluca/VPLModelingTools_Dev/smart/')
-    subprocess.run('/gscratch/vsm/alinc/exec/smart_spectra < '+runscript+' > '+outpath+'smart_run_output_'+casename+'.run', shell=True)
+    subprocess.run('/gscratch/vsm/gialluca/VPLModelingTools_Dev/smart/smart_spectra < '+runscript+' > '+outpath+'smart_run_output_'+casename+'.run', shell=True)
     os.chdir(workdir)
 
 # Make PT prof and mixing ratios for lblabc, climate & smart preferences
@@ -148,14 +153,14 @@ def run_smart_1instance(runscript, casename, outpath=use_path):
 
 # make lblabc runscripts for relevant constituents
 
-constituents = ['h2o', 'o2', 'co', 'o3']#, 'oh', 'h2', 'ho2', 'h2o2']
+constituents = ['h2o', 'o2', 'o3']#, 'oh', 'h2', 'ho2', 'h2o2']
 
 lblabc_script_change_case(lblabc_template_path+'runlblabc_h2o_T1c0-01barO2-1ppmCO2_hitran2020.script', 'EarthLikeOutgasT1c_debug', 
                           'h2o', MMW=mmw_t1c, rmix_col=3)
 lblabc_script_change_case(lblabc_template_path+'runlblabc_o2_T1c0-01barO2-1ppmCO2_hitran2020.script', 'EarthLikeOutgasT1c_debug', 
                           'o2', MMW=mmw_t1c, rmix_col=2)
-lblabc_script_change_case(lblabc_template_path+'runlblabc_co_T1c0-01barO2-1ppmCO2_hitran2020.script', 'EarthLikeOutgasT1c_debug', 
-                          'co', MMW=mmw_t1c, rmix_col=8)
+#lblabc_script_change_case(lblabc_template_path+'runlblabc_co_T1c0-01barO2-1ppmCO2_hitran2020.script', 'EarthLikeOutgasT1c_debug', 
+#                          'co', MMW=mmw_t1c, rmix_col=8)
 lblabc_script_change_case(lblabc_template_path+'runlblabc_o3_T1c0-01barO2-1ppmCO2_hitran2020.script', 'EarthLikeOutgasT1c_debug', 
                           'o3', MMW=mmw_t1c, rmix_col=9)
 
@@ -174,4 +179,4 @@ lblabc_inputs = [['EarthLikeOutgasT1c_debug', molecule] for molecule in constitu
 with Pool() as p:
     runlblabc = p.map(run_lblabc_1instance, lblabc_inputs)
 
-run_smart_1instance('/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/SMART/runsmart_EarthLikeH2OOutgas_T1c0-1barO2_debug.run', 'EarthLikeOutgasT1C_debug_andrewexec')
+run_smart_1instance('/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/SMART/runsmart_EarthLikeH2OOutgas_T1c0-1barO2_debug.run', 'EarthLikeOutgasT1C_debug_andrewavgatm')
