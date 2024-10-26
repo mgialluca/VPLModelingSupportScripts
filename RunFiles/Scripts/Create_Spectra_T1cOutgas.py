@@ -106,7 +106,7 @@ def prep_p_rmix_files_smart(casename, Prof='/gscratch/vsm/gialluca/VPLModelingTo
     #datfortab = [atm['P[Pa]']*1e-5]
     namesfortab = ['Press']
     for i in gases:
-        datfortab.append(atm[i])#[::-1])
+        datfortab.append(atm[i][::-1])
         namesfortab.append(i)
 
     dat = Table(datfortab, names=namesfortab)

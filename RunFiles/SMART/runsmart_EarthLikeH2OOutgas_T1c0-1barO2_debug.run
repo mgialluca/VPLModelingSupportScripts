@@ -114,5 +114,5 @@
 0.15		g Error
 0.02		Albedo Error
 1			Output Format (ascii)
-/gscratch/vsm/gialluca/VPLModelingTools_Dev/T1cOutgassing_Cycle4/Debug/EarthLikeOutgasT1c_smartdebug_AndrewAtm_test2
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/T1cOutgassing_Cycle4/Debug/EarthLikeOutgasT1c_smartdebug_withH2
 2			Overwrite
