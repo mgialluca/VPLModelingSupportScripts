@@ -72,7 +72,7 @@ def lblabc_script_change_case(template, casename, molecule, MMW='same', hitran_g
 ##
 def degrade_PT(casename, nlevel_new=68, ptzFile='/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/Bodies/T1c/T1cOutgas_Testing/01bar.atm', 
                PressUnits='Bar', AtmProfPath=use_path):
-    atm = ascii.read(ptzFile, delimiter=' ')
+    atm = ascii.read(ptzFile, delimiter='\t')#' ')
     #alt = atm['ALT']
     #pres = atm['PRESS']
     #temp = atm['TEMP']
@@ -101,7 +101,7 @@ def degrade_PT(casename, nlevel_new=68, ptzFile='/gscratch/vsm/gialluca/VPLModel
 def prep_p_rmix_files_smart(casename, Prof='/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/Bodies/T1c/T1cOutgas_Testing/01bar.atm', 
                             outputpath=use_path, 
                             gases=['O2', 'H2O', 'O3']): # 'OH', 'H2', 'HO2', 'H2O2', 'CO', 'O3']):
-    atm = ascii.read(Prof)
+    atm = ascii.read(Prof, delimiter='\t')
     #datfortab = [atm['PRESS'][::-1]]
     datfortab = [atm['P[Pa]']*1e-5]
     namesfortab = ['Press']
