@@ -32,7 +32,7 @@
 /gscratch/vsm/gialluca/VPLModelingTools_Dev/T1cOutgassing_Cycle4/Debug/MixingRs_EarthLikeOutgasT1c_debug.dat
 1			Lines to Skip at Top of File
 1			Pressure Coordinate
-1,9			Columns of P and rMix
+1,4			Columns of P and rMix
 1			Volume Mixing Ratio
 100000,1.0		P and rMix Scaling Factors
 7			Gas Code for Fourth Absorber
@@ -100,5 +100,5 @@
 0.15		g Error
 0.02		Albedo Error
 1			Output Format (ascii)
-/gscratch/vsm/gialluca/VPLModelingTools_Dev/T1cOutgassing_Cycle4/Debug/EarthLikeOutgasT1c_smartdebug_AndrewAtm
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/T1cOutgassing_Cycle4/Debug/EarthLikeOutgasT1c_smartdebug_AndrewAtm_test2
 2			Overwrite
