@@ -165,5 +165,5 @@ with Pool() as p:
 
 climaterunscript = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/VPLClimate/runclimate_EarthLikeOutgasT1c_debug.script'
 #subprocess.run('/gscratch/vsm/gialluca/VPLModelingTools_Dev/vpl_climate_py/vpl_climate_twocol_beta17 < '+climaterunscript+' > '+use_path+'vpl_climate_output_EarthLikeOutgasT1c_debug.run', shell=True)
-subprocess.run('/gscratch/vsm/gialluca/VPLModelingTools_Dev/Climate1D_withSMART/vpl_climate < '+climaterunscript+' > '+use_path+'vpl_climate_output_EarthLikeOutgasT1c_testcompile.run', shell=True)
+subprocess.run('/gscratch/vsm/gialluca/VPLModelingTools_Dev/Climate1D_withSMART/vpl_climate/vpl_climate < '+climaterunscript+' > '+use_path+'vpl_climate_output_EarthLikeOutgasT1c_testcompile.run', shell=True)
 
