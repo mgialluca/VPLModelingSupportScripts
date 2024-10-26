@@ -70,24 +70,24 @@ def lblabc_script_change_case(template, casename, molecule, MMW='same', hitran_g
 # PressUnits - can do Bar or Pa, Megan stick with bar for the forseeable forever
 # AtmProfPath - path to output new PT profile to
 ##
-def degrade_PT(casename, nlevel_new=47, ptzFile='/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/Bodies/T1c/T1cOutgas_Testing/01bar.atm', 
+def degrade_PT(casename, nlevel_new=65, ptzFile='/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/Bodies/T1c/T1cOutgas_Testing/PTZ_mixingratios_out_fordebug.dist', 
                PressUnits='Bar', AtmProfPath=use_path):
-    atm = ascii.read(ptzFile, delimiter='\t')#' ')
-    #alt = atm['ALT']
-    #pres = atm['PRESS']
-    #temp = atm['TEMP']
-    alt = atm['Alt[km]']
-    new_pres = atm['P[Pa]']*1e-5
-    new_temp = atm['T[K]']
+    atm = ascii.read(ptzFile, delimiter=' ')
+    alt = atm['ALT']
+    pres = atm['PRESS']
+    temp = atm['TEMP']
+    #alt = atm['Alt[km]']
+    #new_pres = atm['P[Pa]']*1e-5
+    #new_temp = atm['T[K]']
 
-    #new_grid = np.linspace(alt[0], alt[len(alt)-1], nlevel_new)
-    #new_temp = np.interp(new_grid, alt, temp)
-    #new_pres = np.interp(new_grid, alt, pres)
+    new_grid = np.linspace(alt[0], alt[len(alt)-1], nlevel_new)
+    new_temp = np.interp(new_grid, alt, temp)
+    new_pres = np.interp(new_grid, alt, pres)
 
     if PressUnits == 'Pa':
         new_pres = new_pres*u.bar.to(u.Pa)
 
-    #dat = Table([new_pres[::-1], new_temp[::-1]], names=('Press', 'Temp'))
+    dat = Table([new_pres[::-1], new_temp[::-1]], names=('Press', 'Temp'))
     dat = Table([new_pres, new_temp], names=('Press', 'Temp'))
     ascii.write(dat, AtmProfPath+'PT_profile_'+casename+'.pt', overwrite=True)
 
@@ -98,12 +98,12 @@ def degrade_PT(casename, nlevel_new=47, ptzFile='/gscratch/vsm/gialluca/VPLModel
 # Prof - PTZ_mixingratios_out WITH PATH that was output by photochem
 # outputpath - path to write new mixing ratio file to
 ##
-def prep_p_rmix_files_smart(casename, Prof='/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/Bodies/T1c/T1cOutgas_Testing/01bar.atm', 
+def prep_p_rmix_files_smart(casename, Prof='/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/Bodies/T1c/T1cOutgas_Testing/PTZ_mixingratios_out_fordebug.dist', 
                             outputpath=use_path, 
-                            gases=['O2', 'H2O', 'O3']): # 'OH', 'H2', 'HO2', 'H2O2', 'CO', 'O3']):
-    atm = ascii.read(Prof, delimiter='\t')
-    #datfortab = [atm['PRESS'][::-1]]
-    datfortab = [atm['P[Pa]']*1e-5]
+                            gases=['O2', 'H2O', 'O3', 'H2']): # 'OH', 'H2', 'HO2', 'H2O2', 'CO', 'O3']):
+    atm = ascii.read(Prof, delimiter=' ')
+    datfortab = [atm['PRESS'][::-1]]
+    #datfortab = [atm['P[Pa]']*1e-5]
     namesfortab = ['Press']
     for i in gases:
         datfortab.append(atm[i])#[::-1])
@@ -166,8 +166,8 @@ lblabc_script_change_case(lblabc_template_path+'runlblabc_o3_T1c0-01barO2-1ppmCO
 
 #lblabc_script_change_case(lblabc_template_path+'runlblabc_o3_T1c0-01barO2-1ppmCO2_hitran2020.script', 'EarthLikeOutgasT1c_debug', 
 #                          'oh', MMW=mmw_t1c, hitran_gas_code=13, rmix_col=4)
-#lblabc_script_change_case(lblabc_template_path+'runlblabc_o3_T1c0-01barO2-1ppmCO2_hitran2020.script', 'EarthLikeOutgasT1c_debug', 
-#                          'h2', MMW=mmw_t1c, hitran_gas_code=45, rmix_col=5)
+lblabc_script_change_case(lblabc_template_path+'runlblabc_o3_T1c0-01barO2-1ppmCO2_hitran2020.script', 'EarthLikeOutgasT1c_debug', 
+                          'h2', MMW=mmw_t1c, hitran_gas_code=45, rmix_col=5)
 #lblabc_script_change_case(lblabc_template_path+'runlblabc_o3_T1c0-01barO2-1ppmCO2_hitran2020.script', 'EarthLikeOutgasT1c_debug', 
 #                          'ho2', MMW=mmw_t1c, hitran_gas_code=33, rmix_col=6)
 #lblabc_script_change_case(lblabc_template_path+'runlblabc_o3_T1c0-01barO2-1ppmCO2_hitran2020.script', 'EarthLikeOutgasT1c_debug', 
@@ -179,4 +179,4 @@ lblabc_inputs = [['EarthLikeOutgasT1c_debug', molecule] for molecule in constitu
 with Pool() as p:
     runlblabc = p.map(run_lblabc_1instance, lblabc_inputs)
 
-run_smart_1instance('/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/SMART/runsmart_EarthLikeH2OOutgas_T1c0-1barO2_debug.run', 'EarthLikeOutgasT1C_debug_andrewatm')
+run_smart_1instance('/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/SMART/runsmart_EarthLikeH2OOutgas_T1c0-1barO2_debug.run', 'EarthLikeOutgasT1C_debug_withh2')
