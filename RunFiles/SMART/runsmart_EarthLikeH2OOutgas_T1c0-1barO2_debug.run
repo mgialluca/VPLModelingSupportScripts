@@ -6,7 +6,7 @@
 1,2			Columns of P,T
 100000			Pressure Scaling Factor
 333.4 		Surface Temperature
-4			Number of Gas Absorbers
+3			Number of Gas Absorbers
 1			Gas Code for First Absorber
 0			No Jacobians for First Absorber
 2			Number of Absorption Coefficient Types
