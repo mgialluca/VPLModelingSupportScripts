@@ -77,12 +77,12 @@ def degrade_PT(casename, nlevel_new=47, ptzFile='/gscratch/vsm/gialluca/VPLModel
     #pres = atm['PRESS']
     #temp = atm['TEMP']
     alt = atm['Alt[km]']
-    pres = atm['P[Pa]']*1e-5
-    temp = atm['T[K]']
+    new_pres = atm['P[Pa]']*1e-5
+    new_temp = atm['T[K]']
 
-    new_grid = np.linspace(alt[0], alt[len(alt)-1], nlevel_new)
-    new_temp = np.interp(new_grid, alt, temp)
-    new_pres = np.interp(new_grid, alt, pres)
+    #new_grid = np.linspace(alt[0], alt[len(alt)-1], nlevel_new)
+    #new_temp = np.interp(new_grid, alt, temp)
+    #new_pres = np.interp(new_grid, alt, pres)
 
     if PressUnits == 'Pa':
         new_pres = new_pres*u.bar.to(u.Pa)
