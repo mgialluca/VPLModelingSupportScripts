@@ -88,7 +88,7 @@ def degrade_PT(casename, nlevel_new=65, ptzFile='/gscratch/vsm/gialluca/VPLModel
         new_pres = new_pres*u.bar.to(u.Pa)
 
     dat = Table([new_pres[::-1], new_temp[::-1]], names=('Press', 'Temp'))
-    dat = Table([new_pres, new_temp], names=('Press', 'Temp'))
+    #dat = Table([new_pres, new_temp], names=('Press', 'Temp'))
     ascii.write(dat, AtmProfPath+'PT_profile_'+casename+'.pt', overwrite=True)
 
 ### Make pressure increase in the column (reverse all columns) for smart
