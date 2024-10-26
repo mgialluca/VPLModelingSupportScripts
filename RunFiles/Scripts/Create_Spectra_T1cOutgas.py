@@ -179,4 +179,4 @@ lblabc_inputs = [['EarthLikeOutgasT1c_debug', molecule] for molecule in constitu
 with Pool() as p:
     runlblabc = p.map(run_lblabc_1instance, lblabc_inputs)
 
-run_smart_1instance('/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/SMART/runsmart_EarthLikeH2OOutgas_T1c0-1barO2_debug.run', 'EarthLikeOutgasT1C_debug_withh2')
+run_smart_1instance('/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/SMART/runsmart_EarthLikeH2OOutgas_T1c0-1barO2_debug.run', 'EarthLikeOutgasT1C_debug_withOUTh2')
