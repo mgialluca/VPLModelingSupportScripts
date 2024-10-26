@@ -148,12 +148,12 @@ def run_smart_1instance(runscript, casename, outpath=use_path):
 
 # Make PT prof and mixing ratios for lblabc, climate & smart preferences
 
-#degrade_PT('EarthLikeOutgasT1c_debug')
-#prep_p_rmix_files_smart('EarthLikeOutgasT1c_debug')
+degrade_PT('EarthLikeOutgasT1c_debug')
+prep_p_rmix_files_smart('EarthLikeOutgasT1c_debug')
 
 # make lblabc runscripts for relevant constituents
 
-constituents = ['h2o', 'o2', 'o3']#, 'oh', 'h2', 'ho2', 'h2o2']
+constituents = ['h2o', 'o2', 'o3', 'h2']#, 'oh', 'h2', 'ho2', 'h2o2']
 
 lblabc_script_change_case(lblabc_template_path+'runlblabc_h2o_T1c0-01barO2-1ppmCO2_hitran2020.script', 'EarthLikeOutgasT1c_debug', 
                           'h2o', MMW=mmw_t1c, rmix_col=3)
@@ -162,7 +162,7 @@ lblabc_script_change_case(lblabc_template_path+'runlblabc_o2_T1c0-01barO2-1ppmCO
 #lblabc_script_change_case(lblabc_template_path+'runlblabc_co_T1c0-01barO2-1ppmCO2_hitran2020.script', 'EarthLikeOutgasT1c_debug', 
 #                          'co', MMW=mmw_t1c, rmix_col=8)
 lblabc_script_change_case(lblabc_template_path+'runlblabc_o3_T1c0-01barO2-1ppmCO2_hitran2020.script', 'EarthLikeOutgasT1c_debug', 
-                          'o3', MMW=mmw_t1c, rmix_col=9)
+                          'o3', MMW=mmw_t1c, rmix_col=4)
 
 #lblabc_script_change_case(lblabc_template_path+'runlblabc_o3_T1c0-01barO2-1ppmCO2_hitran2020.script', 'EarthLikeOutgasT1c_debug', 
 #                          'oh', MMW=mmw_t1c, hitran_gas_code=13, rmix_col=4)
@@ -179,4 +179,4 @@ lblabc_inputs = [['EarthLikeOutgasT1c_debug', molecule] for molecule in constitu
 with Pool() as p:
     runlblabc = p.map(run_lblabc_1instance, lblabc_inputs)
 
-run_smart_1instance('/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/SMART/runsmart_EarthLikeH2OOutgas_T1c0-1barO2_debug.run', 'EarthLikeOutgasT1C_debug_andrewavgatm')
+run_smart_1instance('/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/SMART/runsmart_EarthLikeH2OOutgas_T1c0-1barO2_debug.run', 'EarthLikeOutgasT1C_debug_andrewatm')
