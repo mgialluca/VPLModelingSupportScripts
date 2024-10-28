@@ -53,9 +53,11 @@
 100000,1.0		P and rMix Scaling Factors
 45			Gas Code for Second Absorber
 0			No Jacobians for Second Absorber
-2			Number of Absorption Coefficient Types
+3			Number of Absorption Coefficient Types
 1			Line Absorbers
 /gscratch/vsm/gialluca/VPLModelingTools_Dev/T1cOutgassing_Cycle4/Debug/EarthLikeOutgasT1c_debug_h2_hitran20_50_1e5cm-1.abs
+2			Collisionally Induced Absorption
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/xsec/h2-h2_abs.cia
 3			Cross Sections
 /gscratch/vsm/gialluca/VPLModelingTools_Dev/xsec/h2xsec.dat
 3			List Directed
@@ -114,5 +116,5 @@
 0.15		g Error
 0.02		Albedo Error
 1			Output Format (ascii)
-/gscratch/vsm/gialluca/VPLModelingTools_Dev/T1cOutgassing_Cycle4/Debug/EarthLikeOutgasT1c_smartdebug_withH2
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/T1cOutgassing_Cycle4/Debug/EarthLikeOutgasT1c_smartdebug_withH2CIA
 2			Overwrite
