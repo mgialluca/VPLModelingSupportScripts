@@ -40,7 +40,7 @@ False			Include conductive heating rates
 0.0002			Surface roughness height [m]
 0			No. condensibles
 1			Generate fluxes using SMART
-8			******NO. ABSORBING GASES******
+3			******NO. ABSORBING GASES******
 7			************HITRAN GAS CODE [o2]*************
 0			Mixing ratio jacobians [0 = None; 1 = Radiance; 2 = Flux]
 3			No. of abs coeff types
@@ -70,7 +70,7 @@ False			Include conductive heating rates
 /gscratch/vsm/gialluca/VPLModelingTools_Dev/T1cOutgassing_Cycle4/Debug/MixingRs_EarthLikeOutgasT1c_debug.dat
 1			Lines to skip
 1			Use pressure coordinate
-1,9			columns of P,rmix
+1,4			columns of P,rmix
 1			Mixing type [1 = volume; 2 = mass]
 100000.,1.0			scale P and rmix
 1			************HITRAN GAS CODE [h2o]*************
@@ -88,77 +88,7 @@ False			Include conductive heating rates
 1,3			columns of P,rmix
 1			Mixing type [1 = volume; 2 = mass]
 100000.,1.0			scale P and rmix
-13			************HITRAN GAS CODE [oh]*************
-0			Mixing ratio jacobians [0 = None; 1 = Radiance; 2 = Flux]
-1			No. of abs coeff types
-1			HITRAN Line Absorbers
-2			Don't compute absorption coefficients
-/gscratch/vsm/gialluca/VPLModelingTools_Dev/T1cOutgassing_Cycle4/Debug/EarthLikeOutgasT1c_debug_oh_hitran20_50_1e5cm-1.abs
-3			List directed input
-/gscratch/vsm/gialluca/VPLModelingTools_Dev/T1cOutgassing_Cycle4/Debug/MixingRs_EarthLikeOutgasT1c_debug.dat
-1			Lines to skip
-1			Use pressure coordinate
-1,4			columns of P,rmix
-1			Mixing type [1 = volume; 2 = mass]
-100000.,1.0			scale P and rmix
-45			************HITRAN GAS CODE [h2]*************
-0			Mixing ratio jacobians [0 = None; 1 = Radiance; 2 = Flux]
-2			No. of abs coeff types
-1			HITRAN Line Absorbers
-2			Don't compute absorption coefficients
-/gscratch/vsm/gialluca/VPLModelingTools_Dev/T1cOutgassing_Cycle4/Debug/EarthLikeOutgasT1c_debug_h2_hitran20_50_1e5cm-1.abs
-3			UV-VIS absorption cross sections
-/gscratch/vsm/gialluca/VPLModelingTools_Dev/xsec/h2xsec.dat
-3			List directed input
-/gscratch/vsm/gialluca/VPLModelingTools_Dev/T1cOutgassing_Cycle4/Debug/MixingRs_EarthLikeOutgasT1c_debug.dat
-1			Lines to skip
-1			Use pressure coordinate
-1,5			columns of P,rmix
-1			Mixing type [1 = volume; 2 = mass]
-100000.,1.0			scale P and rmix
-33			************HITRAN GAS CODE [ho2]*************
-0			Mixing ratio jacobians [0 = None; 1 = Radiance; 2 = Flux]
-1			No. of abs coeff types
-1			HITRAN Line Absorbers
-2			Don't compute absorption coefficients
-/gscratch/vsm/gialluca/VPLModelingTools_Dev/T1cOutgassing_Cycle4/Debug/EarthLikeOutgasT1c_debug_ho2_hitran20_50_1e5cm-1.abs
-3			List directed input
-/gscratch/vsm/gialluca/VPLModelingTools_Dev/T1cOutgassing_Cycle4/Debug/MixingRs_EarthLikeOutgasT1c_debug.dat
-1			Lines to skip
-1			Use pressure coordinate
-1,6			columns of P,rmix
-1			Mixing type [1 = volume; 2 = mass]
-100000.,1.0			scale P and rmix
-25			************HITRAN GAS CODE [h2o2]*************
-0			Mixing ratio jacobians [0 = None; 1 = Radiance; 2 = Flux]
-2			No. of abs coeff types
-1			HITRAN Line Absorbers
-2			Don't compute absorption coefficients
-/gscratch/vsm/gialluca/VPLModelingTools_Dev/T1cOutgassing_Cycle4/Debug/EarthLikeOutgasT1c_debug_h2o2_hitran20_50_1e5cm-1.abs
-3			UV-VIS absorption cross sections
-/gscratch/vsm/gialluca/VPLModelingTools_Dev/xsec/h2o2xsec.dat
-3			List directed input
-/gscratch/vsm/gialluca/VPLModelingTools_Dev/T1cOutgassing_Cycle4/Debug/MixingRs_EarthLikeOutgasT1c_debug.dat
-1			Lines to skip
-1			Use pressure coordinate
-1,7			columns of P,rmix
-1			Mixing type [1 = volume; 2 = mass]
-100000.,1.0			scale P and rmix
-5			************HITRAN GAS CODE [co]*************
-0			Mixing ratio jacobians [0 = None; 1 = Radiance; 2 = Flux]
-2			No. of abs coeff types
-1			HITRAN Line Absorbers
-2			Don't compute absorption coefficients
-/gscratch/vsm/gialluca/VPLModelingTools_Dev/T1cOutgassing_Cycle4/Debug/EarthLikeOutgasT1c_debug_co_hitran20_50_1e5cm-1.abs
-3			UV-VIS absorption cross sections
-/gscratch/vsm/gialluca/VPLModelingTools_Dev/xsec/coxsec.dat
-3			List directed input
-/gscratch/vsm/gialluca/VPLModelingTools_Dev/T1cOutgassing_Cycle4/Debug/MixingRs_EarthLikeOutgasT1c_debug.dat
-1			Lines to skip
-1			Use pressure coordinate
-1,8			columns of P,rmix
-1			Mixing type [1 = volume; 2 = mass]
-100000.,1.0			scale P and rmix
+
 0			******NO. AEROSOLS******
 0			Lambertian surface
 0			No albedo jacobians
