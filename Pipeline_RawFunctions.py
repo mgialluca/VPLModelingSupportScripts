@@ -292,6 +292,7 @@ def check_photochem_conv(casename, trynum=1, NormGrossTolerance=5, L2Tolerance=5
             # Check if youre at the last timestep line
             elif lines[i].split()[0] == 'N':
                 hold = lines[i].split()
+                Nstep_photochemrun = int(hold[2])
                 for k in range(len(hold)):
                     if hold[k] == 'TIME': # Find the final time from the last timestep
                         FinalTime = float(hold[k+2])
@@ -387,3 +388,50 @@ def check_vplclimate_conv(casename, trynum=1, TropHeatingTolerance=1e-4, AvgFlux
 
     return HasItConverged, TropHeating, AvgFlux
 # usage should be 'convergence, tropheating, avgflux = check_vplclimate_conv()
+
+
+### Purpose: Get only the last profile output from a climate run
+## 
+## Attribute Dependencies:
+# outputfile - output file from the climate run
+# nlevel_coarse - number of atmospheric layers (use nlevel_coarse)
+#
+def get_final_climate_output_temp_profile(outputfile, nlevel_coarse):
+    # Define python dictionary to compile data in
+    dat = {}
+    dat['Atm_Levels'] = nlevel_coarse
+
+    # Column names used in VPL Climate output run
+    colnames = ['P[Pa]', 'Alt[km]', 'T[K]', 'Q_s[K/day]', 'Q_t[K/day]', 'Q_c[K/day]', 
+                'Q_ad[K/day]', 'Q_net[K/day]', 'fs_net[W/m/m]', 'ft_net[W/m/m]', 'fc[W/m/m]', 
+                'f_ad[W/m/m]', 'pc[Pas]', 'Altc[km]', 'Tc[K]', 'dt[s]', 'lr[K/km]', 
+                'aid_lr[K/km]', 'Km[m2/s]', 'rmix[kg/kg]']
+
+    # Open a simple text instance of the Climate output to use for parsing
+    dat['FileName'] = outputfile
+    fop = open(outputfile, 'r')
+    flines = fop.readlines()
+    fop.close()
+
+    # Loop through text instance of output file to retrieve atmospheric profiles
+    # Start at bottom of file to extract only the last profile
+    for i in reversed(range(len(flines))):
+        curr_line = flines[i].split()
+        if len(curr_line) > 0:
+            if curr_line[0] == '(Pas)': # This checks if you're at a profile
+                # This reads in that profile beautifully as pandas data frame
+                curr_step = pd.read_csv(dat['FileName'], delimiter=' ', skipinitialspace=True, header=0, 
+                                        names=colnames, skiprows=i, nrows=nlevel_coarse)
+                
+                # Add that profile to the dictionary
+                for k in colnames:
+                    dat[k] = np.array(curr_step[k])
+
+                # Find net flux at each level
+                Fnet = np.zeros(len(curr_step['fs_net[W/m/m]']))
+                for lvl in range(len(Fnet)):
+                    Fnet[lvl] = curr_step['fs_net[W/m/m]'][lvl] - curr_step['ft_net[W/m/m]'][lvl] - curr_step['fc[W/m/m]'][lvl]
+                dat['f_net[W/m/m]'] = Fnet
+                break
+
+    return dat
