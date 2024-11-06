@@ -93,6 +93,8 @@ class VPLModelingPipeline:
         # MOLECULES MUST BE ALL CAPITAL LETTERS AS THEY WILL PRINT OUT FROM PHOTOCHEM
 
         # put photochem initial inputs into the inputs dir if they aren't there already
+        if not os.path.exists(self.photochem_InputsDir):
+            os.mkdir(self.photochem_InputsDir)
         if photochemInitial != self.photochem_InputsDir:
             subprocess.run('cp '+photochemInitial+'input_photchem.dat '+self.photochem_InputsDir, shell=True)
             subprocess.run('cp '+photochemInitial+'parameters.inc '+self.photochem_InputsDir, shell=True)
