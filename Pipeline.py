@@ -1099,6 +1099,7 @@ class VPLModelingPipeline:
     ## Dependent on all Attributes, no fxn-specific inputs
     ##
     def run_automatic(self):
+        ftestingoutput = open('SavingInfoOut.txt', 'w')
         # Prepare your backup directory for photochem data
         if not os.path.exists(self.photochemBackupDir):
             os.mkdir(self.photochemBackupDir)
@@ -1134,6 +1135,7 @@ class VPLModelingPipeline:
             self.num_photochem_runs += 1
             if self.verbose == True:
                 print('----> Beginning photochem run Try number '+str(self.num_photochem_runs))
+                ftestingoutput.write('----> Beginning photochem run Try number '+str(self.num_photochem_runs)+'\n')
             self.run_photochem_1instance(CleanMake=True, InputCopy=self.photochem_InputsDir, trynum=self.num_photochem_runs)
             
             ### If this is the first run, Retrieve the surf gravity and radius of the planet from PLANET.dat
@@ -1170,6 +1172,7 @@ class VPLModelingPipeline:
 
             if self.verbose == True:
                 print('Photochem local convergence found with '+str(photochem_subtries)+' subtries')
+                ftestingoutput.write('Photochem local convergence found with '+str(photochem_subtries)+' subtries\n')
 
             # Save backup of photochem output
             self.backup_photochem_run(trynum=self.num_photochem_runs)
@@ -1202,6 +1205,7 @@ class VPLModelingPipeline:
             self.degrade_PT()
             if self.verbose == True:
                 print('Degraded PT profile created from photochem run '+str(self.num_photochem_runs))
+                ftestingoutput.write('Degraded PT profile created from photochem run '+str(self.num_photochem_runs)+'\n')
             ### Degraded PT Profile finished ------------
 
             ### Create new mixing ratios profile file --------------------------
@@ -1234,6 +1238,7 @@ class VPLModelingPipeline:
                 self.run_lblabc_1instance(self.lblabc_RunScriptDir+'RunLBLABC_'+gas+'_'+self.casename+'.script', gas)
                 if self.verbose == True:
                     print('LBLABC run for '+gas+' complete, LBLABC iteration '+str(self.num_lblabc_runs+1))
+                    ftestingoutput.write('LBLABC run for '+gas+' complete, LBLABC iteration '+str(self.num_lblabc_runs+1)+'\n')
             self.num_lblabc_runs += 1
 
             ### Run LBLABC section end -------------------------------------
@@ -1249,12 +1254,17 @@ class VPLModelingPipeline:
 
             if self.verbose == True:
                 print('Climate Runscript created, beginning first climate run')
+                ftestingoutput.write('Climate Runscript created, beginning first climate run\n')
+
+            ftestingoutput.close()
+            ftestingoutput.open('SavingInfoOut.txt', 'a')
 
             # Now run climate 
             self.run_climate_1instance(self.vplclimate_RunScriptDir+'RunVPLClimate_'+self.casename+'.script', self.vplclimate_executable, trynum=self.num_climate_runs)
 
             if self.verbose == True:
                 print('First Climate run completed')
+                ftestingoutput.write('First Climate run completed\n')
 
             # Check for local convergence of climate, similar to process followed for a given try on photochem            
             local_climate_convergence, tropheating, avgflux = self.check_vplclimate_conv(trynum=self.num_climate_runs)
@@ -1262,8 +1272,10 @@ class VPLModelingPipeline:
             if self.verbose == True:
                 if local_climate_convergence == True:
                     print('Climate convergence found on first try for run number '+str(self.num_climate_runs))
+                    ftestingoutput.write('Climate convergence found on first try for run number '+str(self.num_climate_runs)+'\n')
                 else:
                     print('Climate convergence NOT found on first try for run number '+str(self.num_climate_runs)+', beginning rerun sequence')
+                    ftestingoutput.write('Climate convergence NOT found on first try for run number '+str(self.num_climate_runs)+', beginning rerun sequence\n')
 
             climate_subtries = 1
             # Until climate converges, loop through taking new temp profile
@@ -1283,9 +1295,11 @@ class VPLModelingPipeline:
                 # Re run Climate 
                 if self.verbose == True:
                     print('Beginning Climate rerun')
+                    ftestingoutput.write('Beginning Climate rerun\n')
                 self.run_climate_1instance(self.vplclimate_RunScriptDir+'RunVPLClimate_'+self.casename+'.script', self.vplclimate_executable, trynum=self.num_climate_runs)
                 if self.verbose == True:
                     print('Climate subtry number '+str(climate_subtries)+' completed')
+                    ftestingoutput.write('Climate subtry number '+str(climate_subtries)+' completed\n')
 
                 # Check convergence
                 local_climate_convergence, tropheating, avgflux = self.check_vplclimate_conv(trynum=self.num_climate_runs)
@@ -1293,8 +1307,10 @@ class VPLModelingPipeline:
                 if self.verbose == True:
                     if local_climate_convergence == True:
                         print('Climate convergence found on subtry number '+str(climate_subtries)+' for run number '+str(self.num_climate_runs))
+                        ftestingoutput.write('Climate convergence found on subtry number '+str(climate_subtries)+' for run number '+str(self.num_climate_runs)+'\n')
                     else:
                         print('Climate convergence NOT found on subtry number '+str(climate_subtries)+' for run number '+str(self.num_climate_runs)+', continuing rerun sequence')
+                        ftestingoutput.write('Climate convergence NOT found on subtry number '+str(climate_subtries)+' for run number '+str(self.num_climate_runs)+', continuing rerun sequence\n')
 
             ### Run VPL Climate section end ------------------------------
 
