@@ -637,7 +637,7 @@ class VPLModelingPipeline:
     # trynum - the iteration number youre on for the specific case, defined by self.num_photochem_runs
     ##
     def backup_photochem_run(self, trynum=1):
-        os.mkdir(self.photochemBackupDir+'/RunNumber'+str(trynum)+'/')
+        os.mkdir(self.photochemBackupDir+'RunNumber'+str(trynum)+'/')
         subprocess.run('cp '+self.photochemDir+'OUTPUT/* '+self.photochemBackupDir+'/RunNumber'+str(trynum)+'/', shell=True)
         if self.verbose == True:
             print('Photochem Run Number '+str(trynum)+' Output Backup Created')
@@ -1099,9 +1099,13 @@ class VPLModelingPipeline:
         # Prepare your backup directory for photochem data
         if not os.path.exists(self.photochemBackupDir):
             os.mkdir(self.photochemBackupDir)
+        else:
+            subprocess.run('rm -rf '+self.photochemBackupDir+'*', shell=True)
         # Prepare your directory for storing lblabc .abs files
         if not os.path.exists(self.LBLABC_AbsFilesDir):
             os.mkdir(self.LBLABC_AbsFilesDir)
+        else:
+            subprocess.run('rm -rf '+self.LBLABC_AbsFilesDir+'*', shell=True)
         # Prepare directory for storing lblabc run script files
         if not os.path.exists(self.lblabc_RunScriptDir):
             os.mkdir(self.lblabc_RunScriptDir)
