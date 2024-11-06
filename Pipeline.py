@@ -638,7 +638,8 @@ class VPLModelingPipeline:
     ##
     def backup_photochem_run(self, trynum=1):
         os.mkdir(self.photochemBackupDir+'RunNumber'+str(trynum)+'/')
-        subprocess.run('cp '+self.photochemDir+'OUTPUT/* '+self.photochemBackupDir+'/RunNumber'+str(trynum)+'/', shell=True)
+        subprocess.run('cp '+self.photochemDir+'PTZ_mixingratios_in.dist '+self.photochemBackupDir+'RunNumber'+str(trynum)+'/', shell=True)
+        subprocess.run('cp '+self.photochemDir+'OUTPUT/* '+self.photochemBackupDir+'RunNumber'+str(trynum)+'/', shell=True)
         if self.verbose == True:
             print('Photochem Run Number '+str(trynum)+' Output Backup Created')
 
@@ -847,7 +848,7 @@ class VPLModelingPipeline:
         # Gases Get written here --------------------
 
         for m in self.molecule_dict['Gas_names']:
-            f.write(self.molecule_dict[m]+'			************HITRAN GAS CODE ['+m+']*************\n')
+            f.write(str(self.molecule_dict[m])+'			************HITRAN GAS CODE ['+m+']*************\n')
             f.write('0			Mixing ratio jacobians [0 = None; 1 = Radiance; 2 = Flux]\n')
 
             no_abs_coef = 1
