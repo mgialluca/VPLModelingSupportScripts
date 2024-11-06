@@ -114,7 +114,7 @@ class VPLModelingPipeline:
             self.molecule_dict['Gas_names'] = gas_names
             for m in range(len(gas_names)):
                 self.molecule_dict[gas_names[m]] = self.hitran_lookup.loc[gas_names[m]]['HitranNumber']
-                self.molecule_dict[gas_names[m]+'_RmixCol'] = m+1
+                self.molecule_dict[gas_names[m]+'_RmixCol'] = m+2
 
 
 
