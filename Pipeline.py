@@ -44,8 +44,8 @@ class VPLModelingPipeline:
         self.photochemDir = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/atmos/PHOTOCHEM/' # path to PHOTOCHEM/ dir
         self.atmosDir = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/atmos/' # path to atmos/ dir
         self.lblabcDir = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/lblabc/' # path to lblabc/ dir (such that lblabcDir/lblabc is the executable to call)
-        self.OutPath = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/ModelRunOutputs/' # path for the raw model run outputs (NOT for created data products like dictionaries)
-        self.DataOutPath = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/ModelRunOutputs/' # path for created data products like dictionaries
+        self.OutPath = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/ModelRunOutputs/'+casename+'/' # path for the raw model run outputs (NOT for created data products like dictionaries)
+        self.DataOutPath = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/ModelRunOutputs/'+casename+'/' # path for created data products like dictionaries
         self.AtmProfPath = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/AtmProfiles/' # path to put atmospheric profile files (.pt files really)
         self.photochemBackupDir = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/Save_Photochem_Output/'+casename+'/' # path to save output from each photochem run
         self.LBLABC_AbsFilesDir = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/LinebyLine_absFiles/'+casename+'/' # path to put the created lbl .abs files in 
@@ -1116,6 +1116,11 @@ class VPLModelingPipeline:
         # Prepare directory for storing new photochem inputs
         if not os.path.exists(self.photochem_InputsDir):
             os.mkdir(self.photochem_InputsDir)
+        # Make sure model and data output dirs exist
+        if not os.path.exists(self.OutPath):
+            os.mkdir(self.OutPath)
+        if not os.path.exists(self.DataOutPath):
+            os.mkdir(self.DataOutPath)
         # Prepare the Hyak environment
         #self.prepare_hyak_env()
 
