@@ -1257,7 +1257,7 @@ class VPLModelingPipeline:
                 ftestingoutput.write('Climate Runscript created, beginning first climate run\n')
 
             ftestingoutput.close()
-            ftestingoutput.open('SavingInfoOut.txt', 'a')
+            ftestingoutput = open('SavingInfoOut.txt', 'a')
 
             # Now run climate 
             self.run_climate_1instance(self.vplclimate_RunScriptDir+'RunVPLClimate_'+self.casename+'.script', self.vplclimate_executable, trynum=self.num_climate_runs)
