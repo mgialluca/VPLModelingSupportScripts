@@ -343,7 +343,7 @@ class VPLModelingPipeline:
         atm = ascii.read(PTZOut)
         datfortab = [atm['PRESS'][::-1]]
         namesfortab = ['Press']
-        for i in self.molecule_dict['gas_names']:
+        for i in self.molecule_dict['Gas_names']:
             datfortab.append(atm[i][::-1])
             namesfortab.append(i)
 
@@ -552,10 +552,10 @@ class VPLModelingPipeline:
 
         # Print messages:
         if self.verbose == True:
-            if HasItConverged:
-                print('Photochem run '+self.casename+' Try '+str(trynum)+' has converged!')
-            else:
-                print('Photochem run '+self.casename+' Try '+str(trynum)+' has NOT converged.')
+            #if HasItConverged:
+            #    print('Photochem run '+self.casename+' Try '+str(trynum)+' has converged!')
+            #else:
+            #    print('Photochem run '+self.casename+' Try '+str(trynum)+' has NOT converged.')
             print('Normalized Gross error: '+str(NormGrosserr))
             print('L2 Error: '+str(L2err))
             print('Time of final timestep: '+str(FinalTime)+'\n')
