@@ -55,7 +55,7 @@ class VPLModelingPipeline:
         self.xsec_Path = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/xsec/' # The path where cross section files can be found
 
         # The climate executable:
-        self.vplclimate_executable = 'something_Beta17?' # The VPL Climate executable you want to use WITH FULL PATH
+        self.vplclimate_executable = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/ClimateModel/vpl_climate/vpl_climate' # The VPL Climate executable you want to use WITH FULL PATH
 
         self.HITRAN_year = hitran_year
         # Set the appropriate HITRAN variables
@@ -108,7 +108,7 @@ class VPLModelingPipeline:
 
         if find_molecules_of_interest == False:
             self.molecule_dict = {} # key-value pairs of molecules of interest (keys, str) and their hitran codes (value, int)
-            gas_names = ['O2', 'O3', 'CO', 'CO2', 'H2O', 'HNO3', 'N2O', 'NO2', 'SO2']
+            gas_names = ['O2', 'O3', 'H2O']#, 'CO', 'CO2', 'HNO3', 'N2O', 'NO2', 'SO2']
             self.molecule_dict['Gas_names'] = gas_names
             for m in range(len(gas_names)):
                 self.molecule_dict[gas_names[m]] = self.hitran_lookup.loc[gas_names[m]]['HitranNumber']
@@ -1178,6 +1178,8 @@ class VPLModelingPipeline:
             if photochem_subtries == 1 and self.num_photochem_runs != 1:
                 if nsteps_photo < 1000:
                     self.global_convergence = True
+                    if self.verbose == True:
+                        print('Global Convergence achieved')
                     break
                 else:
                     self.global_convergence = False
