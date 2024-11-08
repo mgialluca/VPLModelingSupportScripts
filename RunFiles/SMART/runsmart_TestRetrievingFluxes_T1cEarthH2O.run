@@ -1,0 +1,74 @@
+0			No Pressure Jacobians
+0			No Jacobians for Temperature
+3			Formatted Atmospheric Structure File
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/AtmProfiles/PT_profile_TestPipelineT1c.pt
+1			Lines to Skip at Top of File
+1,2			Columns of P,T
+100000			Pressure Scaling Factor
+331.4 		Surface Temperature
+1			Number of Gas Absorbers
+7			Gas Code for only Absorber
+0			No Jacobians for only Absorber
+2			Number of Absorption Coefficient Types
+1			Line Absorbers
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/LinebyLine_absFiles/TestPipelineT1c/O2_TestPipelineT1cIonosphere.abs
+3			Cross Sections
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/LBLABC/TestPipelineT1c/O2_UVXsec.dat
+3			List Directed
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/AtmProfiles/MixingRs_TestPipelineT1c.dat
+1			Lines to Skip at Top of File
+1			Pressure Coordinate
+1,2			Columns of P and rMix
+1			Volume Mixing Ratio
+100000,1.0		P and rMix Scaling Factors
+0			Number of Aerosols
+0           Lambert Reflection
+0           No Jacobians
+3           List Directed
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/LBLABC/TestPipelineT1c/Const_UV_p25_albedo.alb
+0          Lines to Skip
+1,2         Columns of wl and albedo
+1           Wavelength Grid Type
+1.0         Wavelength Scaling
+1.0         Albedo Scaling
+0.0158   	Distance from Star (AU)
+10.65			Surface Gravity [m/s*s]
+6996.7757	    Planetary Radius [km]
+31.982014098440811		Mean Molecular Weight
+1			Number of Rayleigh Scatterers
+1			Rayleigh Scatter Index
+1.0			Volume Mixing Ratio
+8			Number of Streams
+3			Source - Solar
+3			File Format - List Directed
+/gscratch/vsm/gialluca/StellarSpectra/TRAPPIST-1_2020.dat
+10			Lines to Skip
+2			Units solar flux
+1			Solar spectral units
+1.0			Micron Conversion Factor
+1,2 		Columns of wn and Flux
+1			Number of Solar Zenith Angles
+60,0			Zenith and Azimuth Angles
+0.01			Convergence Criterion
+9			Output Format
+2           Ray Tracing Transit
+0.1192      Stellar Radius (Rsun)
+0.          Impact Parameter (Rstar)
+1           Include Refraction
+0           No Limb Darkening
+1			Number of Azimuth Angles
+0.			Azimuth Angles
+1			Top of Atmosphere only
+2			Output Radiance Units [W/m*m/sr/micron]
+82257.13580653122,10101010.101010103	Min and Max Wavenumber
+2			Type of Grid (slit)
+2			Triangular Spectral Response Function
+1.0			FWHM
+1.0			Sampling Resolution [per cm]
+0.25		Error for tau Binning
+0.15		Error for pi0 Binning
+0.15		g Error
+0.02		Albedo Error
+1			Output Format (ascii)
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/ModelRunOutputs/TestPipelineT1c/smart_o2IonosphereTest
+2			Overwrite
