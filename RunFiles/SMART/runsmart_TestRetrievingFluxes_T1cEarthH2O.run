@@ -58,13 +58,17 @@
 0           No Limb Darkening
 1			Number of Azimuth Angles
 0.			Azimuth Angles
-1			Top of Atmosphere only
-2			Output Radiance Units [W/m*m/sr/micron]
-82257.13580653122,10101010.101010103	Min and Max Wavenumber
+4			specified level of output pressures for radiances
+3			Number of output pressure levels
+0.00000009972			pressure [bar] of level 1
+0.0000001105			pressure [bar] of level 2
+0.0000001226			pressure [bar] of level 3
+5			Output Radiance Units [Photon/s/m**2/sr/cm-1]
+82257.13580653,10101010.1010101	Min and Max Wavenumber
 2			Type of Grid (slit)
 2			Triangular Spectral Response Function
 1.0			FWHM
-1.0			Sampling Resolution [per cm]
+100			Sampling Resolution [per cm]
 0.25		Error for tau Binning
 0.15		Error for pi0 Binning
 0.15		g Error
