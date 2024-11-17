@@ -25,11 +25,11 @@
 0			No Jacobians for second Absorber
 2			Number of Absorption Coefficient Types
 1			Line Absorbers
-/gscratch/vsm/gialluca/VPLModelingTools_Dev/T1cOutgassing_Cycle4/Debug/H2O_TestPipelineT1cIonosphere.abs
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/LinebyLine_absFiles/TestPipelineT1c/H2O_TestPipelineT1cIonosphere.abs
 3			Cross Sections
 /gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/LBLABC/TestPipelineT1c/H2O_UVXsec.dat
 3			List Directed
-/gscratch/vsm/gialluca/VPLModelingTools_Dev/T1cOutgassing_Cycle4/Debug/MixingRs_TestPipelineT1c.dat
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/AtmProfiles/MixingRs_TestPipelineT1c.dat
 1			Lines to Skip at Top of File
 1			Pressure Coordinate
 1,4			Columns of P and rMix
@@ -39,11 +39,11 @@
 0			No Jacobians for Second Absorber
 2			Number of Absorption Coefficient Types
 1			Line Absorbers
-/gscratch/vsm/gialluca/VPLModelingTools_Dev/T1cOutgassing_Cycle4/Debug/O3_TestPipelineT1cIonosphere.abs
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/LinebyLine_absFiles/TestPipelineT1c/O3_TestPipelineT1cIonosphere.abs
 3			Cross Sections
 /gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/LBLABC/TestPipelineT1c/O3_UVXsec.dat
 3			List Directed
-/gscratch/vsm/gialluca/VPLModelingTools_Dev/T1cOutgassing_Cycle4/Debug/MixingRs_TestPipelineT1c.dat
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/AtmProfiles/MixingRs_TestPipelineT1c.dat
 1			Lines to Skip at Top of File
 1			Pressure Coordinate
 1,3			Columns of P and rMix
