@@ -6,7 +6,7 @@
 1,2			Columns of P,T
 100000			Pressure Scaling Factor
 331.4 		Surface Temperature
-1			Number of Gas Absorbers
+3			Number of Gas Absorbers
 7			Gas Code for only Absorber
 0			No Jacobians for only Absorber
 2			Number of Absorption Coefficient Types
@@ -19,6 +19,34 @@
 1			Lines to Skip at Top of File
 1			Pressure Coordinate
 1,2			Columns of P and rMix
+1			Volume Mixing Ratio
+100000,1.0		P and rMix Scaling Factors
+1			Gas Code for second Absorber
+0			No Jacobians for second Absorber
+2			Number of Absorption Coefficient Types
+1			Line Absorbers
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/T1cOutgassing_Cycle4/Debug/H2O_TestPipelineT1cIonosphere.abs
+3			Cross Sections
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/LBLABC/TestPipelineT1c/H2O_UVXsec.dat
+3			List Directed
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/T1cOutgassing_Cycle4/Debug/MixingRs_TestPipelineT1c.dat
+1			Lines to Skip at Top of File
+1			Pressure Coordinate
+1,4			Columns of P and rMix
+1			Volume Mixing Ratio
+100000,1.0		P and rMix Scaling Factors
+3			Gas Code for Second Absorber
+0			No Jacobians for Second Absorber
+2			Number of Absorption Coefficient Types
+1			Line Absorbers
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/T1cOutgassing_Cycle4/Debug/O3_TestPipelineT1cIonosphere.abs
+3			Cross Sections
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/LBLABC/TestPipelineT1c/O3_UVXsec.dat
+3			List Directed
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/T1cOutgassing_Cycle4/Debug/MixingRs_TestPipelineT1c.dat
+1			Lines to Skip at Top of File
+1			Pressure Coordinate
+1,3			Columns of P and rMix
 1			Volume Mixing Ratio
 100000,1.0		P and rMix Scaling Factors
 0			Number of Aerosols
@@ -61,8 +89,8 @@
 4			specified level of output pressures for radiances
 3			Number of output pressure levels
 0.00000009972			pressure [bar] of level 1
-0.0000001105			pressure [bar] of level 2
-0.0000001226			pressure [bar] of level 3
+0.00000015			pressure [bar] of level 2
+0.0000002			pressure [bar] of level 3
 5			Output Radiance Units [Photon/s/m**2/sr/cm-1]
 82257.13580653,10101010.1010101	Min and Max Wavenumber
 2			Type of Grid (slit)
@@ -74,5 +102,5 @@
 0.15		g Error
 0.02		Albedo Error
 1			Output Format (ascii)
-/gscratch/vsm/gialluca/VPLModelingTools_Dev/ModelRunOutputs/TestPipelineT1c/smart_o2IonosphereTest
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/ModelRunOutputs/TestPipelineT1c/smart_o2IonosphereTest_3Absorbers
 2			Overwrite
