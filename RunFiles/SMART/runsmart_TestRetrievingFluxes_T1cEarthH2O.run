@@ -102,5 +102,5 @@
 0.15		g Error
 0.02		Albedo Error
 1			Output Format (ascii)
-/gscratch/vsm/gialluca/VPLModelingTools_Dev/ModelRunOutputs/TestPipelineT1c/smart_o2IonosphereTest_3Absorbers_higherpresslevels
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/ModelRunOutputs/TestPipelineT1c/smart_o2IonosphereTest_higherpress
 2			Overwrite
