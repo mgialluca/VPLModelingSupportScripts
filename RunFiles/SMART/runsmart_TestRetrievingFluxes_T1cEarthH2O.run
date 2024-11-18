@@ -69,8 +69,8 @@
 8			Number of Streams
 3			Source - Solar
 3			File Format - List Directed
-/gscratch/vsm/gialluca/StellarSpectra/TRAPPIST-1_2020.dat
-10			Lines to Skip
+/gscratch/vsm/gialluca/StellarSpectra/TRAPPIST-1_FullCoverage_2020_Normalized.dat
+1			Lines to Skip
 2			Units solar flux
 1			Solar spectral units
 1.0			Micron Conversion Factor
@@ -92,7 +92,7 @@
 0.00000015			pressure [bar] of level 2
 0.0000002			pressure [bar] of level 3
 5			Output Radiance Units [Photon/s/m**2/sr/cm-1]
-82257.13580653,10101010.1010101	Min and Max Wavenumber
+97087.37864077672,10000000.0	Min and Max Wavenumber
 2			Type of Grid (slit)
 2			Triangular Spectral Response Function
 1.0			FWHM
