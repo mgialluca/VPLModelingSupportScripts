@@ -88,9 +88,9 @@
 0.			Azimuth Angles
 4			specified level of output pressures for radiances
 3			Number of output pressure levels
-0.00000009972			pressure [bar] of level 1
-0.00000015			pressure [bar] of level 2
-0.0000002			pressure [bar] of level 3
+0.000001			pressure [bar] of level 1
+0.00001			pressure [bar] of level 2
+0.0001			pressure [bar] of level 3
 5			Output Radiance Units [Photon/s/m**2/sr/cm-1]
 97087.37864077672,10000000.0	Min and Max Wavenumber
 2			Type of Grid (slit)
@@ -102,5 +102,5 @@
 0.15		g Error
 0.02		Albedo Error
 1			Output Format (ascii)
-/gscratch/vsm/gialluca/VPLModelingTools_Dev/ModelRunOutputs/TestPipelineT1c/smart_o2IonosphereTest_3Absorbers
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/ModelRunOutputs/TestPipelineT1c/smart_o2IonosphereTest_3Absorbers_higherpresslevels
 2			Overwrite
