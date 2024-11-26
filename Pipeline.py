@@ -110,7 +110,7 @@ class VPLModelingPipeline:
 
         if find_molecules_of_interest == False:
             self.molecule_dict = {} # key-value pairs of molecules of interest (keys, str) and their hitran codes (value, int)
-            gas_names = ['O2', 'O3', 'H2O']#, 'CO', 'CO2', 'HNO3', 'N2O', 'NO2', 'SO2']
+            gas_names = ['O2', 'H2O', 'CO', 'CH4', 'H2S', 'SO2', 'SO3', 'CO2']#, 'CO', 'CO2', 'HNO3', 'N2O', 'NO2', 'SO2']
             self.molecule_dict['Gas_names'] = gas_names
             for m in range(len(gas_names)):
                 self.molecule_dict[gas_names[m]] = self.hitran_lookup.loc[gas_names[m]]['HitranNumber']
@@ -698,7 +698,7 @@ class VPLModelingPipeline:
     #
     def set_climate_settings(self):
 
-        planet = 'T1c' # Would suggest keeping all settings available for each target, this provides a quick way to switch between them
+        planet = 'Earth_SO2' # Would suggest keeping all settings available for each target, this provides a quick way to switch between them
 
         if planet == 'T1c':
             self.c_NumberTimesteps = 10000
@@ -768,6 +768,85 @@ class VPLModelingPipeline:
             self.c_OutputsUnits = 2 # 2 - Radiance
             self.c_ThermalMinMaxWn = '40.0,5000.0'
             self.c_SolarMinMaxWn = '300.0, 50000.0'
+            self.c_SlitFunction = 2 # 2 - Triangular Slit function
+            self.c_SolarHWHM = 10.0
+            self.c_SolarRes = 10.0
+            self.c_ThermalHWHM = 1.0
+            self.c_ThermalRes = 1.0
+            self.c_TauError = 0.5
+            self.c_SingleScatterError = 0.35
+            self.c_AsymmetryParamError = 0.35
+            self.c_AlbedoError = 0.25
+            self.c_OutputFileType = 3 # 1 - ASCII, 3 - Binary No Header Output
+
+        elif planet == 'Earth_SO2':
+            self.c_NumberTimesteps = 10000
+            self.c_TimestepLength = 86400.0 # [s]
+            self.c_SubstepIntervals = 10
+            self.c_TimestepOutputIntervals = 25
+            self.c_TimeStepMethodIndex = 7
+            self.c_TempChangeTolerance = 0.01
+            self.c_DoubledRadiationGrid = True
+            self.c_HRTCalcType = 3 # 3 - Global Hrt
+            self.c_NumberSolarZeniths = 4 # number of solar zenith angles used in avg
+            self.c_IncludeRadiativeHrt = True
+            self.c_IncludeConvectiveHrt = True
+            self.c_IncludeConductiveHrt = False
+            self.c_DayLength = 86400.0 # [s], 2.42 days
+            self.c_YearLength = 365.25 # Length of year in days according to c_DayLength (1 when tidally locked)
+            self.c_OrbitalCalcType = 0 # 0 - fixed orbital distance
+            self.c_SemiMajorAxis = 1.0 # [AU]
+
+            #### THIS IS SPECIFIC TO THE TYPE OF ATMOSPHERE BEING TESTED, REVISIT
+            self.c_NumberMajorGases = 1 # Number of major absorbing gases?
+            self.c_MajorAbsorbingGas = 2 # For CO2
+            ####################################
+
+            self.c_PressureJacobians = 0 # 0 - None, 1 - Radiance, 2 - Flux
+            self.c_TempJacobians = 2 # 0 - None, 1 - Radiance, 2 - Flux
+            self.c_Fractional_dtemp = 0.1
+            self.c_SolarTolerance = 1.0 
+            self.c_ThermalTolerance = 0.05
+            self.c_InternalSurfaceFlux = 0.0 # [W/m2]
+            self.c_ConvectiveType = 2 # 1 - adjustment, 2 - mixing length scheme, 3 - turbulent, 4 - moist mixing
+            self.c_MixingLengthType = 3 # 1 - fixed, 2 - proport to scale height, 3 - Blackadar aymptotic ML
+            self.c_MixingLengthProportionality = 0.085
+            self.c_MinEddyDiffusivity = 0.5 # [m2/s]
+            self.c_SurfaceWindSpeed = 7.0 #[m/s]
+            self.c_SurfRoughnessHeight = 0.004 # [m]
+            self.c_NumberCondensibles = 0 
+            self.c_NumberAerosols = 0
+
+            # Surface Specs
+            self.c_SurfaceType = 0 # 0 - Lambertian Surface
+            self.c_AlbedoJacobians = 0 # 0 - None
+            self.c_SurfaceProfile = '/gscratch/vsm/alinc/fixed_input/albedo/earth1.alb'
+            self.c_SurfProfile_SkipLines = 6
+            self.c_SurfProfile_wlalbedo_cols = '1,2'
+            self.c_SurfProfile_wlType = 1 # 1 - Wavelength
+            self.c_Convert_SurfProfilewl_microns = 1.0 # Conversion factor to microns
+            self.c_ScaleAlbedo = 1.15 # Factor to scale albedo
+
+            # Heating Specs
+            self.c_NumberStreams = 4
+            self.c_HRTSources = 3 # 1 - Solar, 2 - Thermal, 3 - Both
+
+            # Host Star Specs
+            self.c_StellarSpectrum = '/gscratch/vsm/alinc/fixed_input/specs/Kurucz1cm-1_susim_atlas2_1361.dat'
+            self.c_StellarSpect_SkipLines = 204
+            self.c_SolarFluxUnits = 1 
+            self.c_SolarSpectralUnits = 2
+            self.c_Convert_Stellar_microns = 1.0 # Conversion factor to microns
+            self.c_StellarSpect_wnflux_col = '1,2'
+
+            # Output specs
+            self.c_OutputsType = 1 # 1 - Fluxes
+            self.c_NumberOutputAzimuths = 1
+            self.c_Azimuth = 0.0
+            self.c_OutputsLevel = 1 # 1 - TOA --- UNSURE ABOUT THIS AND THE LAST ONE DIFFERENCE
+            self.c_OutputsUnits = 2 # 2 - Radiance
+            self.c_ThermalMinMaxWn = '40.0,5000.0'
+            self.c_SolarMinMaxWn = '300.0, 80000.0'
             self.c_SlitFunction = 2 # 2 - Triangular Slit function
             self.c_SolarHWHM = 10.0
             self.c_SolarRes = 10.0
@@ -900,7 +979,7 @@ class VPLModelingPipeline:
         f.write(str(self.c_StellarSpect_SkipLines)+'			Lines to skip\n')
         f.write(str(self.c_SolarFluxUnits)+'			Solar flux units\n')
         f.write(str(self.c_SolarSpectralUnits)+'			Solar spectral units\n')
-        f.write(str(self.c_Convert_Stellar_microns)+'			Conversion factor to microns\n')
+    #    f.write(str(self.c_Convert_Stellar_microns)+'			Conversion factor to microns\n')
         f.write(str(self.c_StellarSpect_wnflux_col)+'			Cols of wn and flux\n')
         f.write(str(self.c_OutputsType)+'			Outputs [fluxes]\n')
         f.write(str(self.c_NumberOutputAzimuths)+'			No. of output azimuth angles\n')
@@ -1199,6 +1278,8 @@ class VPLModelingPipeline:
                 else:
                     self.global_convergence = False
 
+                #self.global_convergence = True
+
             ### Run photochem section end --------------------------
 
             ### Create degraded atmospheric profile to prepare for LBLABC and Climate -------------
@@ -1312,6 +1393,8 @@ class VPLModelingPipeline:
                         print('Climate convergence NOT found on subtry number '+str(climate_subtries)+' for run number '+str(self.num_climate_runs)+', continuing rerun sequence')
                         ftestingoutput.write('Climate convergence NOT found on subtry number '+str(climate_subtries)+' for run number '+str(self.num_climate_runs)+', continuing rerun sequence\n')
 
+                break
+            break
             ### Run VPL Climate section end ------------------------------
 
             ## Last thing to do: update in.dist for next photochem run

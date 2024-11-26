@@ -45,11 +45,11 @@ nlevel_coarse = 70
 def run_photochem_1instance(casename, CleanMake=True, 
                             #InputCopy='/home/mgialluca/Nextcloud/VPL_Modeling/Atmos_Dev/atmos/PHOTOCHEM/INPUTFILES/TEMPLATES/ModernEarth/', 
                             #InputCopy='/home/mgialluca/Nextcloud/VPL_Modeling/Atmos_Dev/atmos/PHOTOCHEM/INPUTFILES/TEMPLATES/Venus/',
-                            InputCopy='/home/mgialluca/Nextcloud/VPL_Modeling/VPLModelingSupportScripts/Bodies/T1c/T1cOutgas_Testing/',
+                            InputCopy='/home/mgialluca/Nextcloud/VPL_Modeling/VPLModelingSupportScripts/Bodies/Earth_Test_SO2/',
                             trynum=1, 
                             photochemDir='/home/mgialluca/Nextcloud/VPL_Modeling/Atmos_Dev/atmos/PHOTOCHEM/', 
                             atmosDir='/home/mgialluca/Nextcloud/VPL_Modeling/Atmos_Dev/atmos/', 
-                            OutPath='/home/mgialluca/Nextcloud/VPL_Modeling/JWSTObserving_TestOutgassing/'):
+                            OutPath='/home/mgialluca/Nextcloud/VPL_Modeling/SO2_Stuff/'):
 
     # If you have new input files to use, give 'InputCopy' the dir path
     if InputCopy != False:

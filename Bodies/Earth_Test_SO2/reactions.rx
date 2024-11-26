@@ -1,0 +1,174 @@
+H2O       O1D       OH        OH                2BODY     1.63E-10    60.                    ! JPL-15
+H2        O1D       OH        H                 2BODY     1.2E-10     0.                     ! JPL-15
+H2        O         OH        H                 WEIRD     6.34E-12*exp(-4000/T(i)) + 1.46e-9*exp(-9650/T(i)) ! NIST 2005
+H2        OH        H2O       H                 2BODY     2.8E-12     -1800.                 ! JPL-15
+H         O3        OH        O2                2BODY     1.4E-10     -470.                  ! JPL-15                                          
+H         O2        HO2                         3BODY     4.4D-32     7.5D-11    1.3D0 -0.2  ! JPL-15  (see also H+SO+M->HSO+M)
+H         HO2       H2        O2                2BODY     6.90E-12    0.                     ! JPL-15 
+H         HO2       H2O       O                 2BODY     1.60E-12    0.                     ! JPL-15 
+H         HO2       OH        OH                2BODY     7.20E-11    0.                     ! JPL-15 
+OH        O         H         O2                2BODY     1.8E-11     180.                   ! JPL-15                                          
+OH        HO2       H2O       O2                2BODY     4.8E-11     250.                   ! JPL-15
+OH        O3        HO2       O2                2BODY     1.7E-12     -940.                  ! JPL-15
+OH        H2O2      HO2       H2O               2BD3P     2.47E-13    627.       2.1         ! CUSTOM FIT TO NIST COMPILED DATA APL FOR MAXIMUM TEMPERATURE RELEVANCE
+HO2       O         OH        O2                2BODY     3.0E-11     200.                   ! JPL-15
+HO2       O3        OH        O2        O2      2BD3P     1.97E-16    693.       4.57        ! JPL-15; APL WEIRD FROM FIT IN NIST REVIEWS
+HO2       HO2       H2O2      O2                WEIRD     3.0E-13*EXP(460./T(I)) + 2.1E-33*EXP(920./T(I))*DEN(I) ! JPL-15
+O         O         O2                          WEIRD                                        ! NIST 05 in O2/N2
+O         O2        O3                          3BODY     6.D-34      1.E000     2.4D0 0.D0  ! JPL-15
+O         O3        O2        O2                2BODY     8.0E-12     -2060.                 ! JPL-15                                          
+O1D       O3        O2        O2                2BODY     1.2E-10                            ! JPL-15 
+O1D       O3        O         O         O2      2BODY     1.2E-10                            ! JPL-15 
+OH        OH        H2O       O                 2BODY     1.8E-12     0.                     ! JPL-15
+O1D       N2        O         N2                2BODY     2.15E-11    110.                   ! JPL-15                                                           
+H         CO        HCO                         3BD3P     1.0E-33     -629.      0.          ! Using combination of reviews on NIST APL
+H         HCO       H2        CO                2BODY     1.8E-10     0.                     ! NIST 2005 - not too certain                                                            
+OH        HCO       H2O       CO                2BODY     1.0E-10     0.                     ! NIST 2005 - not too certain                                                           
+O         HCO       H         CO2               2BODY     5.0E-11     0.                     ! NIST 2005
+O         HCO       OH        CO                2BODY     5.0E-11     0.                     ! NIST 2005
+CO        OH        CO2       H                 2BD3P     1.6E-16     0.         0.6         ! 3BODY     1.5E-13     2.1E+09    0.    6.1   ! JPL-15 ! 
+CO        O         CO2                         3BD3P     1.6E-32     -2184.     0.          ! Gao et al [2015]
+H2CO      H         H2        HCO               2BD3P     2.14E-12    -1090.     1.62        ! NIST 2005 Baulch et al [2002] 
+H         H         H2                          WEIRD                                        ! Baulch et al. [1994]
+HCO       O2        HO2       CO                2BODY     5.2E-12     0.                     ! JPL-15
+H2CO      OH        H2O       HCO               2BODY     5.5E-12     125.                   ! JPL-15
+H         OH        H2O                         3BD3P     6.9E-31     0.         -2.         ! NIST 2005 Baulch et al [2002]
+OH        OH        H2O2                        3BODY     6.9D-31     2.6D-11    1.0   0.0   ! JPL-15
+H2CO      O         HCO       OH                2BODY     3.4E-11     -1600.                 ! JPL-15                                                           
+H2O2      O         OH        HO2               2BODY     1.4E-12     -2000.                 ! JPL-15
+H         NO        HNO                         WEIRD     2.1E-32     EXP(300./T(I))*DEN(I)  ! Hampson and Garvin [1977]
+N         N         N2                          3BD3P     1.38E-33    503.       0.          ! Clyne & Stedman [1967]
+N         O2        NO        O                 2BODY     1.5E-11     -3600.                 ! JPL-15
+N         OH        NO        H                 2BODY     3.8E-11     85.                    ! NIST 2005 - low temp
+N         NO        N2        O                 2BODY     2.1E-11     100.                   ! JPL-15
+NO        O3        NO2       O2                2BODY     3.0E-12     -1500.                 ! JPL-15: 3e-12/-1500; NIST fit 2.4e-12/-1443
+NO        O         NO2                         3BODY     9.D-32      3.D-11     1.50  0.0   ! JPL-15
+NO        HO2       NO2       OH                2BODY     3.3E-12     270.                   ! JPL-15
+NO        OH        HNO2                        3BODY     7.D-31      3.6D-11    2.60  0.10  ! JPL-15
+NO2       O         NO        O2                2BODY     5.1E-12     210.                   ! JPL-15
+NO2       OH        HNO3                        3BODY     1.8D-30     2.8D-11    3.00  0.00  ! JPL-15
+NO2       H         NO        OH                2BODY     4.E-10      -340.                  ! JPL-15
+HNO3      OH        H2O       NO3               WEIRD     AK0 + AK3M/(1. + AK3M/AK2)         ! JPL-15
+H         HNO       H2        NO                2BODY     3.01E-11    -500.                  ! Tsang & Herron [1991]
+O         HNO       OH        NO                2BODY     3.8E-11     0.                     ! NIST 2005
+OH        HNO       H2O       NO                2BODY     5.E-11      0.                     ! NIST 2005
+HNO2      OH        H2O       NO2               2BODY     1.8E-11     -390.                  ! JPL-15
+SO2       O1D       SO2       O                 2BODY     5.3E-11     0.                     ! JPL-15
+SO2       O1D       SO        O2                2BODY     1.7E-10     0.                     ! JPL-15; actual products unknown "reactive products" APL
+SO        O2        O         SO2               2BODY     1.6E-13     -2280.                 ! JPL-15
+SO        HO2       SO2       OH                2BODY     2.8E-11     0.                     ! Kasting [1990]
+SO        O         SO2                         3BD3P     6.0E-31     0.         0.          ! NIST 2005 
+SO        OH        SO2       H                 2BODY     2.7E-11     335.                   ! JPL-15 
+SO2       OH        HSO3                        3BODY     3.3D-31     1.6D-12    4.30  0.0   ! JPL-15
+SO2       O         SO3                         3BODY     1.8D-33     4.2D-14    -2.0  -1.8  ! JPL-15
+SO3       H2O       H2SO4                       WEIRD                                        ! actually SO3 + 2 H2O -> H2SO4 + H2O ! Krasnopolsky 2012
+H2SO4     H2O       SO3       H2O       H2O     2BODY     7.0E-14     -5170.                 ! JPL-15-10 APL ; inverse reaction
+SO3       O         SO2       O2                2BODY     2.3E-16     -500.                  ! Jacob+Winkler 1972 APL
+HSO3      O2        HO2       SO3               2BODY     1.3E-12     -330.                  ! JPL-15
+H2S       OH        H2O       HS                2BODY     6.1E-12     -75.                   ! JPL-15
+H2S       H         H2        HS                2BODY     1.5E-11     -850.                  ! NIST, 1973SCH paper  Shawn uses: Baulch et al. [1976]
+H2S       O         OH        HS                2BODY     9.2E-12     -1800.                 ! JPL-15
+HS        O         H         SO                2BODY     1.6E-10     0.                     ! JPL-15 gives 1.6e-10 but with 5X error
+HS        HO2       H2S       O2                2BODY     1.0E-11     0.                     ! estimated by Molina's group NIST 05
+HS        HS        H2S       S                 2BODY     2.0E-11     0.                     ! 4.5e-11 measured at 1 bar, but NIST 2005 1.7e-11 exptl upper limit at 0.01 bar
+HS        H         H2        S                 2BODY     2.0E-11     0.                     ! measured upper limit 1.7e-11 but other authorities prefer higher
+HS        S         H         S2                2BODY     1.0E-11     0.                     ! KZ: 4e-11 NIST (1970's era lit review), but S2+S2 authority prefers <5e-12 upper limit
+S         O2        SO        O                 2BODY     1.6E-12     100.                   ! JPL-15
+S         OH        SO        H                 2BODY     6.6E-11     0.                     ! JPL-15
+S         HO2       HS        O2                2BODY     5.0E-12     0.                     ! Kasting [1990] uses 1.5e-11 KZ: no information
+S         HO2       SO        OH                2BODY     5.0E-12     0.                     ! Kasting [1990] uses 1.5e-11 KZ: no information
+S         S         S2                          3BD3P     1.0E-32     206.       0.0         ! Du et al. [2008]
+S2        O         S         SO                2BODY     1.1E-11     0.                     ! Hills et al. [1987]                                                           
+S         S2        S3                          3BD3P     1.0E-32     206.       0.0         ! Du et al. [2008]
+S2        S2        S4                          3BD3P     1.0E-32     206.       0.0         ! Du et al. [2008]
+S         S3        S4                          3BD3P     1.0E-32     206.       0.0         ! Du et al. [2008]
+S4        S4        S8                          3BD3P     1.0E-32     206.       0.0         ! Du et al. [2008]
+SO21      M         SO23      M                 2BODY     1.0E-12     0.                     ! Turco et al. [1982]      (HV=M)
+SO21      M         SO2       M                 2BODY     1.0E-11     0.                     ! Turco et al. [1982]      (HV=M)
+SO21      M         SO23      M                 2BODY     1.5E+3      0.                     ! Turco et al. [1982]     (quenching)
+SO21      M         SO2       M                 2BODY     2.2E+4      0.                     ! Turco et al. [1982]     (quenching)
+SO21      O2        SO3       O                 2BODY     1.0E-16     0.                     ! Turco et al. [1982]           
+SO21      SO2       SO3       SO                2BODY     4.0E-12     0.                     ! Turco et al. [1982]           
+SO23      M         SO2       M                 2BODY     1.5E-13     0.                     ! Turco et al. [1982]      (HV=M)
+SO23      M         SO2       M                 2BODY     1.13E+3     0.                     ! Turco et al. [1982]    (quenching)                                    
+SO23      SO2       SO3       SO                2BODY     7.0E-14     0.                     ! Turco et al. [1982]                                              
+SO        NO2       SO2       NO                2BODY     1.4E-11     0.                     ! JPL-15                                                  
+SO        O3        SO2       O2                2BODY     3.4E-12     -1100.                 ! JPL-15                             
+SO2       HO2       SO3       OH                2BODY     2.26E-13    -3420.                 ! Hwang et al. [2010] ; hi-temperature but gives a lower 298 K value (which mostly have upper limits only) APL
+HS        O3        HSO       O2                2BODY     9.0E-12     -280.                  ! JPL-15
+HS        HO2       HSO       OH                2BODY     1.0E-11     0.                     ! Stachnick & Molina [1987]; theory APL
+HS        NO2       HSO       NO                2BODY     2.9E-11     250.                   ! JPL-15
+S         O3        SO        O2                2BODY     1.2E-11     0.                     ! JPL-15 / NIST 2005 DeMore et al. [1992]
+SO        SO        SO2       S                 2BODY     2.0E-15     0.                     ! avg of two measurements NIST
+SO3       SO        SO2       SO2               2BODY     2.0E-15     0.                     ! NIST 2005 Yung and DeMore [1982]                                              
+H         SO        HSO                         3BODY     5.7D-32     7.5D-11    1.60  0.0   ! Kasting [1990] Assumed same as H+O2+M->HO2+M                          
+HSO       NO        HNO       SO                2BODY     3.7E-12     250.                   ! Kasting [1990] APL BUT NIST SHOWS <1e-15 (only one measurement though, in 1987)
+HSO       OH        H2O       SO                2BODY     3.0E-11     0.                     ! Kasting [1990] assumes same as OH + HO2 -> H2O + O2, KZ says no information
+HSO       H         HS        OH                2BODY     2.0E-11     0.                     ! Kasting [1990] Assumed same as H+HO2->OH+OH: QY of 0.90 against rate of 8.1E-11 KZ estimate
+HSO       H         H2        SO                2BODY     1.E-11      0.                     ! Kasting [1990] Assumed same as H+HO2->H2+O2: QY of 0.08 against rate of 8.1E-11, KZ estimate
+HSO       HS        H2S       SO                2BODY     1.E-12      0.                     ! Kasting [1990]
+HSO       O         OH        SO                2BODY     3.0E-11     -200.                  ! Kasting [1990] use same as HO2+O->OH+O2 but Kevin says: I don't like the O2 path here APL THERE ARE CONFLICTS HERE
+HSO       O3        HS        O2        O2      2BODY     2.09E-12    -1120.                 ! Lee et al. [1994]
+HSO       S         HS        SO                2BODY     1.0E-11     0.                     ! Kasting [1990] uses 1e-11: Kevin says no information
+S3        O         S2        SO                2BODY     8.0E-11     0.0                    ! Moses et al. [2002]
+S4        O         S3        SO                2BODY     8.0E-11     0.                     ! Moses et al. [2002]
+O         NO3       O2        NO2               2BODY     1.00E-11    0.                     ! JPL-15
+HO2       NO3       OH        NO2       O2      2BODY     3.50E-12    0.                     ! JPL-15
+NO        NO3       NO2       NO2               2BODY     1.50E-11    170.                   ! JPL-15
+O         NO2       NO3                         3BODY     2.5D-31     2.2D-11    1.80  0.70  ! JPL-15
+OH        NO3       HO2       NO2               2BODY     2.20E-11    0.                     ! JPL-15
+H         N2O       N2        OH                WEIRD     1.60E-10    -7600.                 ! Powell et al. [2010] ! was NIST (high temp)
+N         NO2       N2O       O                 2BODY     5.80E-12    220.                   ! JPL-15
+O1D       N2        N2O                         3BODY     2.8E-36     0.0        0.9   0.0   ! JPL-15 WAS WEIRD
+O1D       N2O       N2        O2                2BODY     4.64E-11    20.                    ! JPL-15
+O1D       N2O       NO        NO                2BODY     7.26E-11    20.                    ! JPL-15
+N         HO2       NO        OH                2BODY     2.2E-11     0.0                    !Brune et al. 1983 (yuk 114)
+NO2       NO3       NO        NO2       O2      2BODY     4.5E-14     -1260.                 !JPL-15 uncertain reaction channel
+NO2       O3        NO3       O2                2BODY     1.2E-13     -2450.                 !JPL-15 (slow)
+NO3       NO3       NO2       NO2       O2      2BODY     8.5E-13     -2450.                 !JPL-15 (slow) 
+O         HNO3      OH        NO3               2BODY     3.0E-17     0.0                    !JPL-15 (upper limit, slow)  
+HO2       NO2       HNO2      O2                2BODY     5.00E-16    0.0                    !JPL-15 (upper limit, slow)
+CO        O1D       CO        O                 2BODY     7.00E-11    0.                     ! NIST       
+CO2       O1D       CO2       O                 2BODY     7.5E-11     115.0                  ! JPL-15
+C         OH        CO        H                 2BD3P     1.15E-10    -3.39      0.108                           ! Zanchet et al [2009] KIDA
+C         O2        CO        O                 2BD3P     4.9E-11     0.         -0.32                           ! Geppert et al. [2000] NIST/KIDA
+C         NO        CO        N                 2BD3P     4.01E-11    -7.3       -0.2        ! Andersson et al. [2003] theory combined temperatures
+C         O         CO                          2BD3P     9.74E-18    -136.      0.705       ! Gustafsson et al. [2015] theory
+O2        HV        O         O1D               PHOTO                                        !
+O2        HV        O         O                 PHOTO                                        ! this line must follow O2+hv->O+O1D
+H2O       HV        H         OH                PHOTO                                                                                               
+O3        HV        O2        O1D               PHOTO                                                                                               
+O3        HV        O2        O                 PHOTO                                        ! this line must follow O3+hv->O2+O1D
+O3        HV        O         O         O       PHOTO                                        ! this line must follow O3+hv->O2+O
+H2O2      HV        OH        OH                PHOTO
+CO2       HV        CO        O1D               PHOTO                                        ! this line must follow CO2+hv->CO+O
+CO2       HV        CO        O                 PHOTO
+H2CO      HV        H         H         CO      PHOTO                                        ! APL REQUIRES LGRID=2
+H2CO      HV        H2        CO                PHOTO                                        ! this line must follow H2CO+hv->2H+CO                                                    
+H2CO      HV        HCO       H                 PHOTO                                        ! this line must follow H2CO+hv->H2+CO
+HO2       HV        OH        O                 PHOTO                                                                                               
+HNO       HV        NO        H                 PHOTO                                        ! APL requires LGRID=2
+HNO2      HV        NO        OH                PHOTO
+HNO3      HV        NO2       OH                PHOTO
+HNO3      HV        HNO2      O                 PHOTO                                        ! must follow HNO3 + HV
+HNO3      HV        HNO2      O1D               PHOTO                                        ! must follow HNO3 + HV                                
+NO        HV        N         O                 PHOTO                                                                                               
+NO2       HV        NO        O1D               PHOTO                                                                                               
+NO2       HV        NO        O                 PHOTO                                        ! must follow NO2 + HV -> NO + O1D                     
+SO        HV        S         O                 PHOTO                                                                                               
+H2S       HV        HS        H                 PHOTO                                                                                               
+SO2       HV        SO        O                 PHOTO                                                                                               
+SO2       HV        SO21                        PHOTO     ! this line must follow SO2+hv->SO+O
+SO2       HV        SO23                        PHOTO     ! this line must follow SO2+hv->SO21
+H2SO4     HV        SO3       H2O               PHOTO                                        ! Lane+Kjaergaard [2008]; Zhang+ [2012] APL
+S2        HV        S         S                 PHOTO                                                                                               
+S4        HV        S2        S2                PHOTO     !note - we use the S2 cross section for S4
+S3        HV        S2        S                 PHOTO     !note - we use the S2 cross section for S3
+S8        HV        S4        S4                PHOTO     !ficticious reaction using the cross section for the linear S8 molecule (prate set to 0 in Photo)
+S8        HV        S4        S4                PHOTO     !this line must follow the S8L reaction - also a fake reaction using the XS for the ring S8 molecule
+S8        HV        S4        S4                PHOTO     !this line must follow the S8R reaction - this is the "real" reaction, prate set in Photo 
+SO3       HV        SO2       O                 PHOTO                                                                                                                            
+HSO       HV        HS        O                 PHOTO                                        ! note - we use the HO2 cross section for HSO                                       
+NO3       HV        NO        O2                PHOTO
+NO3       HV        NO2       O                 PHOTO     ! this line must follow NO3+hv->NO+O2
+N2O       HV        N2        O1D               PHOTO
