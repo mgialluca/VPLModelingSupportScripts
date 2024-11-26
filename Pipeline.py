@@ -530,7 +530,7 @@ class VPLModelingPipeline:
                 # Check if youre at the last timestep line
                 elif lines[i].split()[0] == 'N':
                     hold = lines[i].split()
-                    Nstep_photochemrun = int(hold[2])
+                    Nstep_photochemrun = int(lines[i].split('=')[1])
                     for k in range(len(hold)):
                         if hold[k] == 'TIME': # Find the final time from the last timestep
                             FinalTime = float(hold[k+2])
