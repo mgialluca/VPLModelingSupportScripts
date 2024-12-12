@@ -88,9 +88,9 @@
 0.			Azimuth Angles
 4			specified level of output pressures for radiances
 3			Number of output pressure levels
-0.00000026			pressure [bar] of level 1
-0.00000028			pressure [bar] of level 2
-0.00000030			pressure [bar] of level 3
+0.00000031			pressure [bar] of level 1
+0.00000032			pressure [bar] of level 2
+0.00000033			pressure [bar] of level 3
 5			Output Radiance Units [Photon/s/m**2/sr/cm-1]
 93817.4312787316,299850.0749625188	Min and Max Wavenumber
 2			Type of Grid (slit)
