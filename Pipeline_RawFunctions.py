@@ -45,11 +45,11 @@ nlevel_coarse = 70
 def run_photochem_1instance(casename, CleanMake=True, 
                             #InputCopy='/home/mgialluca/Nextcloud/VPL_Modeling/Atmos_Dev/atmos/PHOTOCHEM/INPUTFILES/TEMPLATES/ModernEarth/', 
                             #InputCopy='/home/mgialluca/Nextcloud/VPL_Modeling/Atmos_Dev/atmos/PHOTOCHEM/INPUTFILES/TEMPLATES/Venus/',
-                            InputCopy='/home/mgialluca/Nextcloud/VPL_Modeling/VPLModelingSupportScripts/Bodies/Earth_Test_SO2/',
+                            InputCopy='/home/mgialluca/Nextcloud/VPL_Modeling/Atmos_Dev/atmos/PHOTOCHEM/INPUTFILES/TEMPLATES/ModernEarth/',
                             trynum=1, 
                             photochemDir='/home/mgialluca/Nextcloud/VPL_Modeling/Atmos_Dev/atmos/PHOTOCHEM/', 
                             atmosDir='/home/mgialluca/Nextcloud/VPL_Modeling/Atmos_Dev/atmos/', 
-                            OutPath='/home/mgialluca/Nextcloud/VPL_Modeling/SO2_Stuff/'):
+                            OutPath='/home/mgialluca/Nextcloud/VPL_Modeling/Ionosphere_Modeling_Explore/Earth_Validation/'):
 
     # If you have new input files to use, give 'InputCopy' the dir path
     if InputCopy != False:
@@ -153,8 +153,8 @@ def run_lblabc_1instance(casename, runscript, molecule,
 # PressUnits - can do Bar or Pa, Megan stick with bar for the forseeable forever
 # AtmProfPath - path to output new PT profile to
 ##
-def degrade_PT(casename, nlevel_new, photochemDir='/gscratch/vsm/gialluca/VPLModelingTools_Dev/atmos/PHOTOCHEM/', 
-               PressUnits='Bar', AtmProfPath='/gscratch/vsm/gialluca/VPLModelingTools_Dev/AtmProfiles/'):
+def degrade_PT(casename, nlevel_new, photochemDir='/home/mgialluca/Nextcloud/VPL_Modeling/Atmos_Dev/atmos/PHOTOCHEM/', 
+               PressUnits='Bar', AtmProfPath='/home/mgialluca/Nextcloud/VPL_Modeling/Ionosphere_Modeling_Explore/Earth_Validation/'):
     atm = ascii.read(photochemDir+'OUTPUT/PTZ_mixingratios_out.dist', delimiter=' ')
     alt = atm['ALT']
     pres = atm['PRESS']
@@ -170,8 +170,20 @@ def degrade_PT(casename, nlevel_new, photochemDir='/gscratch/vsm/gialluca/VPLMod
     dat = Table([new_pres[::-1], new_temp[::-1]], names=('Press', 'Temp'))
     ascii.write(dat, AtmProfPath+'PT_profile_'+casename+'.pt', overwrite=True)
 
-# MEGAN NOTE YOU SHOULD CREATE THE MIXING RATIO COLS TO BE THE SAME AS PTZ OUT (OR JUST USE THAT FILE IF THEY DONT NEED TO BE DEGRADED)
+def prep_rmix_file(casename, PTZOut='/home/mgialluca/Nextcloud/VPL_Modeling/Atmos_Dev/atmos/PHOTOCHEM/OUTPUT/PTZ_mixingratios_out.dist', 
+                   AtmProfPath='/home/mgialluca/Nextcloud/VPL_Modeling/Ionosphere_Modeling_Explore/Earth_Validation/', PressUnits='Bar'):
+    atm = ascii.read(PTZOut)
+    datfortab = [atm['PRESS'][::-1]]
+    namesfortab = ['Press']
+    for i in ['O2', 'H2O', 'O3']:
+        datfortab.append(atm[i][::-1])
+        namesfortab.append(i)
 
+    if PressUnits == 'Pa':
+        datfortab[0] = datfortab[0]*u.bar.to(u.Pa)
+
+    dat = Table(datfortab, names=namesfortab)
+    ascii.write(dat, AtmProfPath+'MixingRs_'+casename+'.dat', overwrite=True)
 
 ### Purpose: To compile all of the steps in a VPL Climate Run in a quick
 #### and easy way to a fast-readable python dictionary using pandas dataframe.

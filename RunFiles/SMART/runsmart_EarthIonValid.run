@@ -1,0 +1,106 @@
+0			No Pressure Jacobians
+0			No Jacobians for Temperature
+3			Formatted Atmospheric Structure File
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/LBLABC/EarthIonValid/PT_profile_EarthIonValid.pt
+1			Lines to Skip at Top of File
+1,2			Columns of P,T
+100000			Pressure Scaling Factor
+288.4 		Surface Temperature
+3			Number of Gas Absorbers
+7			Gas Code for only Absorber
+0			No Jacobians for only Absorber
+2			Number of Absorption Coefficient Types
+1			Line Absorbers
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/LinebyLine_absFiles/EarthIonValid/O2_EarthIonValid.abs
+3			Cross Sections
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/LBLABC/TestPipelineT1c/O2_UVXsec.dat
+3			List Directed
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/LBLABC/EarthIonValid/MixingRs_EarthIonValid.dat
+1			Lines to Skip at Top of File
+1			Pressure Coordinate
+1,2			Columns of P and rMix
+1			Volume Mixing Ratio
+100000,1.0		P and rMix Scaling Factors
+1			Gas Code for second Absorber
+0			No Jacobians for second Absorber
+2			Number of Absorption Coefficient Types
+1			Line Absorbers
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/LinebyLine_absFiles/EarthIonValid/H2O_EarthIonValid.abs
+3			Cross Sections
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/LBLABC/TestPipelineT1c/H2O_UVXsec.dat
+3			List Directed
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/LBLABC/EarthIonValid/MixingRs_EarthIonValid.dat
+1			Lines to Skip at Top of File
+1			Pressure Coordinate
+1,3			Columns of P and rMix
+1			Volume Mixing Ratio
+100000,1.0		P and rMix Scaling Factors
+3			Gas Code for Second Absorber
+0			No Jacobians for Second Absorber
+2			Number of Absorption Coefficient Types
+1			Line Absorbers
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/LinebyLine_absFiles/EarthIonValid/O3_EarthIonValid.abs
+3			Cross Sections
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/LBLABC/TestPipelineT1c/O3_UVXsec.dat
+3			List Directed
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/LBLABC/EarthIonValid/MixingRs_EarthIonValid.dat
+1			Lines to Skip at Top of File
+1			Pressure Coordinate
+1,4			Columns of P and rMix
+1			Volume Mixing Ratio
+100000,1.0		P and rMix Scaling Factors
+0			Number of Aerosols
+0           Lambert Reflection
+0           No Jacobians
+3           List Directed
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/LBLABC/TestPipelineT1c/Const_UV_p25_albedo.alb
+0          Lines to Skip
+1,2         Columns of wl and albedo
+1           Wavelength Grid Type
+1.0         Wavelength Scaling
+1.0         Albedo Scaling
+1   	Distance from Star (AU)
+9.8			Surface Gravity [m/s*s]
+6378.1	    Planetary Radius [km]
+28.774094136716180		Mean Molecular Weight
+1			Number of Rayleigh Scatterers
+1			Rayleigh Scatter Index
+1.0			Volume Mixing Ratio
+8			Number of Streams
+3			Source - Solar
+3			File Format - List Directed
+/gscratch/vsm/gialluca/StellarSpectra/SolarSpectrum_EVE_December2024.dat
+1			Lines to Skip
+2			Units solar flux
+1			Solar spectral units
+1.0			Micron Conversion Factor
+1,2 		Columns of wn and Flux
+1			Number of Solar Zenith Angles
+60,0			Zenith and Azimuth Angles
+0.01			Convergence Criterion
+9			Output Format
+2           Ray Tracing Transit
+1           Stellar Radius (Rsun)
+0.          Impact Parameter (Rstar)
+1           Include Refraction
+0           No Limb Darkening
+1			Number of Azimuth Angles
+0.			Azimuth Angles
+4			specified level of output pressures for radiances
+3			Number of output pressure levels
+0.0000002443			pressure [bar] of level 1
+0.00000035			pressure [bar] of level 2
+0.00000045			pressure [bar] of level 3
+5			Output Radiance Units [Photon/s/m**2/sr/cm-1]
+93817.4312787316,299850.0749625188	Min and Max Wavenumber
+2			Type of Grid (slit)
+2			Triangular Spectral Response Function
+100.0			FWHM should be similar to sampling resolution
+100.0			Sampling Resolution [per cm] this is too wide (also might not be THE problem)
+0.25		Error for tau Binning
+0.15		Error for pi0 Binning
+0.15		g Error
+0.02		Albedo Error
+1			Output Format (ascii)
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/ModelRunOutputs/EarthIonValid/smart_EarthIonValid
+2			Overwrite
