@@ -1,5 +1,5 @@
 3                                       format list directed
-/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/LBLABC/EarthIonValid/PT_profile_EarthIonValid.pt
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/LBLABC/EarthIonValid/PT_profile_addlvls_EarthIonValid.pt
 1                                       # records to skip at TOF
 1,2                                     columns of p and t
 100000                                  pressure scaling factor
@@ -7,7 +7,7 @@
 1                                       hitran gas index
 0                                       # of foreign broadening gases
 3                                       format  (list directed)
-/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/LBLABC/EarthIonValid/MixingRs_EarthIonValid.dat
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/LBLABC/EarthIonValid/MixingRs_addlvls_EarthIonValid.dat
 1                                       # records to skip at TOF
 1                                       vert coordinate (pres)
 1,3                                     columns of p and rmix
@@ -22,5 +22,5 @@
 200.                                    maximum line width
 1.e-5                                   minimum column optical depth
 /gscratch/vsm/gialluca/VPLModelingTools_Dev/lblabc/fundamental2020.dat
-/gscratch/vsm/gialluca/VPLModelingTools_Dev/LinebyLine_absFiles/EarthIonValid/H2O_EarthIonValid.abs
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/LinebyLine_absFiles/EarthIonValid/H2O_addlvls_EarthIonValid.abs
 2                                       overwrite existing files

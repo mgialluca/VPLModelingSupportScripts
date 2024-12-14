@@ -1,7 +1,7 @@
 0			No Pressure Jacobians
 0			No Jacobians for Temperature
 3			Formatted Atmospheric Structure File
-/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/LBLABC/EarthIonValid/PT_profile_EarthIonValid.pt
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/LBLABC/EarthIonValid/PT_profile_addlvls_EarthIonValid.pt
 1			Lines to Skip at Top of File
 1,2			Columns of P,T
 100000			Pressure Scaling Factor
@@ -11,11 +11,11 @@
 0			No Jacobians for only Absorber
 2			Number of Absorption Coefficient Types
 1			Line Absorbers
-/gscratch/vsm/gialluca/VPLModelingTools_Dev/LinebyLine_absFiles/EarthIonValid/O2_EarthIonValid.abs
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/LinebyLine_absFiles/EarthIonValid/O2_addlvls_EarthIonValid.abs
 3			Cross Sections
 /gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/LBLABC/TestPipelineT1c/O2_UVXsec.dat
 3			List Directed
-/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/LBLABC/EarthIonValid/MixingRs_EarthIonValid.dat
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/LBLABC/EarthIonValid/MixingRs_addlvls_EarthIonValid.dat
 1			Lines to Skip at Top of File
 1			Pressure Coordinate
 1,2			Columns of P and rMix
@@ -25,11 +25,11 @@
 0			No Jacobians for second Absorber
 2			Number of Absorption Coefficient Types
 1			Line Absorbers
-/gscratch/vsm/gialluca/VPLModelingTools_Dev/LinebyLine_absFiles/EarthIonValid/H2O_EarthIonValid.abs
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/LinebyLine_absFiles/EarthIonValid/H2O_addlvls_EarthIonValid.abs
 3			Cross Sections
 /gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/LBLABC/TestPipelineT1c/H2O_UVXsec.dat
 3			List Directed
-/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/LBLABC/EarthIonValid/MixingRs_EarthIonValid.dat
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/LBLABC/EarthIonValid/MixingRs_addlvls_EarthIonValid.dat
 1			Lines to Skip at Top of File
 1			Pressure Coordinate
 1,3			Columns of P and rMix
@@ -39,11 +39,11 @@
 0			No Jacobians for Second Absorber
 2			Number of Absorption Coefficient Types
 1			Line Absorbers
-/gscratch/vsm/gialluca/VPLModelingTools_Dev/LinebyLine_absFiles/EarthIonValid/O3_EarthIonValid.abs
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/LinebyLine_absFiles/EarthIonValid/O3_addlvls_EarthIonValid.abs
 3			Cross Sections
 /gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/LBLABC/TestPipelineT1c/O3_UVXsec.dat
 3			List Directed
-/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/LBLABC/EarthIonValid/MixingRs_EarthIonValid.dat
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/LBLABC/EarthIonValid/MixingRs_addlvls_EarthIonValid.dat
 1			Lines to Skip at Top of File
 1			Pressure Coordinate
 1,4			Columns of P and rMix
@@ -88,9 +88,9 @@
 0.			Azimuth Angles
 4			specified level of output pressures for radiances
 3			Number of output pressure levels
-0.000000324			pressure [bar] of level 1
-0.000000326			pressure [bar] of level 2
-0.000000328			pressure [bar] of level 3
+0.000000008			pressure [bar] of level 1
+0.000000001			pressure [bar] of level 2
+0.00000005			pressure [bar] of level 3
 5			Output Radiance Units [Photon/s/m**2/sr/cm-1]
 93817.4312787316,299850.0749625188	Min and Max Wavenumber
 2			Type of Grid (slit)
@@ -102,5 +102,5 @@
 0.15		g Error
 0.02		Albedo Error
 1			Output Format (ascii)
-/gscratch/vsm/gialluca/VPLModelingTools_Dev/ModelRunOutputs/EarthIonValid/smart_EarthIonValid
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/ModelRunOutputs/EarthIonValid/smart_addlvls__EarthIonValid
 2			Overwrite
