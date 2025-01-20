@@ -56,7 +56,7 @@ class VPLModelingPipeline:
 
         # Set the number of levels for the fine (photochem) and coarse (everything else) grids
         self.nlevel_fine = 200 # Number of atm layers for fine grids (i.e., for photochem)
-        self.nlevel_coarse = 60 # Number of atm layers for coarse grids (i.e., for all models besides photochem)
+        self.nlevel_coarse = 40 # Number of atm layers for coarse grids (i.e., for all models besides photochem)
 
         # Start counters to track how many times each model has been ran
         self.num_photochem_runs = 0
@@ -700,7 +700,7 @@ class VPLModelingPipeline:
     #
     def set_climate_settings(self):
 
-        planet = 'Earth_SO2' # Would suggest keeping all settings available for each target, this provides a quick way to switch between them
+        planet = 'T1c' # Would suggest keeping all settings available for each target, this provides a quick way to switch between them
 
         if planet == 'T1c':
             self.c_NumberTimesteps = 10000
