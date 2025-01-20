@@ -45,11 +45,11 @@ nlevel_coarse = 70
 def run_photochem_1instance(casename, CleanMake=True, 
                             #InputCopy='/home/mgialluca/Nextcloud/VPL_Modeling/Atmos_Dev/atmos/PHOTOCHEM/INPUTFILES/TEMPLATES/ModernEarth/', 
                             #InputCopy='/home/mgialluca/Nextcloud/VPL_Modeling/Atmos_Dev/atmos/PHOTOCHEM/INPUTFILES/TEMPLATES/Venus/',
-                            InputCopy='/home/mgialluca/Nextcloud/VPL_Modeling/Atmos_Dev/atmos/PHOTOCHEM/INPUTFILES/TEMPLATES/ModernEarth/',
+                            InputCopy='/home/mgialluca/Nextcloud/VPL_Modeling/VPLModelingSupportScripts/Bodies/T1c/T1cOutgas_Testing/',
                             trynum=1, 
                             photochemDir='/home/mgialluca/Nextcloud/VPL_Modeling/Atmos_Dev/atmos/PHOTOCHEM/', 
                             atmosDir='/home/mgialluca/Nextcloud/VPL_Modeling/Atmos_Dev/atmos/', 
-                            OutPath='/home/mgialluca/Nextcloud/VPL_Modeling/Ionosphere_Modeling_Explore/Earth_Validation/'):
+                            OutPath='/home/mgialluca/Nextcloud/VPL_Modeling/T1c_Thin_Atm_Work/'):
 
     # If you have new input files to use, give 'InputCopy' the dir path
     if InputCopy != False:
@@ -160,6 +160,11 @@ def degrade_PT(casename, nlevel_new, photochemDir='/home/mgialluca/Nextcloud/VPL
     pres = atm['PRESS']
     temp = atm['TEMP']
 
+    alt = alt.insert(200, [9975000.0+(1*50000.0), 9975000.0+(2*50000.0), 9975000.0+(3*50000.0), 9975000.0+(4*50000.0), 9975000.0+(5*50000.0), 9975000.0+(6*50000.0), 
+                     9975000.0+(7*50000.0), 9975000.0+(8*50000.0), 9975000.0+(9*50000.0), 9975000.0+(10*50000.0), 9975000.0+(11*50000.0), 9975000.0+(12*50000.0), 9975000.0+(13*50000.0)])
+    pres = pres.insert(200, [2e-7, 1e-7, 9e-8, 8e-8, 7e-8, 6e-8, 5e-8, 4e-8, 3e-8, 2e-8, 1e-8, 9e-9, 8e-9])
+    temp = temp.insert(200, [temp[199], temp[199], temp[199], temp[199], temp[199], temp[199], temp[199], temp[199], temp[199], temp[199], temp[199], temp[199], temp[199]])
+
     new_grid = np.linspace(alt[0], alt[len(alt)-1], nlevel_new)
     new_temp = np.interp(new_grid, alt, temp)
     new_pres = np.interp(new_grid, alt, pres)
@@ -168,22 +173,26 @@ def degrade_PT(casename, nlevel_new, photochemDir='/home/mgialluca/Nextcloud/VPL
         new_pres = new_pres*u.bar.to(u.Pa)
 
     dat = Table([new_pres[::-1], new_temp[::-1]], names=('Press', 'Temp'))
-    ascii.write(dat, AtmProfPath+'PT_profile_'+casename+'.pt', overwrite=True)
+    ascii.write(dat, AtmProfPath+'PT_profile_addlvls_'+casename+'.pt', overwrite=True)
 
 def prep_rmix_file(casename, PTZOut='/home/mgialluca/Nextcloud/VPL_Modeling/Atmos_Dev/atmos/PHOTOCHEM/OUTPUT/PTZ_mixingratios_out.dist', 
                    AtmProfPath='/home/mgialluca/Nextcloud/VPL_Modeling/Ionosphere_Modeling_Explore/Earth_Validation/', PressUnits='Bar'):
     atm = ascii.read(PTZOut)
-    datfortab = [atm['PRESS'][::-1]]
+    pres = atm['PRESS']
+    pres = pres.insert(200, [2e-7, 1e-7, 9e-8, 8e-8, 7e-8, 6e-8, 5e-8, 4e-8, 3e-8, 2e-8, 1e-8, 9e-9, 8e-9])
+    datfortab = [pres[::-1]]
     namesfortab = ['Press']
     for i in ['O2', 'H2O', 'O3']:
-        datfortab.append(atm[i][::-1])
+        gas = atm[i]
+        gas = gas.insert(200, [gas[199], gas[199], gas[199], gas[199], gas[199], gas[199], gas[199], gas[199], gas[199], gas[199], gas[199], gas[199], gas[199]])
+        datfortab.append(gas[::-1])
         namesfortab.append(i)
 
     if PressUnits == 'Pa':
         datfortab[0] = datfortab[0]*u.bar.to(u.Pa)
 
     dat = Table(datfortab, names=namesfortab)
-    ascii.write(dat, AtmProfPath+'MixingRs_'+casename+'.dat', overwrite=True)
+    ascii.write(dat, AtmProfPath+'MixingRs_addlvls_'+casename+'.dat', overwrite=True)
 
 ### Purpose: To compile all of the steps in a VPL Climate Run in a quick
 #### and easy way to a fast-readable python dictionary using pandas dataframe.

@@ -7,6 +7,7 @@ import astropy.constants as const
 from astropy.table import Table
 import json
 import pandas as pd
+from NewPressure_HelperFunctions import get_true_number_densities, sum_mixing_ratios, new_total_Ndens, new_mixing_rats, find_tot_column_mass_dens
 
 ################################
 ##
@@ -14,27 +15,6 @@ import pandas as pd
 ## Author: Megan Gialluca
 ##
 ################################
-
-''' Delete after testing
-
-# Input Molecule dict example:
-# molecules_I_want = {'O2':7, 'O3':3}
-# where 7 and 3 are the HITRAN gas codes for O2 and O3, respectively
-
-def createmoldic():
-    moldic = {}
-    moldic['O2'] = 7
-    moldic['O3'] = 3
-    moldic['CO'] = 5
-    moldic['CO2'] = 2
-    moldic['H2O'] = 1
-    moldic['HNO3'] = 12
-    moldic['N2O'] = 4
-    moldic['NO2'] = 10
-    moldic['SO2'] = 9
-
-    return moldic
-'''
 
 class VPLModelingPipeline:
 
@@ -47,12 +27,16 @@ class VPLModelingPipeline:
         self.OutPath = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/ModelRunOutputs/'+casename+'/' # path for the raw model run outputs (NOT for created data products like dictionaries)
         self.DataOutPath = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/ModelRunOutputs/'+casename+'/' # path for created data products like dictionaries
         self.AtmProfPath = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/AtmProfiles/' # path to put atmospheric profile files (.pt files really)
+        self.BackupPhotochemRuns = True # Make backups of individual photochem runs
         self.photochemBackupDir = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/Save_Photochem_Output/'+casename+'/' # path to save output from each photochem run
         self.LBLABC_AbsFilesDir = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/LinebyLine_absFiles/'+casename+'/' # path to put the created lbl .abs files in 
         self.lblabc_RunScriptDir = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/LBLABC/'+casename+'/' # path to put lbl runscripts in
         self.vplclimate_RunScriptDir = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/VPLClimate/'+casename+'/' # path to put vpl climate runscripts in
         self.photochem_InputsDir = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/Bodies/'+casename+'/' # The path to create new photochem inputs in
         self.xsec_Path = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/xsec/' # The path where cross section files can be found
+        self.SMARTDir = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/smart' # path to smart/ dir (such that smart/smart_spectra is the executable) ??????????? may need to fix these when klones online again 
+        self.SMART_RunScriptDir = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/SMART/'+casename+'/' # path to put SMART runscripts in
+        self.photochemInitialInput = photochemInitial
 
         # The climate executable:
         self.vplclimate_executable = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/ClimateModel/vpl_climate/vpl_climate' # The VPL Climate executable you want to use WITH FULL PATH
@@ -83,6 +67,7 @@ class VPLModelingPipeline:
         self.photochem_global_converge = False
         self.climate_global_converge = False
         self.global_convergence = False
+        self.max_iterations_master = 10 # Never do anything more than 10x
 
         # User defined inputs
         self.casename = casename # Case name youre running, user defined
@@ -92,18 +77,10 @@ class VPLModelingPipeline:
         self.verbose = verbose # Boolean, whether or not you want print statements (False for computational efficiency)
         # MOLECULES MUST BE ALL CAPITAL LETTERS AS THEY WILL PRINT OUT FROM PHOTOCHEM
 
-        # put photochem initial inputs into the inputs dir if they aren't there already
-        if not os.path.exists(self.photochem_InputsDir):
-            os.mkdir(self.photochem_InputsDir)
-        if photochemInitial != self.photochem_InputsDir:
-            subprocess.run('cp '+photochemInitial+'input_photchem.dat '+self.photochem_InputsDir, shell=True)
-            subprocess.run('cp '+photochemInitial+'parameters.inc '+self.photochem_InputsDir, shell=True)
-            #subprocess.run('cp '+photochemInitial+'params.dat '+self.photochem_InputsDir, shell=True)
-            subprocess.run('cp '+photochemInitial+'PLANET.dat '+self.photochem_InputsDir, shell=True)
-            subprocess.run('cp '+photochemInitial+'reactions.rx '+self.photochem_InputsDir, shell=True)
-            subprocess.run('cp '+photochemInitial+'species.dat '+self.photochem_InputsDir, shell=True)
-            subprocess.run('cp '+photochemInitial+'in.dist '+self.photochem_InputsDir, shell=True)
-
+        # If the atmospheric pressure needs to be checked and adjusted outside of photochem, set this flag to True
+        self.adjust_atmospheric_pressure = False
+        # when adjusting pressure, the number density of each level much change by less than this percentage (as a decimal) on each level to achieve convergence:
+        self.NewPressure_Ndens_tolerance = 0.5 
 
         # lookup table to connect Hitran gas codes to molecule names
         self.hitran_lookup = pd.read_csv('HitranTable.csv', index_col='Molecule')
@@ -117,9 +94,21 @@ class VPLModelingPipeline:
                 self.molecule_dict[gas_names[m]+'_RmixCol'] = m+2
 
 
-
-
     ######################################################### Support Functions
+
+    def setup_intial_photochem_dir(self):
+
+        # put photochem initial inputs into the inputs dir if they aren't there already
+        if not os.path.exists(self.photochem_InputsDir):
+            os.mkdir(self.photochem_InputsDir)
+        if self.photochemInitialInput != self.photochem_InputsDir:
+            subprocess.run('cp '+self.photochemInitialInput+'input_photchem.dat '+self.photochem_InputsDir, shell=True)
+            subprocess.run('cp '+self.photochemInitialInput+'parameters.inc '+self.photochem_InputsDir, shell=True)
+            #subprocess.run('cp '+self.photochemInitialInput+'params.dat '+self.photochem_InputsDir, shell=True)
+            subprocess.run('cp '+self.photochemInitialInput+'PLANET.dat '+self.photochem_InputsDir, shell=True)
+            subprocess.run('cp '+self.photochemInitialInput+'reactions.rx '+self.photochem_InputsDir, shell=True)
+            subprocess.run('cp '+self.photochemInitialInput+'species.dat '+self.photochem_InputsDir, shell=True)
+            subprocess.run('cp '+self.photochemInitialInput+'in.dist '+self.photochem_InputsDir, shell=True)
 
     ### Switch paths to Megan's local dev environment if off of hyak
     ##
@@ -275,6 +264,19 @@ class VPLModelingPipeline:
         os.chdir(self.lblabcDir)
         subprocess.run(self.lblabcDir+'lblabc < '+runscript, shell=True, stdout=f)
         f.close()
+        os.chdir(workdir)
+
+    ### Run SMART for a given runscript (just useful to get the output or be fully in python w/e)
+    ##
+    ## Inputs:
+    # runscript - name of SMART runscript WITH PATH
+    # casename - name of case you're running (to name output file)
+    # outpath - path to put run output in
+    ##
+    def run_smart_1instance(self, runscript):
+        workdir = os.getcwd()
+        os.chdir(self.SMARTDir)
+        subprocess.run(self.SMARTDir+'smart_spectra < '+runscript+' > '+self.OutPath+'smart_run_output_'+self.casename+'.run', shell=True)
         os.chdir(workdir)
 
     ### Take the PT profile output from photochem and degrade it to a specified number of layers ...
@@ -1006,64 +1008,225 @@ class VPLModelingPipeline:
 
         f.close()
 
-    ''' Delete after testing, or change to be another option for climate script generation
 
-    # THIS IS THE FUNCTION TO BE CAREFUL OF
-    # IT IS *HIGHLY* DEPENDENT ON HOW YOU WRITE YOUR CLIMATE TEMPLATE FILE
-    # A NEW USER SHOULD TEST THIS WORKS BEFORE RUNNING THE AUTOMATIC PIPELINE
-    ##
-    ### Take user defined vpl climate run file, update profile, .abs file paths, and MMW
-    ##
-    ## Attribute Dependencies:
+    ### Purpose: Read in the out.dist file to create a python dict with its values (e.g., mixing ratios, T, EDD, Ndens, etc)
+    ####  used for finding new surface pressures
     #
+    ## Attribute Dependencies:
+    # photochem_InputsDir - The directory of inputs using the species.dat file
+    # photochemDir - To retrieve the out.dist file
+    # nlevel_fine - The NZ of photochem
     #
     ## Fxn-specific Inputs:
+    # None
     ##
-    def make_first_climate_runscript(self):
-        # Start a new runscript to create, and open/read the template user defined climate script
-        f = open(self.vplclimate_RunScriptDir+'RunVPLClimate_'+self.casename+'_FirstTry.script', 'w')
-        template = open(self.vplclimateInitial, 'r')
-        lines = template.readlines()
-        template.close()
+    def ingest_outdist(self):
 
-        # Iterate through the template runscript, only change necessary paths and MMW
-        PTwritten = False # Flag if PT profile has been written yet
-        RmixWritten = True # Flag to know if you are in a gas-specific block that needs a rmix profile written
-        for i in range(len(lines)):
-            # If its the mean mol weight line, write the MMW:
-            if len(lines[i].split('atm mean mol wgt')) > 1:
-                f.write(self.MMW+'			atm mean mol wgt [g\mol]\n')
-            # If the PT profile has not been written yet, and the line 2 away is for the columns of P,T, write the pt profile
-            elif PTwritten == False and len(lines[i+2].split('columns of P,T')) > 1:
-                f.write(self.AtmProfPath+'PT_profile_'+self.casename+'.pt\n')
-                PTwritten == True
-            # If the line is the columns of P,T for the pt profile, they will be '1,2'
-            elif len(lines[i].split('columns of P,T')) > 1:
-                f.write('1,2			columns of P,T\n')
-            # If youve reached a hitran gas code line, decide what the gas will be based on the index
-            elif len(lines[i].split('HITRAN GAS CODE')) > 1:
-                curr_gas_index = int(lines[i].split()[0])
-                for g in self.molecule_dict['Gas_names']:
-                    if self.molecule_dict[g] == curr_gas_index:
-                        curr_gas = g
-                RmixWritten = False
-                f.write(lines[i])
-            ## You should be in gas-specific info block by this point:
-            # If the line youre on is a .abs HITRAN line absorber file, write the appropriate on for the gas youre on
-            elif RmixWritten == False and len(lines[i-2].split('HITRAN Line Absorbers')) > 1:
-                f.write(self.LBLABC_AbsFilesDir+curr_gas+'_'+self.casename+'.abs\n')
-            # If the line youre on is for the mixing ratios, write the atmospheric profile
-            elif RmixWritten == False and len(lines[i+3].split('columns of P,rmix')) > 1:
-                f.write(self.photochemDir+'OUTPUT/PTZ_mixingratios_out.dist\n')
-            # If the line youre on is for the columns of P,rmix, give appropriate column number
-            elif RmixWritten == False and len(lines[i].split('columns of P,rmix')) > 1:
-                f.write('1,'+str(self.molecule_dict[curr_gas+'_RmixCol'])+'			columns of P,rmix\n')
-                RmixWritten = True
+        # Read in species.dat file
+        species = self.photochem_InputsDir+'species.dat'
+        nsp = open(species, 'r')
 
-    # Where you left off: Just wrote the correct Rmix column for the gas youre on
-    # Need to go through rest of runclimate runscript to make sure nothing else needs to be written explicitly
-    # also whats the deal with pressure scaling? Does it need to convert to Pa from bars? I think sooooo 
-    '''
+        # initialize output dictionary
+        d = {}
+
+        # Loop through species and find all gas names for naming in dictionary
+        done = False
+        new_gases = []
+        for l in nsp.readlines():
+            if l.split()[0][0] == '*':
+                if done == True:
+                    break
+            else:
+                new_gases.append(l.split()[0])
+                done = True
+
+        # Total number of LL gases (will have mixing ratios in out.dist)
+        NQ = len(new_gases)
+
+        # Define relavant trackers for looping through out.dist
+        blockstart = 0
+        blockend = self.nlevel_fine
+
+        NQblocks = np.ceil(NQ/10)
+        species_ind = 0
+
+        # Loop through out.dist file NQ blocks and append species mixing ratios to dictionary
+        for i in range(int(NQblocks)):
+            curr_nq_block = ascii.read(self.photochemDir+'OUTPUT/out.dist', data_start=blockstart, data_end=blockend, header_start=None)
+            blockstart = blockend
+            blockend = blockend+self.nlevel_fine
+
+            for i in curr_nq_block.columns:
+                d[new_gases[species_ind]] = list(curr_nq_block[i])
+                species_ind += 1
+
+        # Add Temp, Edd, and number density to output dictionary 
+        T_edd_block = ascii.read(self.photochemDir+'OUTPUT/out.dist', data_start=blockstart, data_end=blockend)
+        blockstart = blockend
+
+        d['Temp'] = list(T_edd_block['col1'])
+        d['Edd'] = list(T_edd_block['col2'])
+        d['NDens'] = list(T_edd_block['col3'])
+
+        return d
+    
+
+    ### Purpose: Create a new in.dist file for an updated surface pressure / number density grid
+    #
+    ## Attribute Dependencies:
+    # photochem_InputsDir - The directory of inputs using the species.dat and in.dist files
+    # photochemDir - To retrieve the out.dist file
+    # nlevel_fine - The NZ of photochem
+    #
+    ## Fxn-Specific Inputs:
+    # newndens_perspecies - The new/updated number densities per species (as a python dictionary)... 
+    #     ...created within self.change_atmospheric_pressure() using the New Pressure helper fxn get_true_number_densities()
+    # newtotndens - The new/updated total number density created within self.change_atmospheric_pressure()...
+    #     ...using the New Pressure helper fxn new_total_Ndens()
+    # newmixings - The new/updated mixing ratios per species (as a python dictionary)...
+    #     ...created within self.change_atmospheric_pressure() using the New Pressure helper fxn new_mixing_rats()
+    # oldoutdict - The ingested out.dist file as a python dictionary (from self.ingest_outdist() called by self.change_atmospheric_pressure())
+    ##
+    def new_indist_new_pressure(self, newndens_perspecies, newtotndens, newmixings, oldoutdict):
+
+        # Define needed files
+        oldout = self.photochemDir+'OUTPUT/out.dist'
+
+        fnew = open(self.photochem_InputsDir+'NEWpressure_in.dist', 'w')
+
+        # Read in species.dat file
+        species = self.photochem_InputsDir+'species.dat'
+        nsp = open(species, 'r')
+
+        done = False
+        new_gases = []
+        for l in nsp.readlines():
+            if l.split()[0][0] == '*':
+                if done == True:
+                    break
+            else:
+                new_gases.append(l.split()[0])
+                done = True
+
+        NQ = len(new_gases)
+        NQblocks = np.ceil(NQ/10)
+
+        for i in range(int(NQblocks)):
+            gases_to_add = list(newmixings.keys())[i*10:i*10+10]
+            write_table = Table()
+            counter = 1
+            for gas in gases_to_add:
+                write_table.add_column(newmixings[gas], name='col'+str(counter))
+                counter += 1
+
+            for line in range(len(write_table)):
+                fnew.write('   ')
+                for col in write_table.columns:
+                    if write_table[col][line] < 9e-99:
+                        val = 9e-99
+                    else:
+                        val = write_table[col][line]
+                    fnew.write("{:.8E}".format(val)+'   ')
+                fnew.write('\n')
+
+        write_table = Table()
+        write_table.add_column(oldoutdict['Temp'], name='col1')
+        write_table.add_column(oldoutdict['Edd'], name='col2')
+        write_table.add_column(newtotndens, name='col3')
+        write_table.add_column(newmixings['O3'], name='col4')
+        write_table.add_column(newndens_perspecies['CO2'], name='col5')
+
+        for line in range(len(write_table)):
+            fnew.write('   ')
+            for col in write_table.columns:
+                if write_table[col][line] < 9e-99:
+                    val = 9e-99
+                else:
+                    val = write_table[col][line]
+                fnew.write("{:.8E}".format(val)+'   ')
+            fnew.write('\n')
+
+        lastbloc_start = (self.nlevel_fine*NQblocks)+self.nlevel_fine
+
+        olddist_txt = open(oldout, 'r')
+        alllines = olddist_txt.readlines()
+        olddist_txt.close()
+        for line in range(len(alllines)):
+            if line >= lastbloc_start:
+                fnew.write(alllines[line])
+
+        fnew.close()
+
+        subprocess.run('rm '+self.photochem_InputsDir+'in.dist', shell=True)
+        subprocess.run('mv '+self.photochem_InputsDir+'NEWpressure_in.dist '+self.photochem_InputsDir+'in.dist', shell=True)
+
+    ### Purpose: If the atmospheric pressure needs to be changed/adjusted, this function finds the new pressure... 
+    ###     ...and updates the in.dist and PLANET.dat files
+    # 
+    ## Attribute Dependencies:
+    # photochem_InputsDir - The directory of photochem inputs
+    # photochemDir - Photochem directory (for OUTPUTS/)
+    # nlevel_fine - The NZ of photochem 
+    # planetary_gravity - Planet gravity (to calculate pressure)
+    # MMW - mean molecular weight
+    #
+    ## Fxn-specific Inputs:
+    # None
+    #  
+    ##
+    def change_atmospheric_pressure(self):
+
+        # Load the current out.dist values
+        outdistdic = self.ingest_outdist()
+
+        # sum of all mixing ratios to find new total number density
+        new_total_VMR = sum_mixing_ratios(outdistdic, self.nlevel_fine)
+
+        # New number densities for each species
+        new_Ndens_species = get_true_number_densities(outdistdic)
+
+        # New total number density and the change in number density on each level
+        new_Ndens_tot, change_in_Ndens = new_total_Ndens(new_total_VMR, outdistdic['NDens'])
+
+        # Check if the pressure converged or if photochem needs to be rerun with new pressure
+        pressure_converged = True
+        for c in change_in_Ndens:
+            if c > self.NewPressure_Ndens_tolerance:
+                pressure_converged = False
+                break
+        
+        # Update in.dist file for new number densities
+        new_VMR_species = new_mixing_rats(new_Ndens_species, new_Ndens_tot)
+        self.new_indist_new_pressure(new_Ndens_species, new_Ndens_tot, new_VMR_species, outdistdic)
+
+        # Find new surface pressure
+        loaded_ptz_out = ascii.read(self.photochemDir+'OUTPUT/PTZ_mixingratios_out.dist')
+        colmass = find_tot_column_mass_dens(new_Ndens_tot, loaded_ptz_out['ALT'], self.MMW)
+        new_surfP = (colmass*(self.planetary_gravity*(u.m*u.s**-2).to(u.cm*u.s**-2))*100)*u.Pa.to(u.bar) # 100 converts per cm to per m
+
+        self.updated_atm_pressure = new_surfP
+
+        # Change surface pressure in PLANET.dat
+        planetdat_new = open(self.photochem_InputsDir+'New_PLANET.dat', 'w')
+        planetdat_old = open(self.photochem_InputsDir+'PLANET.dat', 'r')
+
+        planetdat_lines = planetdat_old.readlines()
+        for l in planetdat_lines:
+            hold = l.split()
+            if 'surface' in hold and 'pressure' in hold:
+                planetdat_new.write("{:.2e}".format(new_surfP))
+                planetdat_new.write(' = P0, surface pressure [bar] \n')
+            else:
+                planetdat_new.write(l)
+
+        planetdat_new.close()
+        planetdat_old.close()
+
+        subprocess.run('rm '+self.photochem_InputsDir+'PLANET.dat', shell=True)
+        subprocess.run('mv '+self.photochem_InputsDir+'New_PLANET.dat '+self.photochem_InputsDir+'in.dist', shell=True)
+
+        return pressure_converged
+
 
     ### Purpose: Change the T/EDD profiles from climate in photochems in.dist to rerun photochem after a climate run
     ##
@@ -1074,7 +1237,7 @@ class VPLModelingPipeline:
     # oldptz - path to the PTZ_out file from the last photochem run (use PHOTOCHEM/OUTPUT/ dir)
     # climateprof - the last output profile from vpl climate, found with self.get_final_climate_output_temp_profile()
     ##
-    def update_indist(self, oldptz, climateprof):
+    def update_indist_T_EDD(self, oldptz, climateprof):
 
         # WARNING: this may be hard coded if folks don't write their parameters.inc file the same way as templates etc
         # I don't think it will be a problem but just noting in case
@@ -1171,6 +1334,7 @@ class VPLModelingPipeline:
         subprocess.run('mv '+self.photochem_InputsDir+'NEWin.dist '+self.photochem_InputsDir+'in.dist', shell=True)
 
 
+    ### 
 
 
     ### AUTOMATIC PIPELINE, calls all above functions sequentially defined by flow chart, updates necessary object parameters
@@ -1178,7 +1342,7 @@ class VPLModelingPipeline:
     ## Dependent on all Attributes, no fxn-specific inputs
     ##
     def run_automatic(self):
-        ftestingoutput = open('SavingInfoOut.txt', 'w')
+        #ftestingoutput = open('SavingInfoOut.txt', 'w')
         # Prepare your backup directory for photochem data
         if not os.path.exists(self.photochemBackupDir):
             os.mkdir(self.photochemBackupDir)
@@ -1196,8 +1360,9 @@ class VPLModelingPipeline:
         if not os.path.exists(self.vplclimate_RunScriptDir):
             os.mkdir(self.vplclimate_RunScriptDir)
         # Prepare directory for storing new photochem inputs
-        if not os.path.exists(self.photochem_InputsDir):
-            os.mkdir(self.photochem_InputsDir)
+        #if not os.path.exists(self.photochem_InputsDir):
+        #    os.mkdir(self.photochem_InputsDir)
+        self.setup_intial_photochem_dir()
         # Make sure model and data output dirs exist
         if not os.path.exists(self.OutPath):
             os.mkdir(self.OutPath)
@@ -1214,7 +1379,7 @@ class VPLModelingPipeline:
             self.num_photochem_runs += 1
             if self.verbose == True:
                 print('----> Beginning photochem run Try number '+str(self.num_photochem_runs))
-                ftestingoutput.write('----> Beginning photochem run Try number '+str(self.num_photochem_runs)+'\n')
+                #ftestingoutput.write('----> Beginning photochem run Try number '+str(self.num_photochem_runs)+'\n')
             self.run_photochem_1instance(CleanMake=True, InputCopy=self.photochem_InputsDir, trynum=self.num_photochem_runs)
             
             ### If this is the first run, Retrieve the surf gravity and radius of the planet from PLANET.dat
@@ -1242,6 +1407,8 @@ class VPLModelingPipeline:
 
             # If photochem did not converge, try try again
             while local_photochem_conv == False:
+                if photochem_subtries > self.max_iterations_master:
+                    raise IOError('Photochem ran >'+str(self.max_iterations_master)+' times with no convergence. On photochem run number '+str(self.num_photochem_runs))
                 subprocess.run('rm -rf '+self.photochemDir+'in.dist', shell=True)
                 subprocess.run('rm -rf '+self.photochemDir+'PTZ_mixingratios_in.dist', shell=True)
                 subprocess.run('cp '+self.photochemDir+'OUTPUT/out.dist '+self.photochemDir+'in.dist', shell=True)
@@ -1249,12 +1416,13 @@ class VPLModelingPipeline:
                 photochem_subtries += 1
                 local_photochem_conv, grosserr, l2err, finaltime, nsteps_photo = self.check_photochem_conv()
 
+            # Copy the out.dist to be the new in.dist in the photochem inputs directory
+            subprocess.run('rm -rf '+self.photochem_InputsDir+'in.dist', shell=True)
+            subprocess.run('cp '+self.photochemDir+'OUTPUT/out.dist '+self.photochem_InputsDir+'in.dist', shell=True)
+
             if self.verbose == True:
                 print('Photochem local convergence found with '+str(photochem_subtries)+' subtries')
-                ftestingoutput.write('Photochem local convergence found with '+str(photochem_subtries)+' subtries\n')
-
-            # Save backup of photochem output
-            self.backup_photochem_run(trynum=self.num_photochem_runs)
+                #ftestingoutput.write('Photochem local convergence found with '+str(photochem_subtries)+' subtries\n')
 
             # Retrieve atmosphere MMW for use moving forward:
             if self.num_photochem_runs == 1:
@@ -1268,15 +1436,72 @@ class VPLModelingPipeline:
                     self.MMW = float(i.split()[len(i.split())-1])
                     break
 
+            # If the atmospheric pressure should be checked / updated, run that
+            photochem_newPsurf_subtries = 0
+            if self.adjust_atmospheric_pressure == True:
+                pressure_converged = self.change_atmospheric_pressure()
+
+                if self.verbose == True:
+                    print('New Pressure found: '+"{:.4e}".format(self.updated_atm_pressure)+' bars')
+                    if pressure_converged == True:
+                        print('Pressure converged, no need to rerun photochem')
+                
+                if pressure_converged == False:
+
+                    if self.verbose == True:
+                        print('Pressure NOT converged, rerunning photochem')
+
+                    while pressure_converged == False:
+
+                        if photochem_newPsurf_subtries > self.max_iterations_master:
+                            raise IOError('Photochem attempted to find new pressure >'+str(self.max_iterations_master)+' times with no pressure convergence. On photochem run number '+str(self.num_photochem_runs))
+
+                        self.run_photochem_1instance(CleanMake=True, InputCopy=self.photochem_InputsDir, trynum=self.num_photochem_runs)
+
+                        photochem_newPsurf_subtries += 1
+                        # Currently, the trynum will only refer to the converged case (should we save every single try no matter what?)
+                        local_photochem_conv, grosserr, l2err, finaltime, nsteps_photo = self.check_photochem_conv()
+                        photochem_newPsurf_inner_subtries = 1
+
+                        # If photochem did not converge, try try again
+                        while local_photochem_conv == False:
+                            if photochem_newPsurf_inner_subtries > self.max_iterations_master:
+                                raise IOError('Photochem failed to converge with a new pressure with >'+str(self.max_iterations_master)+' runs. On photochem run number '+str(self.num_photochem_runs)+' and new pressure attempt '+str(photochem_newPsurf_subtries))
+                            
+                            subprocess.run('rm -rf '+self.photochemDir+'in.dist', shell=True)
+                            subprocess.run('rm -rf '+self.photochemDir+'PTZ_mixingratios_in.dist', shell=True)
+                            subprocess.run('cp '+self.photochemDir+'OUTPUT/out.dist '+self.photochemDir+'in.dist', shell=True)
+                            self.run_photochem_1instance(CleanMake=False, InputCopy=False, trynum=self.num_photochem_runs)
+                            photochem_newPsurf_inner_subtries += 1
+                            local_photochem_conv, grosserr, l2err, finaltime, nsteps_photo = self.check_photochem_conv()
+
+                        pressure_converged = self.change_atmospheric_pressure()
+
+                    if self.verbose == True:
+                        print('Pressure converged after '+str(photochem_newPsurf_subtries)+' iterations, with '+str(photochem_newPsurf_inner_subtries)+' number of photochem reruns at this pressure')
+
+            # Save backup of photochem output if desired
+            if self.BackupPhotochemRuns == True:
+                self.backup_photochem_run(trynum=self.num_photochem_runs)
+
             # If you only had 1 subtry, and its not the first run, check for global convergence
-            if photochem_subtries == 1 and self.num_photochem_runs != 1:
+            if photochem_subtries == 1 and self.num_photochem_runs != 1 and photochem_newPsurf_subtries == 0:
                 if nsteps_photo < 1000:
                     self.global_convergence = True
                     if self.verbose == True:
                         print('Global Convergence achieved')
+                        subprocess.run('cp '+self.photochemDir+'OUTPUT/out.dist '+self.DataOutPath+'final_out.dist')
+                        subprocess.run('cp '+self.photochemDir+'OUTPUT/out.out '+self.DataOutPath+'final_out.out')
+                        subprocess.run('cp '+self.photochemDir+'OUTPUT/PTZ_mixingratios_out.dist '+self.DataOutPath+'final_PTZ_mixingratios_out.dist')
                     break
                 else:
                     self.global_convergence = False
+                    if self.num_photochem_runs > self.max_iterations_master:
+                        subprocess.run('cp '+self.photochemDir+'OUTPUT/out.dist '+self.DataOutPath+'final_out_FAILED.dist')
+                        subprocess.run('cp '+self.photochemDir+'OUTPUT/out.out '+self.DataOutPath+'final_out_FAILED.out')
+                        subprocess.run('cp '+self.photochemDir+'OUTPUT/PTZ_mixingratios_out.dist '+self.DataOutPath+'final_PTZ_mixingratios_out_FAILED.dist')
+
+                        raise IOError('Photochem+Climate have run together >'+str(self.max_iterations_master)+' without finding global convergence, run failed.')
 
                 #self.global_convergence = True
 
@@ -1286,25 +1511,12 @@ class VPLModelingPipeline:
             self.degrade_PT()
             if self.verbose == True:
                 print('Degraded PT profile created from photochem run '+str(self.num_photochem_runs))
-                ftestingoutput.write('Degraded PT profile created from photochem run '+str(self.num_photochem_runs)+'\n')
+                #ftestingoutput.write('Degraded PT profile created from photochem run '+str(self.num_photochem_runs)+'\n')
             ### Degraded PT Profile finished ------------
 
             ### Create new mixing ratios profile file --------------------------
             self.prep_rmix_file(self.photochemDir+'OUTPUT/PTZ_mixingratios_out.dist')
             ### Mixing ratios profile created --------------------------
-
-            ''' Delete after testing, switched to hitran lookup table and creating mixingRs file
-
-            # If LBLABC hasnt run yet, Get the columns of rmix for the molecules of interest, save molecule names though
-            if self.num_lblabc_runs == 0:
-                mixingRs = ascii.read(self.photochemDir+'OUTPUT/PTZ_mixingratios_out.dist')
-                self.molecule_dict['Gas_names'] = list(self.molecule_dict.keys())
-                for gas in self.molecule_dict['Gas_names']:
-                    for i in range(len(mixingRs.keys())):
-                        if mixingRs.keys()[i] == gas:
-                            self.molecule_dict[gas+'_RmixCol'] = i+1
-                            break
-            '''
 
             ### Run LBLABC section start ----------------------------
 
@@ -1319,7 +1531,7 @@ class VPLModelingPipeline:
                 self.run_lblabc_1instance(self.lblabc_RunScriptDir+'RunLBLABC_'+gas+'_'+self.casename+'.script', gas)
                 if self.verbose == True:
                     print('LBLABC run for '+gas+' complete, LBLABC iteration '+str(self.num_lblabc_runs+1))
-                    ftestingoutput.write('LBLABC run for '+gas+' complete, LBLABC iteration '+str(self.num_lblabc_runs+1)+'\n')
+                    #ftestingoutput.write('LBLABC run for '+gas+' complete, LBLABC iteration '+str(self.num_lblabc_runs+1)+'\n')
             self.num_lblabc_runs += 1
 
             ### Run LBLABC section end -------------------------------------
@@ -1335,17 +1547,17 @@ class VPLModelingPipeline:
 
             if self.verbose == True:
                 print('Climate Runscript created, beginning first climate run')
-                ftestingoutput.write('Climate Runscript created, beginning first climate run\n')
+                #ftestingoutput.write('Climate Runscript created, beginning first climate run\n')
 
-            ftestingoutput.close()
-            ftestingoutput = open('SavingInfoOut.txt', 'a')
+            #ftestingoutput.close()
+            #ftestingoutput = open('SavingInfoOut.txt', 'a')
 
             # Now run climate 
             self.run_climate_1instance(self.vplclimate_RunScriptDir+'RunVPLClimate_'+self.casename+'.script', self.vplclimate_executable, trynum=self.num_climate_runs)
 
             if self.verbose == True:
                 print('First Climate run completed')
-                ftestingoutput.write('First Climate run completed\n')
+                #ftestingoutput.write('First Climate run completed\n')
 
             # Check for local convergence of climate, similar to process followed for a given try on photochem            
             local_climate_convergence, tropheating, avgflux = self.check_vplclimate_conv(trynum=self.num_climate_runs)
@@ -1353,14 +1565,17 @@ class VPLModelingPipeline:
             if self.verbose == True:
                 if local_climate_convergence == True:
                     print('Climate convergence found on first try for run number '+str(self.num_climate_runs))
-                    ftestingoutput.write('Climate convergence found on first try for run number '+str(self.num_climate_runs)+'\n')
+                    #ftestingoutput.write('Climate convergence found on first try for run number '+str(self.num_climate_runs)+'\n')
                 else:
                     print('Climate convergence NOT found on first try for run number '+str(self.num_climate_runs)+', beginning rerun sequence')
-                    ftestingoutput.write('Climate convergence NOT found on first try for run number '+str(self.num_climate_runs)+', beginning rerun sequence\n')
+                    #ftestingoutput.write('Climate convergence NOT found on first try for run number '+str(self.num_climate_runs)+', beginning rerun sequence\n')
 
             climate_subtries = 1
             # Until climate converges, loop through taking new temp profile
             while local_climate_convergence == False:
+
+                if climate_subtries == self.max_iterations_master:
+                    raise IOError('Climate could not converge in >'+str(self.max_iterations_master)+' tries. For climate run number '+str(self.num_climate_runs))
 
                 climate_subtries += 1
 
@@ -1376,11 +1591,11 @@ class VPLModelingPipeline:
                 # Re run Climate 
                 if self.verbose == True:
                     print('Beginning Climate rerun')
-                    ftestingoutput.write('Beginning Climate rerun\n')
+                    #ftestingoutput.write('Beginning Climate rerun\n')
                 self.run_climate_1instance(self.vplclimate_RunScriptDir+'RunVPLClimate_'+self.casename+'.script', self.vplclimate_executable, trynum=self.num_climate_runs)
                 if self.verbose == True:
                     print('Climate subtry number '+str(climate_subtries)+' completed')
-                    ftestingoutput.write('Climate subtry number '+str(climate_subtries)+' completed\n')
+                    #ftestingoutput.write('Climate subtry number '+str(climate_subtries)+' completed\n')
 
                 # Check convergence
                 local_climate_convergence, tropheating, avgflux = self.check_vplclimate_conv(trynum=self.num_climate_runs)
@@ -1388,13 +1603,13 @@ class VPLModelingPipeline:
                 if self.verbose == True:
                     if local_climate_convergence == True:
                         print('Climate convergence found on subtry number '+str(climate_subtries)+' for run number '+str(self.num_climate_runs))
-                        ftestingoutput.write('Climate convergence found on subtry number '+str(climate_subtries)+' for run number '+str(self.num_climate_runs)+'\n')
+                        #ftestingoutput.write('Climate convergence found on subtry number '+str(climate_subtries)+' for run number '+str(self.num_climate_runs)+'\n')
                     else:
                         print('Climate convergence NOT found on subtry number '+str(climate_subtries)+' for run number '+str(self.num_climate_runs)+', continuing rerun sequence')
-                        ftestingoutput.write('Climate convergence NOT found on subtry number '+str(climate_subtries)+' for run number '+str(self.num_climate_runs)+', continuing rerun sequence\n')
+                        #ftestingoutput.write('Climate convergence NOT found on subtry number '+str(climate_subtries)+' for run number '+str(self.num_climate_runs)+', continuing rerun sequence\n')
 
-                break
-            break
+            #    break
+            #break
             ### Run VPL Climate section end ------------------------------
 
             ## Last thing to do: update in.dist for next photochem run
@@ -1406,7 +1621,7 @@ class VPLModelingPipeline:
             
             # Now update in.dist
             climate_profile = self.get_final_climate_output_temp_profile(trynum=self.num_climate_runs)
-            self.update_indist(self.photochemDir+'OUTPUT/PTZ_mixingratios_out.dist', climate_profile)
+            self.update_indist_T_EDD(self.photochemDir+'OUTPUT/PTZ_mixingratios_out.dist', climate_profile)
 
             ### Update in.dist section end ------------------------------
 

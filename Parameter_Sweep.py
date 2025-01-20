@@ -1,0 +1,439 @@
+# Units of fluxes are molecules / cm^2 / s
+
+from Pipeline import *
+import numpy as np
+import astropy.units as u
+import astropy.constants as const 
+import os
+import copy
+
+# Need to figure out how parameter sweeps are running:
+# 1. Run across a grid (every combination? Or strategic points? former is brute force method, could start with that)
+# 2. Fit for a particular case with emcee 
+
+# General Notes:
+# - Could do a dict for grid; define the molecules to change as keys, allow user to define either the array of points to test at
+###  or allow the user to specify a min/max range, log or linear sampling, and sampling resolution for np
+# - Have user give input units of flux via astropy units, can do conversion to molec/cm2/s internally 
+
+class Generate_Atmosphere_Parameter_Sweep:
+
+    def __init__(self, sweepname, photochemInitial, hitran_year='2020'):
+
+        self.sweepname = sweepname # Naming convention for directory structure
+        self.photochemInitial = photochemInitial # Input files for photochem to copy and change 
+        self.hitran_year = hitran_year # hitran year, 2016 or 2020 (default should be latter)
+        if hitran_year == '2020':
+            self.lblabc_qtxt_dir = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/lblabc/hitranQtips2020/' # For the hitran distribution you want
+        elif hitran_year == '2016':
+            self.lblabc_qtxt_dir = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/lblabc/hitranQtips/'
+
+        self.R_p = 1.097*u.Rearth # Currently radius of Trappist-1c 
+
+        self.atmos_Dir = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/atmos/' # Path to dir containing atmos, will be copied for runs 
+
+        #########  Parameters to set if you want to do a grid sweep  #########
+
+        self.outgass_species_gridsweep = ['H2O'] # Species to vary outgassing rates of
+        self.outgass_species_molarmass = {} # Molar masses in g/mol
+        self.outgass_species_molarmass['H2O'] = [18.015]*(u.g/u.mol)# Molar masses in g/mol
+        self.escape_species_gridsweep = ['O'] # Species to vary escape rates of
+        self.escape_species_molarmass = {}
+        self.escape_species_molarmass['O'] = [15.999]*(u.g/u.mol) 
+
+        self.outgass_sample_type_gridsweep = ['Linear'] # How to sample outgassed molecules: 'Linear', 'Log', or 'UserDef' 
+        self.escape_sample_type_gridsweep = ['UserDef']
+        # Linear - sample every flux on a linear grid (np.linspace) with some defined resolution
+        # Log - sample every flux on a log grid (np.logspace) with some defined resolution
+        # UserDef - User defined arrays of samples for every flux to vary 
+
+        # Need to set Min / Max ranges for each molecule to vary in the form of a dictionary if using Linear or Log sampling
+        self.outgass_species_MinMax_gridsweep = {}
+        self.outgass_species_MinMax_gridsweep['H2O'] = [1.65e8, 3.0e12] # min, max
+
+        self.escape_species_MinMax_gridsweep = {}
+        self.escape_species_MinMax_gridsweep['O'] = [0,0]
+
+        # Sample resolution if using Linear / Log sampling 
+        self.outgass_sample_resolution_gridsweep = [4] # number of samples for each outgassed species
+        self.escape_sample_resolution_gridsweep = [0]
+
+        # Need to pass samples for user defined option
+        self.outgass_samples_gridsweep = {}
+        self.escape_samples_gridsweep = {}
+        self.escape_samples_gridsweep['O'] = [1e26]
+
+        # Units for either Min/Max values, or the user defined samples 
+        self.outgass_species_units_gridsweep = 1 / (u.cm**2 * u.s) # molecules / cm2*s (can convert from mass/time with molar mass or mol/time)
+        self.escape_species_units_gridsweep = 1 / u.s # Molecules per second
+
+        #######################################################################
+
+        #########  Setting output paths  #########
+
+        self.master_out = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/'+self.sweepname+'/'
+
+        # UNCOMMENT BEFORE RUNNING:
+        #if not os.path.exists(self.master_out):
+            #os.mkdir(self.master_out)
+
+        ##########################################
+
+
+    # Set relevant variables of a model pipeline object that is constant for all runs in the sweep
+    # casename - specific for each pipeline initialization
+    # pipelineobj - initialized pipeline object
+    def set_pipeline_vars(self, casename, pipelineobj):
+
+        # Paths are the main thing to set, because they will be massive amounts of running/files, want to keep each sweep colocated in one master dir
+
+        # Create casename dir
+        if not os.path.exists(self.master_out+casename+'/'):
+            os.mkdir(self.master_out+casename+'/')
+
+        # Make new atmos dir for this model
+        subprocess.run('cp -r '+self.atmos_Dir+' '+self.master_out+casename+'/atmos/', shell=True)
+
+        pipelineobj.photochemDir = self.master_out+casename+'/atmos/PHOTOCHEM/' # path to PHOTOCHEM/ dir
+        pipelineobj.atmosDir = self.master_out+casename+'/atmos/' # path to atmos/ dir
+        pipelineobj.lblabcDir = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/lblabc/' # path to lblabc/ dir (such that lblabcDir/lblabc is the executable to call)
+        pipelineobj.OutPath = self.master_out+casename+'/' # path for the raw model run outputs (NOT for created data products like dictionaries)
+        pipelineobj.DataOutPath = self.master_out+casename+'/' # path for created data products like dictionaries
+        pipelineobj.AtmProfPath = self.master_out+casename+'/' # path to put atmospheric profile files (.pt files really)
+        pipelineobj.BackupPhotochemRuns = False # Make backups of individual photochem runs
+        pipelineobj.photochemBackupDir = self.master_out+casename+'/' # path to save output from each photochem run
+        pipelineobj.LBLABC_AbsFilesDir = self.master_out+casename+'/' # path to put the created lbl .abs files in 
+        pipelineobj.lblabc_RunScriptDir = self.master_out+casename+'/' # path to put lbl runscripts in
+        pipelineobj.vplclimate_RunScriptDir = self.master_out+casename+'/' # path to put vpl climate runscripts in
+        pipelineobj.photochem_InputsDir = self.master_out+casename+'/PhotochemInputs/' # The path to create new photochem inputs in
+        pipelineobj.xsec_Path = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/xsec/' # The path where cross section files can be found
+
+        # Adjust the atmospheric pressure
+        pipelineobj.adjust_atmospheric_pressure = True
+
+        # Molecules for the type of atmosphere we're interested in 
+
+        pipelineobj.molecule_dict = {} # key-value pairs of molecules of interest (keys, str) and their hitran codes (value, int)
+        gas_names = ['O2', 'H2O', 'O3']
+        pipelineobj.molecule_dict['Gas_names'] = gas_names
+        for m in range(len(gas_names)):
+            pipelineobj.molecule_dict[gas_names[m]] = pipelineobj.hitran_lookup.loc[gas_names[m]]['HitranNumber']
+            pipelineobj.molecule_dict[gas_names[m]+'_RmixCol'] = m+2
+
+
+    # Prepare the hyak environment with ifort, python, and the HITRAN you want to use
+    ## lblabc_qtxt_dir - the qtxt dir for the hitran distribution you want to use with lblabc
+    def prepare_hyak_env(self):
+        subprocess.run('module load intel/oneAPI/2021.1.1', shell=True)
+        subprocess.run("alias python='/gscratch/vsm/gialluca/anaconda3/bin/python'", shell=True)
+        subprocess.run('export LBLABC_QTXT_DIR='+self.lblabc_qtxt_dir, shell=True)
+
+
+    # Change any flux unit to molecules / cm**2*s 
+    ## var - variable to convert
+    ## species - the species the variable corresponds to (to use molar mass properly)
+    ## fluxtype - 'escape' or 'outgass' 
+    def fix_flux_units(self, var, species, fluxtype):
+
+        try:
+            var = var.to(1 / (u.cm**2 * u.s))
+        except:
+            try:
+                var = var.to(u.mol / (u.cm**2 * u.s))
+                var = (var*const.N_A).to(1 / (u.cm**2 * u.s))
+            except:
+                try:
+                    var = var.to(u.mol / u.s)
+                    var = var / (4*np.pi*(self.R_p**2))
+                    var = var.to(u.mol / (u.cm**2 * u.s))
+                    var = (var*const.N_A).to(1 / (u.cm**2 * u.s))
+                except:
+                    try:
+                        var = var.to(u.kg / u.s)
+                        if fluxtype == 'outgass':
+                            var = (var / self.outgass_species_molarmass[species]).to(u.mol/u.s)
+                        elif fluxtype == 'escape':
+                            var = (var / self.escape_species_molarmass[species]).to(u.mol/u.s)
+                        var = var / (4*np.pi*(self.R_p**2))
+                        var = var.to(u.mol / (u.cm**2 * u.s))
+                        var = (var*const.N_A).to(1 / (u.cm**2 * u.s))
+                    except:
+                        try:
+                            var = var.to(1/u.s)
+                            var = var / (4*np.pi*(self.R_p**2))
+                            var = var.to(1 / (u.cm**2 * u.s))
+                        except:
+                            raise IOError('Could not properly convert flux units to molecules/cm^2/s for '+species+' ('+fluxtype+')')
+        
+        return var
+    
+
+    # Replace input fluxes in the species.dat file
+    ## pipelineobj - the initialized pipeline object for the model with the variables correctly set by self.set_pipeline_vars()
+    ## fluxes - the input fluxes to use, same as InputFlux for self.run_one_model but without the number to indicate the unique casename
+    def replace_fluxes(self, pipelineobj, fluxes):
+
+        # First need to create the inputs directory and copy the initial master files to change
+        # Pipeline already has a function that does this:
+        pipelineobj.setup_intial_photochem_dir()
+
+        # Set pipeline objects "photochemInitialInput" dir to the inputs dir to avoid this happening again in the auto run
+        pipelineobj.photochemInitialInput = pipelineobj.photochem_InputsDir
+
+        # Set fluxes in the species.dat file
+        # Fluxes are in order of outgassed species followed by escaping species 
+        all_affected_species = self.outgass_species_gridsweep + self.escape_species_gridsweep
+        nsp = open(pipelineobj.photochem_InputsDir+'species.dat', 'r')
+        nsp_new = open(pipelineobj.photochem_InputsDir+'species_new.dat', 'w')
+        inLLbloc = False
+        LLblocdone = False
+        for l in nsp.readlines():
+            if l.split()[0][0] == '*':
+                if inLLbloc == True: # If you're done with the LL species block can just write rest of file out
+                    LLblocdone = True
+                nsp_new.write(l)
+
+            elif LLblocdone == False: # In the LL species block
+                currgas = l.split()[0]
+                inLLbloc = True
+                if currgas in all_affected_species: # If the current gas needs to change outgassing and/or escape flux
+                
+                    currline = l.split()
+                    nsp_new.write(currline[0])
+                    add_spaces = 11-len(currline[0])
+                    for space in range(add_spaces):
+                        nsp_new.write(' ')
+                    nsp_new.write(currline[1]+'  ') # will be 'LL' and then 2 spaces
+
+                    # Now writing the 'O H C S N CL' block, each has a space after with 4 spaces after CL to get to LBOUND
+                    nsp_new.write(currline[2]+' '+currline[3]+' '+currline[4]+' '+currline[5]+' '+currline[6]+' '+currline[7]+'    ')
+
+                    # If the outgassing flux is changing, we can explicitly set this now at LBOUND
+                    if currgas in self.outgass_species_gridsweep:
+
+                        # get the index of the new value in fluxes array
+                        fluxind = np.where(np.array(all_affected_species) == currgas)[0][0] # outgassing would always come first so you can use ind of 0 
+
+                        # since we're outgassing, LBOUND will be '2' and VDEP0 and FIXEDMR will be '0.' with fixed amount of spaces
+                        nsp_new.write('2     0.      0.      ')
+
+                        # Now SGFLUX is set to be the new flux value 
+                        newsgval = "{:.1E}".format(fluxes[fluxind])
+                        nsp_new.write(newsgval)
+                        add_spaces = 10-len(newsgval)
+                        for space in range(add_spaces):
+                            nsp_new.write(' ')
+                        
+                        # Now DISTH is set to '0.' with fixed spaces
+                        nsp_new.write('0.      ')
+
+                    else: # Need to preserve the lines LBOUND through DISTH (line indicies 8-12)
+
+                        # First is the LBOUND with 5 spaces 
+                        nsp_new.write(currline[8]+'     ')
+
+                        # Then VDEP0 with 8 characters total
+                        nsp_new.write(currline[9])
+                        add_spaces = 8 - len(currline[9])
+                        for space in range(add_spaces):
+                            nsp_new.write(' ')
+
+                        # Then FIXEDMR with 8 characters total
+                        nsp_new.write(currline[10])
+                        add_spaces = 8 - len(currline[10])
+                        for space in range(add_spaces):
+                            nsp_new.write(' ')
+
+                        # Then SGFLUX with 10 characters total
+                        nsp_new.write(currline[11])
+                        add_spaces = 10 - len(currline[11])
+                        for space in range(add_spaces):
+                            nsp_new.write(' ')
+                        
+                        # Then DITSH with 8 characters total
+                        nsp_new.write(currline[12])
+                        add_spaces = 8 - len(currline[12])
+                        for space in range(add_spaces):
+                            nsp_new.write(' ')
+
+                    # if the Escape flux is changing, we can now explicitly set that at MBOUND
+                    if currgas in self.escape_species_gridsweep:
+
+                        # Get the index of the new value in fluxes array
+                        fluxind_hold = np.where(np.array(all_affected_species) == currgas)[0] # escape will always come last so need to be length agnostic
+                        fluxind = fluxind_hold[len(fluxind_hold)-1]
+
+                        # MBOUND explicitly set to 2
+                        nsp_new.write('2      ')
+
+                        # Set the new flux as SMFLUX, always put one space after but NOTE if the exponent is >=100 there could be a character error in fortran file reading
+                        newsmval = "{:.1E}".format(fluxes[fluxind])
+                        nsp_new.write(newsmval+' ')
+
+                        # VEFF0 set to 0. with fixed spaces, and then you're done
+                        nsp_new.write('0.   ')
+                        nsp_new.write('\n')
+
+                    else: # Need to preserve the lines MBOUND through VEFF0 (line indicies 13-15)
+
+                        # First MBOUND with 6 spaces
+                        nsp_new.write(currline[13]+'      ')
+
+                        # Then SMFLUX with 8 characters
+                        nsp_new.write(currline[14])
+                        add_spaces = 8 - len(currline[14])
+                        if add_spaces < 0:
+                            add_spaces == 0
+                        for space in range(add_spaces):
+                            nsp_new.write(' ')
+
+                        # Finally VEFF0 with 5 characters
+                        nsp_new.write(currline[15])
+                        add_spaces = 8 - len(currline[15])
+                        if add_spaces < 0:
+                            add_spaces == 0
+                        for space in range(add_spaces):
+                            nsp_new.write(' ')
+                        nsp_new.write('\n')
+
+                else: # currgas not an affected species
+                    nsp_new.write(l)    
+            else: # Out of the LL species block
+                nsp_new.write(l)
+
+        nsp_new.close()
+        nsp.close()
+
+        # Delete old species and rename fixed version to be species.dat
+        subprocess.run('rm '+pipelineobj.photochem_InputsDir+'species.dat', shell=True)
+        subprocess.run('mv '+pipelineobj.photochem_InputsDir+'species_new.dat '+pipelineobj.photochem_InputsDir+'species.dat', shell=True)
+
+
+    # For a given suite of inputs, run the photochem/climate pipeline 
+    # InputFlux - list of input fluxes for both outgassing and escaping species built up in a run function 
+    ##    samples for all outgassed species in their order followed by escaping species, plus a number to indicate the unique casename 
+    def run_one_model(self, InputFlux):
+
+        # Model ID number for file naming will be the last value of the input string
+        hold = len(InputFlux)-1
+        modelID = InputFlux[hold]
+        fluxes = InputFlux[:hold]
+
+        # Initialize model pipeline object
+        currmodel = VPLModelingPipeline('RunNumber'+str(modelID), self.photochemInitial, False, find_molecules_of_interest=False, hitran_year=self.hitran_year)
+
+        # Set relevant values of object 
+        self.set_pipeline_vars('RunNumber'+str(modelID), currmodel)
+
+        # Need to replace flux values in species.dat for this run 
+        # A pipeline object will copy new files if currmodel.photochem_InputsDir is not equal to currmodel.photochemInitialInput
+        # set them equal after setting up the current models files before running automatic pipeline (this is handled in replace_fluxes function)
+        self.replace_fluxes(currmodel, fluxes)
+        
+        # Run the Photochem-Climate-SMART pipeline
+        currmodel.run_automatic()
+
+        # Clean abs files out as they take up the most space
+        subprocess.run('rm -rf '+currmodel.LBLABC_AbsFilesDir+'*.abs', shell=True)
+
+        # Delete copied atmos directory
+        subprocess.run('rm -rf '+currmodel.atmosDir, shell=True)
+
+        return currmodel
+
+
+    # Run a Grid sweep
+    # Use every combination of samples for evey outgassing and escape species of interest 
+    def run_grid_sweep(self):
+
+        ### First generate samples for all species of interest
+        ### For outgassing species:
+        for curr_samp in range(len(self.outgass_sample_type_gridsweep)):
+            if self.outgass_sample_type_gridsweep[curr_samp] == 'Linear':
+                curr_species = self.outgass_species_gridsweep[curr_samp]
+
+                # Ensure Min / Max flux units are correct
+                self.outgass_species_MinMax_gridsweep[curr_species] = self.fix_flux_units(self.outgass_species_MinMax_gridsweep[curr_species]*self.outgass_species_units_gridsweep, 
+                                                                                          curr_species, 'outgass').value
+
+                # Linear sampling at user requested resolution
+                self.outgass_samples_gridsweep[curr_species] = np.linspace(self.outgass_species_MinMax_gridsweep[curr_species][0], 
+                                                                            self.outgass_species_MinMax_gridsweep[curr_species][1], 
+                                                                            self.outgass_sample_resolution_gridsweep[curr_samp])
+                
+            elif self.outgass_sample_type_gridsweep[curr_samp] == 'Log':
+                curr_species = self.outgass_species_gridsweep[curr_samp]
+
+                # Ensure Min / Max flux units are correct
+                self.outgass_species_MinMax_gridsweep[curr_species] = self.fix_flux_units(self.outgass_species_MinMax_gridsweep[curr_species]*self.outgass_species_units_gridsweep, 
+                                                                                          curr_species, 'outgass').value
+
+                # Log sampling at user requested resolution
+                self.outgass_samples_gridsweep[curr_species] = np.logspace(self.outgass_species_MinMax_gridsweep[curr_species][0], 
+                                                                            self.outgass_species_MinMax_gridsweep[curr_species][1], 
+                                                                            self.outgass_sample_resolution_gridsweep[curr_samp])
+
+            elif self.outgass_sample_type_gridsweep[curr_samp] == 'UserDef':
+                curr_species = self.outgass_species_gridsweep[curr_samp]
+
+                # Fix flux units
+                self.outgass_samples_gridsweep[curr_species] = self.fix_flux_units(self.outgass_samples_gridsweep[curr_species]*self.outgass_species_units_gridsweep, 
+                                                                                          curr_species, 'outgass').value
+                
+        ### For escaping species:
+        for curr_samp in range(len(self.escape_sample_type_gridsweep)):
+            if self.escape_sample_type_gridsweep[curr_samp] == 'Linear':
+                curr_species = self.escape_species_gridsweep[curr_samp]
+
+                # Ensure Min / Max flux units are correct
+                self.escape_species_MinMax_gridsweep[curr_species] = self.fix_flux_units(self.escape_species_MinMax_gridsweep[curr_species]*self.escape_species_units_gridsweep, 
+                                                                                          curr_species, 'escape').value
+
+                # Linear sampling at user requested resolution
+                self.escape_samples_gridsweep[curr_species] = np.linspace(self.escape_species_MinMax_gridsweep[curr_species][0], 
+                                                                            self.escape_species_MinMax_gridsweep[curr_species][1], 
+                                                                            self.escape_sample_resolution_gridsweep[curr_samp])
+                
+            elif self.escape_sample_type_gridsweep[curr_samp] == 'Log':
+                curr_species = self.escape_species_gridsweep[curr_samp]
+
+                # Ensure Min / Max flux units are correct
+                self.escape_species_MinMax_gridsweep[curr_species] = self.fix_flux_units(self.escape_species_MinMax_gridsweep[curr_species]*self.escape_species_units_gridsweep, 
+                                                                                          curr_species, 'escape').value
+
+                # Log sampling at user requested resolution
+                self.escape_samples_gridsweep[curr_species] = np.logspace(self.escape_species_MinMax_gridsweep[curr_species][0], 
+                                                                            self.escape_species_MinMax_gridsweep[curr_species][1], 
+                                                                            self.escape_sample_resolution_gridsweep[curr_samp])
+
+            elif self.escape_sample_type_gridsweep[curr_samp] == 'UserDef':
+                curr_species = self.escape_species_gridsweep[curr_samp]
+
+                # Fix flux units
+                self.escape_samples_gridsweep[curr_species] = self.fix_flux_units(self.escape_samples_gridsweep[curr_species]*self.escape_species_units_gridsweep, 
+                                                                                          curr_species, 'escape').value
+                
+        ### Define all input combinations
+        ### Syntax will be samples for all outgassed species in their order followed by escaping species 
+        outgass_samps = [self.outgass_samples_gridsweep[species] for species in self.outgass_samples_gridsweep.keys()]
+        esc_samps = [self.escape_samples_gridsweep[species] for species in self.escape_samples_gridsweep.keys()]
+        all_samps = outgass_samps+esc_samps
+        inputs = [[]]
+        for i in range(len(all_samps)):
+            newset = []
+            ns_ind = 0
+            for j in all_samps[i]:
+                for f in range(len(inputs)):
+                    newset.append(copy.deepcopy(inputs[f]))
+                    newset[ns_ind].append(j)
+                    ns_ind += 1
+            inputs = newset
+
+        # add a unique ID number for each run
+        for i in range(len(inputs)):
+            inputs[i].append(i)
+
+        self.gridsweep_inputstrings = inputs
+
+
+
