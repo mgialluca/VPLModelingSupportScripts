@@ -1,10 +1,6 @@
 
 import numpy as np
-from astropy.io import ascii
-import astropy.units as u
 import astropy.constants as const
-from scipy.integrate import trapezoid
-from astropy.table import Table, Column
 
 ### NOTE - Most of these depend on "indistdic" which is the ingested out.dist file turned into a...
 ###  ... python dictionary found from the ingest_indist(self) function in the pipeline
@@ -57,7 +53,7 @@ def new_mixing_rats(Ndenses, NdensTot):
 # Find column mass density of atmosphere
 def find_tot_column_mass_dens(Ndenstot, alt, mmw):
 
-    colnumdens = trapezoid(Ndenstot, alt)
+    colnumdens = np.trapz(Ndenstot, alt)
     colmas = (1e-3*colnumdens*mmw)/const.N_A.value
 
     return colmas
