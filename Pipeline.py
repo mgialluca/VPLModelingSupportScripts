@@ -1223,7 +1223,7 @@ class VPLModelingPipeline:
         planetdat_old.close()
 
         subprocess.run('rm '+self.photochem_InputsDir+'PLANET.dat', shell=True)
-        subprocess.run('mv '+self.photochem_InputsDir+'New_PLANET.dat '+self.photochem_InputsDir+'in.dist', shell=True)
+        subprocess.run('mv '+self.photochem_InputsDir+'New_PLANET.dat '+self.photochem_InputsDir+'PLANET.dat', shell=True)
 
         return pressure_converged
 
