@@ -6,6 +6,7 @@ import astropy.units as u
 import astropy.constants as const 
 import os
 import copy
+from multiprocessing import Pool
 
 # Need to figure out how parameter sweeps are running:
 # 1. Run across a grid (every combination? Or strategic points? former is brute force method, could start with that)
@@ -434,6 +435,15 @@ class Generate_Atmosphere_Parameter_Sweep:
             inputs[i].append(i)
 
         self.gridsweep_inputstrings = inputs
+
+        with Pool() as p:
+            models = p.map(self.run_one_model, self.gridsweep_inputstrings)
+
+        final_pressures = [m.updated_atm_pressure for m in models]
+
+        print('final pressures are ')
+        for press in final_pressures:
+            print(press)
 
 
 
