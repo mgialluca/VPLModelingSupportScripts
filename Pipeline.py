@@ -87,7 +87,7 @@ class VPLModelingPipeline:
 
         if find_molecules_of_interest == False:
             self.molecule_dict = {} # key-value pairs of molecules of interest (keys, str) and their hitran codes (value, int)
-            gas_names = ['O2', 'H2O', 'CO', 'CH4', 'H2S', 'SO2', 'SO3', 'CO2']#, 'CO', 'CO2', 'HNO3', 'N2O', 'NO2', 'SO2']
+            gas_names = ['O2', 'H2O', 'O3']#, 'CO', 'CO2', 'HNO3', 'N2O', 'NO2', 'SO2']
             self.molecule_dict['Gas_names'] = gas_names
             for m in range(len(gas_names)):
                 self.molecule_dict[gas_names[m]] = self.hitran_lookup.loc[gas_names[m]]['HitranNumber']
