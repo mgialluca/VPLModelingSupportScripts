@@ -981,7 +981,7 @@ class VPLModelingPipeline:
         f.write(str(self.c_StellarSpect_SkipLines)+'			Lines to skip\n')
         f.write(str(self.c_SolarFluxUnits)+'			Solar flux units\n')
         f.write(str(self.c_SolarSpectralUnits)+'			Solar spectral units\n')
-    #    f.write(str(self.c_Convert_Stellar_microns)+'			Conversion factor to microns\n')
+        f.write(str(self.c_Convert_Stellar_microns)+'			Conversion factor to microns\n')
         f.write(str(self.c_StellarSpect_wnflux_col)+'			Cols of wn and flux\n')
         f.write(str(self.c_OutputsType)+'			Outputs [fluxes]\n')
         f.write(str(self.c_NumberOutputAzimuths)+'			No. of output azimuth angles\n')
