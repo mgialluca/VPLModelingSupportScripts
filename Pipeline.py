@@ -34,7 +34,7 @@ class VPLModelingPipeline:
         self.vplclimate_RunScriptDir = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/VPLClimate/'+casename+'/' # path to put vpl climate runscripts in
         self.photochem_InputsDir = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/Bodies/'+casename+'/' # The path to create new photochem inputs in
         self.xsec_Path = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/xsec/' # The path where cross section files can be found
-        self.SMARTDir = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/smart' # path to smart/ dir (such that smart/smart_spectra is the executable) ??????????? may need to fix these when klones online again 
+        self.SMARTDir = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/smart/' # path to smart/ dir (such that smart/smart_spectra is the executable) ??????????? may need to fix these when klones online again 
         self.SMART_RunScriptDir = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/SMART/'+casename+'/' # path to put SMART runscripts in
         self.photochemInitialInput = photochemInitial
 
@@ -860,6 +860,77 @@ class VPLModelingPipeline:
             self.c_AlbedoError = 0.25
             self.c_OutputFileType = 3 # 1 - ASCII, 3 - Binary No Header Output
 
+    ### Purpose: For modifying settings in the SMART runscript, you should edit this function directly
+    #### For all settings, the prefix 's_' indicates these are used specifically for SMART
+    #
+    ## Attribute Dependencies:
+    # None
+    #
+    ## Fxn-specific Inputs:
+    # None
+    #
+    def set_smart_settings(self):
+
+        planet = 'T1c' # Would suggest keeping all settings available for each target, this provides a quick way to switch between them
+
+        if planet == 'T1c':
+
+            self.s_PressJacobians = 0 # 0 - No pressure jacobians
+            self.s_TempJacobians = 0 # 0 - No temperature jacobians
+
+            # Following should be same as what's passed to climate
+            self.s_NumberAerosols = self.c_NumberAerosols # Number of Aerosols, should be same as climate, might be redundant
+            self.s_SurfaceType = self.c_SurfaceType # e.g., 0 for Lambertian reflection
+            self.s_AlbedoJacobians = self.c_AlbedoJacobians # albedo jacobians
+            self.s_SurfaceProfile = self.c_SurfaceProfile # Should be same as climate
+            self.s_SurfProfile_SkipLines = self.c_SurfProfile_SkipLines
+            self.s_SurfProfile_wlalbedo_cols = self.c_SurfProfile_wlalbedo_cols
+            self.s_SurfProfile_wlType = self.c_SurfProfile_wlType
+            self.s_Convert_SurfProfilewl_microns = self.c_Convert_SurfProfilewl_microns
+            self.s_ScaleAlbedo = self.c_ScaleAlbedo
+
+            # Rayleigh scattering
+            self.s_NumRayleigh = 1 # Number of Rayleigh scatterers
+            self.s_RayleighIndex = 1 # Rayleigh scatter index
+            self.s_vmrRayleigh = 1.0 # Volumn Mixing Ratio of Rayleigh scatterer (?)
+            
+            # Heating Sources (NOTE Climate also uses these, but may be set differently)
+            self.s_NumberStreams = 8 # Number of streams
+            self.s_HRTSources = 3 # 1 - Solar, 2 - Thermal, 3 - Both
+            
+            # Host Star Specs (NOTE Climate also uses these, should match)
+            self.s_StellarSpectrum = '/gscratch/vsm/gialluca/StellarSpectra/TRAPPIST-1_2020.dat'
+            self.s_StellarSpect_SkipLines = 10
+            self.s_SolarFluxUnits = 2 
+            self.s_SolarSpectralUnits = 1
+            self.s_Convert_Stellar_microns = 1.0 # Conversion factor to microns
+            self.s_StellarSpect_wnflux_col = '1,2'
+
+            # Orientation Specs
+            self.s_NumZenith = 1 # number of solar zenith angles
+            self.s_ZenithAzimuth_Angles = '60,0' # Zenith and Azimuth angles
+            self.s_ConvergenceCriteria = 0.01 # convergence criteria, unsure exactly what it is in reference to
+            self.s_OutputFormat = 9 # Can't remember exact options, could see in smart manual run
+            self.s_TranistType = 2 # 2 - Ray Tracing Transit, need to verify this one for model generalizability
+            self.s_ImpactParam = 0.0
+            self.s_LimbDarkening = 0 # 0 - No limb darkening
+            self.s_NumAzimuths = 1 # Number of Azimuth angles
+            self.s_AzimuthAngles = 0.0 # Azimuth angles
+            self.s_OutputLevels = 1 # 1 - Top of atmosphere only
+            self.s_OutputUnits = 2 # 2 - [W/m**2/sr/um]
+            self.s_MinMax_wavenumber = '50.,100000.'
+            self.s_GridType = 2 # 2 - slit
+            self.s_SpectralResponseFxn = 2 # 2 - Triangular Spectral Response Function
+            self.s_FWHM = 1.0
+            self.s_SampleRes = 1.0 # Sample resolution [cm**-1]
+            self.s_TauBinError = 0.25 # Error for Tau Binning
+            self.s_pi0BinError = 0.15 # Error for pi0 Binning
+            self.s_gError = 0.15 # g Error
+            self.s_AlbedoError = 0.02 # Albedo Error
+            self.s_OutputFileFormat = 1 # 1 - ascii
+
+
+
 
     ### Purpose: Make the vpl climate run file based on the climate settings
     #
@@ -1007,6 +1078,78 @@ class VPLModelingPipeline:
         f.write('2			Overwrite existing files\n')
 
         f.close()
+
+    ### Purpose: Make the SMART run file based on the SMART settings
+    #
+    ## Attribute Dependencies:
+    # molecule_dict - All the molecules of interest
+    # casename - for naming convention
+    # MMW - the atmospheric MMW found by photochem
+    # SMART_RunScriptDir - the output location of SMART runscripts
+    # AtmProfPath - Path to the PT and Mixing ratio profiles
+    # planetary_gravity - gravity [in m/s]
+    # planetary_radius - planet radius [in km]
+    # surface_temp - Surface temperature [K] gets set when calling degrade_PT()
+    #
+    ## Fxn-specific Inputs:
+    # None
+    ##
+    def make_smart_runscript(self):
+
+        # Load default climate settings
+        self.set_smart_settings()
+
+        # Start a new runscript to create
+        f = open(self.SMART_RunScriptDir+'RunSMART_'+self.casename+'.run', 'w')
+
+        f.write(str(self.s_PressJacobians)+'			Pressure Jacobians (0-None)\n')
+        f.write(str(self.s_TempJacobians)+'			Temperature Jacobians (0-None)\n')
+        
+        # PT profile should remain the same
+        f.write('3			Formatted Atmospheric Structure File\n')
+        f.write(self.AtmProfPath+'PT_profile_'+self.casename+'.pt\n')
+        f.write('1			Lines to skip\n')
+        f.write('1,2			columns of P,T\n')
+        f.write('100000.			Scale to Pa\n')
+        f.write(str(self.surface_temp)+'			Surface temperature [K]\n')
+
+        # Gases Get written here --------------------
+
+        f.write(str(len(self.molecule_dict['Gas_names']))+'			Number of Gas Absorbers\n')
+        for m in self.molecule_dict['Gas_names']:
+            f.write(str(self.molecule_dict[m])+'			Hitran gas code for '+m+'\n')
+            f.write('0			Absorber jacobians [0 = None; 1 = Radiance; 2 = Flux]\n')
+
+            no_abs_coef = 1
+            use_xsec = False
+            if m in ['O2', 'H2']: # Then CIA is also available
+                no_abs_coef += 1
+            if os.path.exists(self.xsec_Path+m.lower()+'xsec.dat'): # If an xsec file is available use that
+                use_xsec = True
+                no_abs_coef += 1
+
+            f.write(str(no_abs_coef)+'			No. of abs coeff types\n')
+            f.write('1			HITRAN Line Absorbers\n') # Always start with the line by line
+            f.write(self.LBLABC_AbsFilesDir+m+'_'+self.casename+'.abs\n')
+            if m in ['O2', 'H2']: # Add CIA
+                f.write('2			Collisionally-induced absorption [CIA] files\n')
+                f.write(self.xsec_Path+m.lower()+'-'+m.lower()+'_abs.cia\n')
+            if use_xsec == True: # Use cross sections
+                f.write('3			UV-VIS absorption cross sections\n')
+                f.write(self.xsec_Path+m.lower()+'xsec.dat\n')
+            
+            # Now pass the mixing ratios
+            f.write('3			List directed input\n')
+            f.write(self.AtmProfPath+'MixingRs_'+self.casename+'.dat\n')
+            f.write('1 			Lines to skip\n')
+            f.write('1			Use pressure coordinate\n')
+            f.write('1,'+str(self.molecule_dict[m+'_RmixCol'])+'			columns of P,rmix\n')
+            f.write('1			Mixing type [1 = volume; 2 = mass]\n')
+            f.write('100000.,1.0			scale P and rmix\n')
+
+        # End Gases block -------------------------
+
+        
 
 
     ### Purpose: Read in the out.dist file to create a python dict with its values (e.g., mixing ratios, T, EDD, Ndens, etc)
@@ -1613,11 +1756,8 @@ class VPLModelingPipeline:
                         print('Climate convergence NOT found on subtry number '+str(climate_subtries)+' for run number '+str(self.num_climate_runs)+', continuing rerun sequence')
                         #ftestingoutput.write('Climate convergence NOT found on subtry number '+str(climate_subtries)+' for run number '+str(self.num_climate_runs)+', continuing rerun sequence\n')
 
-            #    break
-            #break
             ### Run VPL Climate section end ------------------------------
 
-            ## Last thing to do: update in.dist for next photochem run
             ### Update in.dist for next photochem run ------------------------------
 
             # If this is the first change, save the original in.dist just in case
@@ -1629,5 +1769,28 @@ class VPLModelingPipeline:
             self.update_indist_T_EDD(self.photochemDir+'OUTPUT/PTZ_mixingratios_out.dist', climate_profile)
 
             ### Update in.dist section end ------------------------------
+
+        ##### Generate SMART spectra of the final converged atmosphere ------------------------------
+
+        ### Rerun the LBLABC files for the most recent atmosphere ------------------------------
+
+        #self.make_lblabc_runscripts()
+
+        # Now Run LBLABC for all the gases of interest
+        #for gas in self.molecule_dict['Gas_names']:
+        #    self.run_lblabc_1instance(self.lblabc_RunScriptDir+'RunLBLABC_'+gas+'_'+self.casename+'.script', gas)
+        #    if self.verbose == True:
+        #        print('LBLABC run for '+gas+' complete, LBLABC iteration '+str(self.num_lblabc_runs+1))
+                #ftestingoutput.write('LBLABC run for '+gas+' complete, LBLABC iteration '+str(self.num_lblabc_runs+1)+'\n')
+        #self.num_lblabc_runs += 1
+        
+        ### Rerun the LBLABC Section Finish ------------------------------
+
+        ### Create SMART runscript ------------------------------
+
+        #self.set_smart_settings()
+
+
+
 
 
