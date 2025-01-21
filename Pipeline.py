@@ -1579,11 +1579,6 @@ class VPLModelingPipeline:
 
                 climate_subtries += 1
 
-                if self.num_climate_runs == 1:
-                    subprocess.run('mv '+self.OutPath+'vpl_climate_output_'+self.casename+'.run '+self.OutPath+'vpl_climate_output_'+self.casename+'_Subtry'+str(climate_subtries)+'.run', shell=True)
-                else:
-                    subprocess.run('mv '+self.OutPath+'vpl_climate_output_'+self.casename+'_Try'+str(self.num_climate_runs)+'.run '+self.OutPath+'vpl_climate_output_'+self.casename+'_Try'+str(self.num_climate_runs)+'_Subtry'+str(climate_subtries)+'.run', shell=True)
-
                 # First, get the final profile from the last climate run to use in the restart
                 climate_profile = self.get_final_climate_output_temp_profile(trynum=self.num_climate_runs)
 
@@ -1592,6 +1587,11 @@ class VPLModelingPipeline:
 
                 # Recreate the runscript to update the surface temp
                 self.make_climate_runscript(trynum=self.num_climate_runs)
+
+                if self.num_climate_runs == 1:
+                    subprocess.run('mv '+self.OutPath+'vpl_climate_output_'+self.casename+'.run '+self.OutPath+'vpl_climate_output_'+self.casename+'_Subtry'+str(climate_subtries)+'.run', shell=True)
+                else:
+                    subprocess.run('mv '+self.OutPath+'vpl_climate_output_'+self.casename+'_Try'+str(self.num_climate_runs)+'.run '+self.OutPath+'vpl_climate_output_'+self.casename+'_Try'+str(self.num_climate_runs)+'_Subtry'+str(climate_subtries)+'.run', shell=True)
 
                 # Re run Climate 
                 if self.verbose == True:
