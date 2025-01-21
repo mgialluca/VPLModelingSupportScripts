@@ -56,13 +56,13 @@ class Generate_Atmosphere_Parameter_Sweep:
         self.escape_species_MinMax_gridsweep['O'] = [0,0]
 
         # Sample resolution if using Linear / Log sampling 
-        self.outgass_sample_resolution_gridsweep = [4] # number of samples for each outgassed species
+        self.outgass_sample_resolution_gridsweep = [2] # number of samples for each outgassed species
         self.escape_sample_resolution_gridsweep = [0]
 
         # Need to pass samples for user defined option
         self.outgass_samples_gridsweep = {}
         self.escape_samples_gridsweep = {}
-        self.escape_samples_gridsweep['O'] = [1e26]
+        self.escape_samples_gridsweep['O'] = [0]
 
         # Units for either Min/Max values, or the user defined samples 
         self.outgass_species_units_gridsweep = 1 / (u.cm**2 * u.s) # molecules / cm2*s (can convert from mass/time with molar mass or mol/time)
