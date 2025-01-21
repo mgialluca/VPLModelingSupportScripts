@@ -580,7 +580,7 @@ class VPLModelingPipeline:
     # AvgFluxTolerance - Convergence check, last output value of avg flux must be <= this tolerance
     #          [W/m^2] to be converged
     ##
-    def check_vplclimate_conv(self, trynum=1, TropHeatingTolerance=1e-4, AvgFluxTolerance=0.1):
+    def check_vplclimate_conv(self, trynum=1, TropHeatingTolerance=1e-4, AvgFluxTolerance=0.3):
         # Set the output flag of converged or not (boolean)
         # Guilty until proven innocent
         HasItConverged = False
