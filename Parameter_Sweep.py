@@ -38,9 +38,9 @@ class Generate_Atmosphere_Parameter_Sweep:
         self.outgass_species_gridsweep = ['H2O'] # Species to vary outgassing rates of
         self.outgass_species_molarmass = {} # Molar masses in g/mol
         self.outgass_species_molarmass['H2O'] = [18.015]*(u.g/u.mol)# Molar masses in g/mol
-        self.escape_species_gridsweep = ['O'] # Species to vary escape rates of
+        self.escape_species_gridsweep = []#['O'] # Species to vary escape rates of
         self.escape_species_molarmass = {}
-        self.escape_species_molarmass['O'] = [15.999]*(u.g/u.mol) 
+        #self.escape_species_molarmass['O'] = [15.999]*(u.g/u.mol) 
 
         self.outgass_sample_type_gridsweep = ['Linear'] # How to sample outgassed molecules: 'Linear', 'Log', or 'UserDef' 
         self.escape_sample_type_gridsweep = ['UserDef']
@@ -53,7 +53,7 @@ class Generate_Atmosphere_Parameter_Sweep:
         self.outgass_species_MinMax_gridsweep['H2O'] = [1.65e8, 3.0e12] # min, max
 
         self.escape_species_MinMax_gridsweep = {}
-        self.escape_species_MinMax_gridsweep['O'] = [0,0]
+        #self.escape_species_MinMax_gridsweep['O'] = [0,0]
 
         # Sample resolution if using Linear / Log sampling 
         self.outgass_sample_resolution_gridsweep = [2] # number of samples for each outgassed species
@@ -62,7 +62,7 @@ class Generate_Atmosphere_Parameter_Sweep:
         # Need to pass samples for user defined option
         self.outgass_samples_gridsweep = {}
         self.escape_samples_gridsweep = {}
-        self.escape_samples_gridsweep['O'] = [0]
+        #self.escape_samples_gridsweep['O'] = [0]
 
         # Units for either Min/Max values, or the user defined samples 
         self.outgass_species_units_gridsweep = 1 / (u.cm**2 * u.s) # molecules / cm2*s (can convert from mass/time with molar mass or mol/time)

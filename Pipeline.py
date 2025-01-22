@@ -1633,16 +1633,16 @@ class VPLModelingPipeline:
                     self.global_convergence = True
                     if self.verbose == True:
                         print('Global Convergence achieved')
-                        subprocess.run('cp '+self.photochemDir+'OUTPUT/out.dist '+self.DataOutPath+'final_out.dist')
-                        subprocess.run('cp '+self.photochemDir+'OUTPUT/out.out '+self.DataOutPath+'final_out.out')
-                        subprocess.run('cp '+self.photochemDir+'OUTPUT/PTZ_mixingratios_out.dist '+self.DataOutPath+'final_PTZ_mixingratios_out.dist')
+                        subprocess.run('cp '+self.photochemDir+'OUTPUT/out.dist '+self.DataOutPath+'final_out.dist', shell=True)
+                        subprocess.run('cp '+self.photochemDir+'OUTPUT/out.out '+self.DataOutPath+'final_out.out', shell=True)
+                        subprocess.run('cp '+self.photochemDir+'OUTPUT/PTZ_mixingratios_out.dist '+self.DataOutPath+'final_PTZ_mixingratios_out.dist', shell=True)
                     break
                 else:
                     self.global_convergence = False
                     if self.num_photochem_runs > self.max_iterations_master:
-                        subprocess.run('cp '+self.photochemDir+'OUTPUT/out.dist '+self.DataOutPath+'final_out_FAILED.dist')
-                        subprocess.run('cp '+self.photochemDir+'OUTPUT/out.out '+self.DataOutPath+'final_out_FAILED.out')
-                        subprocess.run('cp '+self.photochemDir+'OUTPUT/PTZ_mixingratios_out.dist '+self.DataOutPath+'final_PTZ_mixingratios_out_FAILED.dist')
+                        subprocess.run('cp '+self.photochemDir+'OUTPUT/out.dist '+self.DataOutPath+'final_out_FAILED.dist', shell=True)
+                        subprocess.run('cp '+self.photochemDir+'OUTPUT/out.out '+self.DataOutPath+'final_out_FAILED.out', shell=True)
+                        subprocess.run('cp '+self.photochemDir+'OUTPUT/PTZ_mixingratios_out.dist '+self.DataOutPath+'final_PTZ_mixingratios_out_FAILED.dist', shell=True)
 
                         raise IOError('Photochem+Climate have run together >'+str(self.max_iterations_master)+' without finding global convergence, run failed.')
 
