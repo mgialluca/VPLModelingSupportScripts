@@ -43,7 +43,7 @@ class Generate_Atmosphere_Parameter_Sweep:
         #self.escape_species_molarmass['O'] = [15.999]*(u.g/u.mol) 
 
         self.outgass_sample_type_gridsweep = ['Linear'] # How to sample outgassed molecules: 'Linear', 'Log', or 'UserDef' 
-        self.escape_sample_type_gridsweep = ['UserDef']
+        self.escape_sample_type_gridsweep = []#['UserDef']
         # Linear - sample every flux on a linear grid (np.linspace) with some defined resolution
         # Log - sample every flux on a log grid (np.logspace) with some defined resolution
         # UserDef - User defined arrays of samples for every flux to vary 
