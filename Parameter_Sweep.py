@@ -75,8 +75,8 @@ class Generate_Atmosphere_Parameter_Sweep:
         self.master_out = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/'+self.sweepname+'/'
 
         # UNCOMMENT BEFORE RUNNING:
-        #if not os.path.exists(self.master_out):
-            #os.mkdir(self.master_out)
+        if not os.path.exists(self.master_out):
+            os.mkdir(self.master_out)
 
         ##########################################
 
