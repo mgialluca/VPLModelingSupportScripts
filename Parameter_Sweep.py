@@ -93,7 +93,11 @@ class Generate_Atmosphere_Parameter_Sweep:
             os.mkdir(self.master_out+casename+'/')
 
         # Make new atmos dir for this model
+        if not os.path.exists(self.master_out+casename+'/atmos/'):
+            os.mkdir(self.master_out+casename+'/atmos/')
+        
         subprocess.run('cp -r '+self.atmos_Dir+' '+self.master_out+casename+'/atmos/', shell=True)
+        print('completed copy shouldve')
 
         pipelineobj.photochemDir = self.master_out+casename+'/atmos/PHOTOCHEM/' # path to PHOTOCHEM/ dir
         pipelineobj.atmosDir = self.master_out+casename+'/atmos/' # path to atmos/ dir
