@@ -80,7 +80,7 @@ class Generate_Atmosphere_Parameter_Sweep:
         if not os.path.exists(self.master_out):
             os.mkdir(self.master_out)
         elif self.Restart_Run == True:
-            subprocess.run('rm -rf '+self.master_out, shell=True)
+            subprocess.run('rm -rf '+self.master_out+'/*', shell=True)
 
         ##########################################
 
@@ -481,14 +481,27 @@ class Generate_Atmosphere_Parameter_Sweep:
             print(conv)
         '''
 
-    '''
+
     # Compile the data from a gridsweep into a python dictionary
-    # Need to make sure restart_run is false when initializing a class object
+    # Need to make sure restart_run is false when initializing a class object from scratch
     def compile_run_output(self, photochem=True):
 
+        # put run statistics into dictionary from output file of run
+        stats = ascii.read(self.master_out+'ParameterSweep_RunStats.dat')
         d = {}
-
+        for run in len(range(stats['RunLabel'])):
+            d[stats['RunLabel'][run]] = {}
+            d[stats['RunLabel'][run]]['Converged'] = stats['Converged'][run]
+            d[stats['RunLabel'][run]]['SurfacePress[bar]'] = stats['FinalPressure'][run]
+            for rate in stats.colnames:
+                if rate not in ['RunLabel', 'Converged', 'FinalPressure']:
+                    d[stats['RunLabel'][run]][rate] = stats[rate][run]
 
         # if photochem is True, compile the data from final PTZ mixingratios photochem output
         if photochem == True:
-    '''
+            for runlabel in stats['RunLabel']:
+                if d[runlabel]['Converged'] == True:
+                    ptz = ascii.read(self.master_out+runlabel+'/FINAL_PTZ_mixingratios_out.dist')
+                    d[runlabel]['PTZMixingRatiosOut'] = {}
+                    for col in ptz.colnames:
+                        d[runlabel]['PTZMixingRatiosOut'][col] = list(ptz[col])
