@@ -1487,10 +1487,11 @@ class VPLModelingPipeline:
     def run_automatic(self):
         #ftestingoutput = open('SavingInfoOut.txt', 'w')
         # Prepare your backup directory for photochem data
-        if not os.path.exists(self.photochemBackupDir):
-            os.mkdir(self.photochemBackupDir)
-        else:
-            subprocess.run('rm -rf '+self.photochemBackupDir+'*', shell=True)
+        if self.BackupPhotochemRuns == True:
+            if not os.path.exists(self.photochemBackupDir):
+                os.mkdir(self.photochemBackupDir)
+            else:
+                subprocess.run('rm -rf '+self.photochemBackupDir+'*', shell=True)
         # Prepare your directory for storing lblabc .abs files
         if not os.path.exists(self.LBLABC_AbsFilesDir):
             os.mkdir(self.LBLABC_AbsFilesDir)

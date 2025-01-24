@@ -104,8 +104,8 @@ class Generate_Atmosphere_Parameter_Sweep:
         pipelineobj.DataOutPath = self.master_out+casename+'/' # path for created data products like dictionaries
         pipelineobj.AtmProfPath = self.master_out+casename+'/' # path to put atmospheric profile files (.pt files really)
         pipelineobj.BackupPhotochemRuns = False # Make backups of individual photochem runs
-        pipelineobj.photochemBackupDir = self.master_out+casename+'/' # path to save output from each photochem run
-        pipelineobj.LBLABC_AbsFilesDir = self.master_out+casename+'/' # path to put the created lbl .abs files in 
+        pipelineobj.photochemBackupDir = self.master_out+casename+'/PhotochemBackup/' # path to save output from each photochem run
+        pipelineobj.LBLABC_AbsFilesDir = self.master_out+casename+'/ABSFiles/' # path to put the created lbl .abs files in 
         pipelineobj.lblabc_RunScriptDir = self.master_out+casename+'/' # path to put lbl runscripts in
         pipelineobj.vplclimate_RunScriptDir = self.master_out+casename+'/' # path to put vpl climate runscripts in
         pipelineobj.photochem_InputsDir = self.master_out+casename+'/PhotochemInputs/' # The path to create new photochem inputs in
