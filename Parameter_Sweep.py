@@ -337,10 +337,10 @@ class Generate_Atmosphere_Parameter_Sweep:
         currmodel.run_automatic()
 
         # Clean abs files out as they take up the most space
-        subprocess.run('rm -rf '+currmodel.LBLABC_AbsFilesDir+'*.abs', shell=True)
+        #subprocess.run('rm -rf '+currmodel.LBLABC_AbsFilesDir+'*.abs', shell=True)
 
         # Delete copied atmos directory
-        subprocess.run('rm -rf '+currmodel.atmosDir, shell=True)
+        #subprocess.run('rm -rf '+currmodel.atmosDir, shell=True)
 
         return currmodel
 
