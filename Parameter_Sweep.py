@@ -327,7 +327,7 @@ class Generate_Atmosphere_Parameter_Sweep:
         fluxes = InputFlux[:hold]
 
         # Initialize model pipeline object
-        currmodel = VPLModelingPipeline('RunNumber'+str(modelID), self.photochemInitial, False, find_molecules_of_interest=False, hitran_year=self.hitran_year)
+        currmodel = VPLModelingPipeline('RunNumber'+str(modelID), self.photochemInitial, True, find_molecules_of_interest=False, hitran_year=self.hitran_year)
 
         # Set relevant values of object 
         self.set_pipeline_vars('RunNumber'+str(modelID), currmodel)
@@ -466,6 +466,8 @@ class Generate_Atmosphere_Parameter_Sweep:
         for i in range(len(models[0].fluxes_used_in_sweep)):
             hold = [m.fluxes_used_in_sweep[i] for m in models]
             data_for_table.append(hold)
+
+        tab = Table(data_for_table, names=output_col_names)
 
         # Save output info
         ascii.write(data_for_table, self.master_out+'ParameterSweep_RunStats.dat', delimiter=' ', format='fixed_width')
