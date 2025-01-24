@@ -7,3 +7,4 @@ test_object = Generate_Atmosphere_Parameter_Sweep('TestSweep',
 
 
 test_object.run_grid_sweep()
+test_object.compile_run_output()
