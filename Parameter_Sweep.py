@@ -20,7 +20,7 @@ import shutil
 
 class Generate_Atmosphere_Parameter_Sweep:
 
-    def __init__(self, sweepname, photochemInitial, hitran_year='2020'):
+    def __init__(self, sweepname, photochemInitial, restart_run=False, hitran_year='2020'):
 
         self.sweepname = sweepname # Naming convention for directory structure
         self.photochemInitial = photochemInitial # Input files for photochem to copy and change 
@@ -73,11 +73,14 @@ class Generate_Atmosphere_Parameter_Sweep:
 
         #########  Setting output paths  #########
 
+        self.Restart_Run = restart_run
         self.master_out = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/'+self.sweepname+'/'
 
         # UNCOMMENT BEFORE RUNNING:
         if not os.path.exists(self.master_out):
             os.mkdir(self.master_out)
+        elif self.Restart_Run == True:
+            subprocess.run('rm -rf '+self.master_out, shell=True)
 
         ##########################################
 
@@ -113,6 +116,7 @@ class Generate_Atmosphere_Parameter_Sweep:
 
         # Adjust the atmospheric pressure
         pipelineobj.adjust_atmospheric_pressure = True
+        pipelineobj.suppress_IOerrors = True
 
         # Molecules for the type of atmosphere we're interested in 
 
@@ -328,13 +332,16 @@ class Generate_Atmosphere_Parameter_Sweep:
         # Set relevant values of object 
         self.set_pipeline_vars('RunNumber'+str(modelID), currmodel)
 
+        # Save fluxes for later
+        currmodel.fluxes_used_in_sweep = fluxes
+
         # Need to replace flux values in species.dat for this run 
         # A pipeline object will copy new files if currmodel.photochem_InputsDir is not equal to currmodel.photochemInitialInput
         # set them equal after setting up the current models files before running automatic pipeline (this is handled in replace_fluxes function)
         self.replace_fluxes(currmodel, fluxes)
         
         # Run the Photochem-Climate-SMART pipeline
-        currmodel.run_automatic()
+        converged = currmodel.run_automatic()
 
         # Clean abs files out as they take up the most space
         #subprocess.run('rm -rf '+currmodel.LBLABC_AbsFilesDir+'*.abs', shell=True)
@@ -442,10 +449,46 @@ class Generate_Atmosphere_Parameter_Sweep:
             models = p.map(self.run_one_model, self.gridsweep_inputstrings)
 
         final_pressures = [m.updated_atm_pressure for m in models]
+        convergence = [m.global_convergence for m in models]
+        run_names = [m.casename for m in models]
+        output_col_names = ['RunLabel', 'Converged', 'FinalPressure']
+        data_for_table = []
+        data_for_table.append(run_names)
+        data_for_table.append(convergence)
+        data_for_table.append(final_pressures)
 
+        # Add rates used for each run
+        for species in self.outgass_samples_gridsweep.keys():
+            output_col_names.append(species+'_OutgassRate')
+        for species in self.escape_samples_gridsweep.keys():
+            output_col_names.append(species+'_EscapeRate')
+
+        for i in range(len(models[0].fluxes_used_in_sweep)):
+            hold = [m.fluxes_used_in_sweep[i] for m in models]
+            data_for_table.append(hold)
+
+        # Save output info
+        ascii.write(data_for_table, self.master_out+'ParameterSweep_RunStats.dat', delimiter=' ', format='fixed_width')
+
+        '''
         print('final pressures are ')
         for press in final_pressures:
             print(press)
 
+        print('\n')
+        print('Convergence of each model:')
+        for conv in convergence:
+            print(conv)
+        '''
+
+    '''
+    # Compile the data from a gridsweep into a python dictionary
+    # Need to make sure restart_run is false when initializing a class object
+    def compile_run_output(self, photochem=True):
+
+        d = {}
 
 
+        # if photochem is True, compile the data from final PTZ mixingratios photochem output
+        if photochem == True:
+    '''
