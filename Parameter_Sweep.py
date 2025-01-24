@@ -92,10 +92,6 @@ class Generate_Atmosphere_Parameter_Sweep:
         # Create casename dir
         if not os.path.exists(self.master_out+casename+'/'):
             os.mkdir(self.master_out+casename+'/')
-
-        # Make new atmos dir for this model
-        if not os.path.exists(self.master_out+casename+'/atmos/'):
-            os.mkdir(self.master_out+casename+'/atmos/')
         
         #subprocess.run('cp -r '+self.atmos_Dir+' '+self.master_out+casename+'/atmos/', shell=True)
         shutil.copytree(self.atmos_Dir, self.master_out + casename + '/atmos/')
