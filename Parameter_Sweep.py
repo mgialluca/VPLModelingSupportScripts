@@ -7,6 +7,7 @@ import astropy.constants as const
 import os
 import copy
 from multiprocessing import Pool
+import shutil
 
 # Need to figure out how parameter sweeps are running:
 # 1. Run across a grid (every combination? Or strategic points? former is brute force method, could start with that)
@@ -96,7 +97,8 @@ class Generate_Atmosphere_Parameter_Sweep:
         if not os.path.exists(self.master_out+casename+'/atmos/'):
             os.mkdir(self.master_out+casename+'/atmos/')
         
-        subprocess.run('cp -r '+self.atmos_Dir+' '+self.master_out+casename+'/atmos/', shell=True)
+        #subprocess.run('cp -r '+self.atmos_Dir+' '+self.master_out+casename+'/atmos/', shell=True)
+        shutil.copytree(self.atmos_Dir, self.master_out + casename + '/atmos/')
         print('completed copy shouldve')
 
         pipelineobj.photochemDir = self.master_out+casename+'/atmos/PHOTOCHEM/' # path to PHOTOCHEM/ dir
