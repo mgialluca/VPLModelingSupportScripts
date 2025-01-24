@@ -1569,7 +1569,7 @@ class VPLModelingPipeline:
             # If convergence failed, raise io error or break run
             if local_photochem_conv == False and self.suppress_IOerrors == False:
                 raise IOError('Photochem ran >'+str(self.max_iterations_master)+' times with no convergence. On photochem run number '+str(self.num_photochem_runs))
-            elif local_climate_convergence == False and self.suppress_IOerrors == True:
+            elif local_photochem_conv == False and self.suppress_IOerrors == True:
                 break
 
             if self.verbose == True:
@@ -1618,8 +1618,8 @@ class VPLModelingPipeline:
                         # If photochem did not converge, try try again
                         while local_photochem_conv == False:
                             if photochem_newPsurf_inner_subtries > self.max_iterations_master:
-                                raise IOError('Photochem failed to converge with a new pressure with >'+str(self.max_iterations_master)+' runs. On photochem run number '+str(self.num_photochem_runs)+' and new pressure attempt '+str(photochem_newPsurf_subtries))
-                            
+                                break
+
                             subprocess.run('rm -rf '+self.photochemDir+'in.dist', shell=True)
                             subprocess.run('rm -rf '+self.photochemDir+'PTZ_mixingratios_in.dist', shell=True)
                             subprocess.run('cp '+self.photochemDir+'OUTPUT/out.dist '+self.photochemDir+'in.dist', shell=True)
@@ -1630,7 +1630,7 @@ class VPLModelingPipeline:
                         pressure_converged = self.change_atmospheric_pressure()
 
                     if pressure_converged == False and self.suppress_IOerrors == False:
-                            raise IOError('Photochem attempted to find new pressure >'+str(self.max_iterations_master)+' times with no pressure convergence. On photochem run number '+str(self.num_photochem_runs))
+                        raise IOError('Photochem attempted to find new pressure >'+str(self.max_iterations_master)+' times with no pressure convergence. On photochem run number '+str(self.num_photochem_runs))
                     elif pressure_converged == False and self.suppress_IOerrors == True:
                         break
 

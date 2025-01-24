@@ -505,3 +505,9 @@ class Generate_Atmosphere_Parameter_Sweep:
                     d[runlabel]['PTZMixingRatiosOut'] = {}
                     for col in ptz.colnames:
                         d[runlabel]['PTZMixingRatiosOut'][col] = list(ptz[col])
+
+        # save as json
+        f = open(self.sweepname+'_OutputDict.json', 'w')
+        dh = json.dumps(d)
+        json.dump(dh, f)
+        f.close()
