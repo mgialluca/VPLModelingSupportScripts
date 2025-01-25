@@ -470,7 +470,7 @@ class Generate_Atmosphere_Parameter_Sweep:
         tab = Table(data_for_table, names=output_col_names)
 
         # Save output info
-        ascii.write(data_for_table, self.master_out+'ParameterSweep_RunStats.dat', delimiter=' ', format='fixed_width')
+        ascii.write(tab, self.master_out+'ParameterSweep_RunStats.dat', delimiter=' ', format='fixed_width')
 
         '''
         print('final pressures are ')
