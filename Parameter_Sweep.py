@@ -342,6 +342,7 @@ class Generate_Atmosphere_Parameter_Sweep:
         
         # Run the Photochem-Climate-SMART pipeline
         converged = currmodel.run_automatic()
+        print(converged)
 
         # Clean abs files out as they take up the most space
         #subprocess.run('rm -rf '+currmodel.LBLABC_AbsFilesDir+'*.abs', shell=True)
@@ -491,7 +492,7 @@ class Generate_Atmosphere_Parameter_Sweep:
         # put run statistics into dictionary from output file of run
         stats = ascii.read(self.master_out+'ParameterSweep_RunStats.dat')
         d = {}
-        for run in len(range(stats['RunLabel'])):
+        for run in range(len(stats['RunLabel'])):
             d[stats['RunLabel'][run]] = {}
             d[stats['RunLabel'][run]]['Converged'] = stats['Converged'][run]
             d[stats['RunLabel'][run]]['SurfacePress[bar]'] = stats['FinalPressure'][run]
