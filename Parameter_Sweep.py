@@ -116,7 +116,7 @@ class Generate_Atmosphere_Parameter_Sweep:
 
         # Adjust the atmospheric pressure
         pipelineobj.adjust_atmospheric_pressure = True
-        pipelineobj.suppress_IOerrors = True
+        pipelineobj.suppress_IOerrors = False
 
         # Molecules for the type of atmosphere we're interested in 
 

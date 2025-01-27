@@ -1790,10 +1790,13 @@ class VPLModelingPipeline:
             
             # Now update in.dist
             climate_profile = self.get_final_climate_output_temp_profile(trynum=self.num_climate_runs)
+            ftestingoutput.write('Retrieved final climate output\n')
             self.update_indist_T_EDD(self.photochemDir+'OUTPUT/PTZ_mixingratios_out.dist', climate_profile)
+            ftestingoutput.write('Updated indist TEDD\n')
 
             ### Update in.dist section end ------------------------------
 
+        ftestingoutput.write('Outside of loop, '+str(self.global_convergence))
         ftestingoutput.close()
 
         ##### Generate SMART spectra of the final converged atmosphere ------------------------------
