@@ -298,9 +298,9 @@ class VPLModelingPipeline:
         temp = atm['TEMP']
 
         # Save surface temperature for use in climate 
-        self.surface_temp = temp[0]
+        self.surface_temp = temp[0] # This is NOT THE SURFACE TEMPERATURE; use the 'surface level' line with Tc column
 
-        new_grid = np.linspace(alt[0], alt[len(alt)-1], self.nlevel_coarse)
+        new_grid = np.linspace(alt[0], alt[len(alt)-1], self.nlevel_coarse) # target lower level to be 0.5 km for thin atmospheres
         new_temp = np.interp(new_grid, alt, temp)
         new_pres = np.interp(new_grid, alt, pres)
 
@@ -1456,7 +1456,7 @@ class VPLModelingPipeline:
         T_edd_block = ascii.read(self.photochem_InputsDir+'in.dist', data_start=blockstart, data_end=blockend)
         blockstart = blockend
         T_edd_block['col1'] = new_T
-        T_edd_block['col2'] = new_edd
+        T_edd_block['col2'] = new_edd # Need to convert from m**2/ to cm**2/s; climate model will be between 1/2 and 1000, photochem will be 1e4-1e6 ish
 
         for line in range(len(T_edd_block)):
             fnew.write('   ')
@@ -1486,7 +1486,8 @@ class VPLModelingPipeline:
     ## Dependent on all Attributes, no fxn-specific inputs
     ##
     def run_automatic(self):
-        ftestingoutput = open(self.OutPath+self.casename+'_SavingInfoOut.txt', 'w')
+        if self.verbose == True:
+            ftestingoutput = open(self.OutPath+self.casename+'_SavingInfoOut.txt', 'w')
         # Prepare your backup directory for photochem data
         if self.BackupPhotochemRuns == True:
             if not os.path.exists(self.photochemBackupDir):
@@ -1790,14 +1791,15 @@ class VPLModelingPipeline:
             
             # Now update in.dist
             climate_profile = self.get_final_climate_output_temp_profile(trynum=self.num_climate_runs)
-            ftestingoutput.write('Retrieved final climate output\n')
+            #ftestingoutput.write('Retrieved final climate output\n')
             self.update_indist_T_EDD(self.photochemDir+'OUTPUT/PTZ_mixingratios_out.dist', climate_profile)
-            ftestingoutput.write('Updated indist TEDD\n')
+            #ftestingoutput.write('Updated indist TEDD\n')
 
             ### Update in.dist section end ------------------------------
 
-        ftestingoutput.write('Outside of loop, '+str(self.global_convergence))
-        ftestingoutput.close()
+        if self.verbose == True:
+            ftestingoutput.write('Outside of loop, '+str(self.global_convergence))
+            ftestingoutput.close()
 
         ##### Generate SMART spectra of the final converged atmosphere ------------------------------
 
