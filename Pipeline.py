@@ -289,18 +289,24 @@ class VPLModelingPipeline:
     # AtmProfPath - path to output new PT profile to
     #
     ## Fxn-specific Inputs:
+    # grid_spacing - to make new degraded grid with numpy linear spacing or log spacing (for thin atmospheres)
     # PressUnits - can do Bar or Pa, Megan stick with bar for the forseeable forever
     ##
-    def degrade_PT(self, PressUnits='Bar'):
+    def degrade_PT(self, grid_spacing='linear', PressUnits='Bar'):
         atm = ascii.read(self.photochemDir+'OUTPUT/PTZ_mixingratios_out.dist', delimiter=' ')
         alt = atm['ALT']
         pres = atm['PRESS']
         temp = atm['TEMP']
 
-        # Save surface temperature for use in climate 
-        self.surface_temp = temp[0] # This is NOT THE SURFACE TEMPERATURE; use the 'surface level' line with Tc column
+        # Save surface temperature for use in climate from PTZ file IF climate has not been run yet
+        #     ... if climate has run, surface temp should be updated automatically from the climate run output
+        if self.num_climate_runs == 0:
+            self.surface_temp = temp[0] # This is NOT THE SURFACE TEMPERATURE; use the 'surface level' line with Tc column
 
-        new_grid = np.linspace(alt[0], alt[len(alt)-1], self.nlevel_coarse) # target lower level to be 0.5 km for thin atmospheres
+        if grid_spacing == 'linear':
+            new_grid = np.linspace(alt[0], alt[len(alt)-1], self.nlevel_coarse) # target lower level to be 0.5 km for thin atmospheres
+        elif grid_spacing == 'log':
+            new_grid = np.logspace(np.log10(alt[0]), np.log10(alt[len(alt)-1]), self.nlevel_coarse) # target lower level to be 0.5 km for thin atmospheres
         new_temp = np.interp(new_grid, alt, temp)
         new_pres = np.interp(new_grid, alt, pres)
 
@@ -328,7 +334,7 @@ class VPLModelingPipeline:
         oldpt['Temp'] = new_temp
 
         # Update Surface Temperature
-        self.surface_temp = new_temp[len(new_temp)-1]
+        #self.surface_temp = new_temp[len(new_temp)-1]
 
         # Overwrite the PT profile
         ascii.write(oldpt, self.AtmProfPath+'PT_profile_'+self.casename+'.pt', overwrite=True)
@@ -607,7 +613,9 @@ class VPLModelingPipeline:
                 AvgFlux = float(hold[2])
             elif hold[0] == 'avg' and hold[1] == 'trop':
                 TropHeating = float(hold[5])
-                # After retrieving tropospheric heating rate will have all values, break
+            elif hold[0] == 'surface:':
+                self.surface_temp = float(hold[8])
+                # After retrieving surface temp, will have all values, break
                 break
 
         # Do Convergence checking
@@ -1674,7 +1682,13 @@ class VPLModelingPipeline:
             ### Run photochem section end --------------------------
 
             ### Create degraded atmospheric profile to prepare for LBLABC and Climate -------------
-            self.degrade_PT()
+            if self.adjust_atmospheric_pressure == True:
+                if self.updated_atm_pressure < 1e-2:
+                    self.degrade_PT(grid_spacing='log')
+                else:
+                    self.degrade_PT()
+            else:
+                self.degrade_PT()
             if self.verbose == True:
                 print('Degraded PT profile created from photochem run '+str(self.num_photochem_runs))
                 ftestingoutput.write('Degraded PT profile created from photochem run '+str(self.num_photochem_runs)+'\n')
