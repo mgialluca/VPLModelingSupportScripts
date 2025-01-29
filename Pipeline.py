@@ -1494,8 +1494,7 @@ class VPLModelingPipeline:
     ## Dependent on all Attributes, no fxn-specific inputs
     ##
     def run_automatic(self):
-        if self.verbose == True:
-            ftestingoutput = open(self.OutPath+self.casename+'_SavingInfoOut.txt', 'w')
+        
         # Prepare your backup directory for photochem data
         if self.BackupPhotochemRuns == True:
             if not os.path.exists(self.photochemBackupDir):
@@ -1524,6 +1523,9 @@ class VPLModelingPipeline:
             os.mkdir(self.DataOutPath)
         # Prepare the Hyak environment
         #self.prepare_hyak_env()
+
+        if self.verbose == True:
+            ftestingoutput = open(self.OutPath+self.casename+'_SavingInfoOut.txt', 'w')
 
         # Start loop to find global convergence with photochem + lblabc + vpl climate
         while self.global_convergence == False:
