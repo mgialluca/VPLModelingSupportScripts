@@ -822,7 +822,7 @@ class VPLModelingPipeline:
             self.c_ConvectiveType = 2 # 1 - adjustment, 2 - mixing length scheme, 3 - turbulent, 4 - moist mixing
             self.c_MixingLengthType = 3 # 1 - fixed, 2 - proport to scale height, 3 - Blackadar aymptotic ML
             self.c_MixingLengthProportionality = 0.085
-            self.c_MinEddyDiffusivity = 0.5 # [m2/s]
+            self.c_MinEddyDiffusivity = 1000 # [m2/s]
             self.c_SurfaceWindSpeed = 7.0 #[m/s]
             self.c_SurfRoughnessHeight = 0.004 # [m]
             self.c_NumberCondensibles = 0 
@@ -1464,7 +1464,7 @@ class VPLModelingPipeline:
         T_edd_block = ascii.read(self.photochem_InputsDir+'in.dist', data_start=blockstart, data_end=blockend)
         blockstart = blockend
         T_edd_block['col1'] = new_T
-        T_edd_block['col2'] = new_edd # Need to convert from m**2/ to cm**2/s; climate model will be between 1/2 and 1000, photochem will be 1e4-1e6 ish
+        #T_edd_block['col2'] = new_edd # Need to convert from m**2/ to cm**2/s; climate model will be between 1/2 and 1000, photochem will be 1e4-1e6 ish
 
         for line in range(len(T_edd_block)):
             fnew.write('   ')
