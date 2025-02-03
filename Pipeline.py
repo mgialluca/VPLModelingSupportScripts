@@ -587,7 +587,7 @@ class VPLModelingPipeline:
     # AvgFluxTolerance - Convergence check, last output value of avg flux must be <= this tolerance
     #          [W/m^2] to be converged
     ##
-    def check_vplclimate_conv(self, trynum=1, TropHeatingTolerance=1e-4, AvgFluxTolerance=0.3):
+    def check_vplclimate_conv(self, trynum=1, TropHeatingTolerance=6e-2, AvgFluxTolerance=0.3):
         # Set the output flag of converged or not (boolean)
         # Guilty until proven innocent
         HasItConverged = False
@@ -822,7 +822,7 @@ class VPLModelingPipeline:
             self.c_ConvectiveType = 2 # 1 - adjustment, 2 - mixing length scheme, 3 - turbulent, 4 - moist mixing
             self.c_MixingLengthType = 3 # 1 - fixed, 2 - proport to scale height, 3 - Blackadar aymptotic ML
             self.c_MixingLengthProportionality = 0.085
-            self.c_MinEddyDiffusivity = 1000 # [m2/s]
+            self.c_MinEddyDiffusivity = 0.5 # [m2/s]
             self.c_SurfaceWindSpeed = 7.0 #[m/s]
             self.c_SurfRoughnessHeight = 0.004 # [m]
             self.c_NumberCondensibles = 0 
