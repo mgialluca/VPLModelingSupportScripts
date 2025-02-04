@@ -1,7 +1,7 @@
 
 from Pipeline import *
 
-test_object = VPLModelingPipeline('PsurfTest', 
+test_object = VPLModelingPipeline('KhminHighTest', 
                                   '/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/InputDir_ForTesting/', 
                                   True, find_molecules_of_interest=False, hitran_year='2020')
 

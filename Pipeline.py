@@ -743,7 +743,7 @@ class VPLModelingPipeline:
             self.c_ConvectiveType = 2 # 1 - adjustment, 2 - mixing length scheme, 3 - turbulent, 4 - moist mixing
             self.c_MixingLengthType = 3 # 1 - fixed, 2 - proport to scale height, 3 - Blackadar aymptotic ML
             self.c_MixingLengthProportionality = 0.01
-            self.c_MinEddyDiffusivity = 0.5 # [m2/s]
+            self.c_MinEddyDiffusivity = 1000 # [m2/s]
             self.c_SurfaceWindSpeed = 10.0 #[m/s]
             self.c_SurfRoughnessHeight = 0.0002 # [m]
             self.c_NumberCondensibles = 0 
