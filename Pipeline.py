@@ -1889,6 +1889,25 @@ class VPLModelingPipeline:
 
             ##### Generate SMART spectra of the final converged atmosphere ------------------------------
 
+            ### Create degraded atmospheric profile to prepare for LBLABC and Climate -------------
+            if self.adjust_atmospheric_pressure == True:
+                if self.updated_atm_pressure < 1e-2:
+                    self.degrade_PT(grid_spacing='log')
+                    if self.verbose == True:
+                        print('log spacing used')
+                else:
+                    self.degrade_PT()
+            else:
+                self.degrade_PT()
+            if self.verbose == True:
+                print('Degraded PT profile created from photochem run '+str(self.num_photochem_runs))
+                ftestingoutput.write('Degraded PT profile created from photochem run '+str(self.num_photochem_runs)+'\n')
+            ### Degraded PT Profile finished ------------
+
+            ### Create new mixing ratios profile file --------------------------
+            self.prep_rmix_file(self.photochemDir+'OUTPUT/PTZ_mixingratios_out.dist')
+            ### Mixing ratios profile created --------------------------
+
             ### Rerun the LBLABC files for the most recent atmosphere ------------------------------
             
             self.make_lblabc_runscripts()
