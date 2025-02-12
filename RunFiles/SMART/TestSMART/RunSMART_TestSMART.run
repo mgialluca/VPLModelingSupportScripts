@@ -1,0 +1,104 @@
+0			Pressure Jacobians (0-None)
+0			Temperature Jacobians (0-None)
+3			Formatted Atmospheric Structure File
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/AtmProfiles/PT_profile_TestSMART.pt
+1			Lines to skip
+1,2			columns of P,T
+100000.			Scale to Pa
+334.46			Surface temperature [K]
+3			Number of Gas Absorbers
+7			Hitran gas code for O2
+0			Absorber jacobians [0 = None; 1 = Radiance; 2 = Flux]
+3			No. of abs coeff types
+1			HITRAN Line Absorbers
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/LinebyLine_absFiles/TestSMART/O2_TestSMART.abs
+2			Collisionally-induced absorption [CIA] files
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/xsec/o2-o2_abs.cia
+3			UV-VIS absorption cross sections
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/xsec/o2xsec.dat
+3			List directed input
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/AtmProfiles/MixingRs_TestSMART.dat
+1 			Lines to skip
+1			Use pressure coordinate
+1,2			columns of P,rmix
+1			Mixing type [1 = volume; 2 = mass]
+100000.,1.0			scale P and rmix
+1			Hitran gas code for H2O
+0			Absorber jacobians [0 = None; 1 = Radiance; 2 = Flux]
+2			No. of abs coeff types
+1			HITRAN Line Absorbers
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/LinebyLine_absFiles/TestSMART/H2O_TestSMART.abs
+3			UV-VIS absorption cross sections
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/xsec/h2oxsec.dat
+3			List directed input
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/AtmProfiles/MixingRs_TestSMART.dat
+1 			Lines to skip
+1			Use pressure coordinate
+1,3			columns of P,rmix
+1			Mixing type [1 = volume; 2 = mass]
+100000.,1.0			scale P and rmix
+3			Hitran gas code for O3
+0			Absorber jacobians [0 = None; 1 = Radiance; 2 = Flux]
+2			No. of abs coeff types
+1			HITRAN Line Absorbers
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/LinebyLine_absFiles/TestSMART/O3_TestSMART.abs
+3			UV-VIS absorption cross sections
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/xsec/o3xsec.dat
+3			List directed input
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/AtmProfiles/MixingRs_TestSMART.dat
+1 			Lines to skip
+1			Use pressure coordinate
+1,4			columns of P,rmix
+1			Mixing type [1 = volume; 2 = mass]
+100000.,1.0			scale P and rmix
+0			Number of Aerosols
+0           Lambert Reflection
+0           Albedo Jacobians (0 - None)
+3           List Directed Surface Albedo Profile
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/albedo/basalt_fresh.alb
+16          Lines to Skip
+1,2         Columns of wl and albedo
+1			Wavelength Grid Type
+1.0			Convert to microns
+1.0			Scale albedo
+0.0158   	Distance from Star (AU)
+10.65			Surface Gravity [m/s*s]
+6990.000000000001	    Planetary Radius [km]
+31.995904308333998		Mean Molecular Weight
+1			Number of Rayleigh Scatterers
+1			Rayleigh Scatter Index
+1.0			Volume Mixing Ratio
+8			Number of Streams
+3			HRT Source
+3			File Format - List Directed
+/gscratch/vsm/gialluca/StellarSpectra/TRAPPIST-1_2020.dat
+10			Lines to Skip
+2			Units solar flux
+1			Solar spectral units
+1.0			Micron Conversion Factor
+1,2 		Columns of wn and Flux
+1			Number of Solar Zenith Angles
+60,0			Zenith and Azimuth Angles
+0.01			Convergence Criterion
+9			Output Format
+2           Ray Tracing Transit
+0.1192      Stellar Radius (Rsun)
+0.0          Impact Parameter (Rstar)
+1           Include Refraction
+0           Include Limb Darkening?
+1			Number of Azimuth Angles
+0.0			Azimuth Angles
+1			Output levels (1 - TOA only)
+2			Output Radiance Units [2 - W/m*m/sr/micron]
+50.,100000.	Min and Max Wavenumber
+2			Type of Grid (2-slit)
+2			Triangular Spectral Response Function
+1.0			FWHM
+1.0			Sampling Resolution [per cm]
+0.25		Error for tau Binning
+0.15		Error for pi0 Binning
+0.15		g Error
+0.02		Albedo Error
+3			Output Format (ascii)
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/ModelRunOutputs/TestSMART/TestSMART_try2
+2			Overwrite
