@@ -99,6 +99,6 @@
 0.15		Error for pi0 Binning
 0.15		g Error
 0.02		Albedo Error
-3			Output Format (ascii)
+1			Output Format (ascii)
 /gscratch/vsm/gialluca/VPLModelingTools_Dev/ModelRunOutputs/TestSMART/TestSMART_try2
 2			Overwrite

@@ -1217,7 +1217,7 @@ class VPLModelingPipeline:
         f.write(str(self.s_pi0BinError)+'		Error for pi0 Binning\n')
         f.write(str(self.s_gError)+'		g Error\n')
         f.write(str(self.s_AlbedoError)+'		Albedo Error\n')
-        f.write(str(self.c_OutputFileType)+'			Output Format (ascii)\n')
+        f.write(str(self.s_OutputFileType)+'			Output Format (ascii)\n')
         f.write(self.OutPath+self.casename+'_SMART\n')
         f.write('2			Overwrite\n')
 
