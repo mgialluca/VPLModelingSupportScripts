@@ -69,6 +69,7 @@ class VPLModelingPipeline:
         self.global_convergence = False
         self.max_iterations_master = 10 # Never do anything more than 10x
         self.suppress_IOerrors = False # if convergence fails, raise IO errors if False, or just break running function if True
+        self.run_spectra = True # If true, finished a converged run with smart 
 
         # User defined inputs
         self.casename = casename # Case name youre running, user defined
@@ -897,6 +898,8 @@ class VPLModelingPipeline:
             self.s_SurfProfile_wlType = self.c_SurfProfile_wlType
             self.s_Convert_SurfProfilewl_microns = self.c_Convert_SurfProfilewl_microns
             self.s_ScaleAlbedo = self.c_ScaleAlbedo
+            self.s_SemiMajorAxis = 0.0158 # [AU]
+            self.s_StellarRadius = 0.1192 # [Rsun]
 
             # Rayleigh scattering
             self.s_NumRayleigh = 1 # Number of Rayleigh scatterers
@@ -1158,7 +1161,67 @@ class VPLModelingPipeline:
 
         # End Gases block -------------------------
 
-        
+        f.write(str(self.s_NumberAerosols)+'			Number of Aerosols\n')
+        f.write(str(self.s_SurfaceType)+'           Lambert Reflection\n')
+        f.write(str(self.s_AlbedoJacobians)+'           Albedo Jacobians (0 - None)\n')
+        f.write('3           List Directed Surface Albedo Profile\n')
+        f.write(str(self.s_SurfaceProfile)+'\n')
+        f.write(str(self.s_SurfProfile_SkipLines)+'          Lines to Skip\n')
+        f.write(str(self.s_SurfProfile_wlalbedo_cols)+'         Columns of wl and albedo\n')
+        f.write(str(self.s_SurfProfile_wlType)+'			Wavelength Grid Type\n')
+        f.write(str(self.s_Convert_SurfProfilewl_microns)+'			Convert to microns\n')
+        f.write(str(self.s_ScaleAlbedo)+'			Scale albedo\n')
+
+        # Physical Parameters
+        f.write(str(self.s_SemiMajorAxis)+'   	Distance from Star (AU)\n')
+        f.write(str(self.planetary_gravity)+'			Surface Gravity [m/s*s]\n')
+        f.write(str(self.planetary_radius)+'	    Planetary Radius [km]\n')
+        f.write(str(self.MMW)+'		Mean Molecular Weight\n')
+
+        # Rayleigh scattering params
+        f.write(str(self.s_NumRayleigh)+'			Number of Rayleigh Scatterers\n')
+        f.write(str(self.s_RayleighIndex)+'			Rayleigh Scatter Index\n')
+        f.write(str(self.s_vmrRayleigh)+'			Volume Mixing Ratio\n')
+
+        # Heating Sources / streams params
+        f.write(str(self.s_NumberStreams)+'			Number of Streams\n')
+        f.write(str(self.s_HRTSources)+'			HRT Source\n')
+        f.write('3			File Format - List Directed\n')
+        f.write(str(self.s_StellarSpectrum)+'\n')
+        f.write(str(self.s_StellarSpect_SkipLines)+'			Lines to Skip\n')
+        f.write(str(self.s_SolarFluxUnits)+'			Units solar flux\n')
+        f.write(str(self.s_SolarSpectralUnits)+'			Solar spectral units\n')
+        f.write(str(self.s_Convert_Stellar_microns)+'			Micron Conversion Factor\n')
+        f.write(str(self.s_StellarSpect_wnflux_col)+' 		Columns of wn and Flux\n')
+        f.write(str(self.s_NumZenith)+'			Number of Solar Zenith Angles\n')
+        f.write(str(self.s_ZenithAzimuth_Angles)+'			Zenith and Azimuth Angles\n')
+        f.write(str(self.s_ConvergenceCriteria)+'			Convergence Criterion\n')
+
+        # Output info
+        f.write(str(self.s_OutputFormat)+'			Output Format\n')
+        f.write(str(self.s_TranistType)+'           Ray Tracing Transit\n')
+        f.write(str(self.s_StellarRadius)+'      Stellar Radius (Rsun)\n')
+        f.write(str(self.s_ImpactParam)+'          Impact Parameter (Rstar)\n')
+        f.write('1           Include Refraction\n')
+        f.write(str(self.s_LimbDarkening)+'           Include Limb Darkening?\n')
+        f.write(str(self.s_NumAzimuths)+'			Number of Azimuth Angles\n')
+        f.write(str(self.s_AzimuthAngles)+'			Azimuth Angles\n')
+        f.write(str(self.s_OutputLevels)+'			Output levels (1 - TOA only)\n')
+        f.write(str(self.s_OutputUnits)+'			Output Radiance Units [2 - W/m*m/sr/micron]\n')
+        f.write(str(self.s_MinMax_wavenumber)+'	Min and Max Wavenumber\n')
+        f.write(str(self.s_GridType)+'			Type of Grid (2-slit)\n')
+        f.write(str(self.s_SpectralResponseFxn)+'			Triangular Spectral Response Function\n')
+        f.write(str(self.s_FWHM)+'			FWHM\n')
+        f.write(str(self.s_SampleRes)+'			Sampling Resolution [per cm]\n')
+        f.write(str(self.s_TauBinError)+'		Error for tau Binning\n')
+        f.write(str(self.s_pi0BinError)+'		Error for pi0 Binning\n')
+        f.write(str(self.s_gError)+'		g Error\n')
+        f.write(str(self.s_AlbedoError)+'		Albedo Error\n')
+        f.write(str(self.c_OutputFileType)+'			Output Format (ascii)\n')
+        f.write(self.OutPath+self.casename+'_SMART\n')
+        f.write('2			Overwrite\n')
+
+        f.close()
 
 
     ### Purpose: Read in the out.dist file to create a python dict with its values (e.g., mixing ratios, T, EDD, Ndens, etc)
@@ -1816,28 +1879,37 @@ class VPLModelingPipeline:
             ### Update in.dist section end ------------------------------
 
         if self.verbose == True:
-            ftestingoutput.write('Outside of loop, '+str(self.global_convergence))
+            ftestingoutput.write('Global Convergence, '+str(self.global_convergence))
             ftestingoutput.close()
 
-        ##### Generate SMART spectra of the final converged atmosphere ------------------------------
 
-        ### Rerun the LBLABC files for the most recent atmosphere ------------------------------
+        if self.run_spectra == True: 
 
-        #self.make_lblabc_runscripts()
+            ##### Generate SMART spectra of the final converged atmosphere ------------------------------
 
-        # Now Run LBLABC for all the gases of interest
-        #for gas in self.molecule_dict['Gas_names']:
-        #    self.run_lblabc_1instance(self.lblabc_RunScriptDir+'RunLBLABC_'+gas+'_'+self.casename+'.script', gas)
-        #    if self.verbose == True:
-        #        print('LBLABC run for '+gas+' complete, LBLABC iteration '+str(self.num_lblabc_runs+1))
-                #ftestingoutput.write('LBLABC run for '+gas+' complete, LBLABC iteration '+str(self.num_lblabc_runs+1)+'\n')
-        #self.num_lblabc_runs += 1
-        
-        ### Rerun the LBLABC Section Finish ------------------------------
+            ### Rerun the LBLABC files for the most recent atmosphere ------------------------------
+            
+            self.make_lblabc_runscripts()
 
-        ### Create SMART runscript ------------------------------
+            # Now Run LBLABC for all the gases of interest
+            for gas in self.molecule_dict['Gas_names']:
+                self.run_lblabc_1instance(self.lblabc_RunScriptDir+'RunLBLABC_'+gas+'_'+self.casename+'.script', gas)
+                if self.verbose == True:
+                    print('LBLABC run for '+gas+' complete, LBLABC iteration '+str(self.num_lblabc_runs+1))
+                    #ftestingoutput.write('LBLABC run for '+gas+' complete, LBLABC iteration '+str(self.num_lblabc_runs+1)+'\n')
+            self.num_lblabc_runs += 1
+            
+            ### Rerun the LBLABC Section Finish ------------------------------
 
-        #self.set_smart_settings()
+            ### Create SMART runscript ------------------------------
+
+            self.set_smart_settings()
+            self.make_smart_runscript()
+
+            self.run_smart_1instance(self.SMART_RunScriptDir+'RunSMART_'+self.casename+'.run')
+
+            if self.verbose == True:
+                print('SMART run completed')
 
 
         return self.global_convergence
