@@ -1584,6 +1584,8 @@ class VPLModelingPipeline:
             os.mkdir(self.OutPath)
         if not os.path.exists(self.DataOutPath):
             os.mkdir(self.DataOutPath)
+        if not os.path.exists(self.SMART_RunScriptDir):
+            os.mkdir(self.SMART_RunScriptDir)
         # Prepare the Hyak environment
         #self.prepare_hyak_env()
 
