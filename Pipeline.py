@@ -1887,6 +1887,9 @@ class VPLModelingPipeline:
 
         if self.run_spectra == True: 
 
+            if self.verbose == True:
+                ftestingoutput = open(self.OutPath+self.casename+'_SavingInfoOut.txt', 'a')
+
             ##### Generate SMART spectra of the final converged atmosphere ------------------------------
 
             ### Create degraded atmospheric profile to prepare for LBLABC and Climate -------------
@@ -1931,6 +1934,8 @@ class VPLModelingPipeline:
 
             if self.verbose == True:
                 print('SMART run completed')
+                ftestingoutput.write('SMART run completed\n')
+                ftestingoutput.close()
 
 
         return self.global_convergence
