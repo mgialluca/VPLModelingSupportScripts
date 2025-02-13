@@ -82,7 +82,7 @@ class VPLModelingPipeline:
         # If the atmospheric pressure needs to be checked and adjusted outside of photochem, set this flag to True
         self.adjust_atmospheric_pressure = False
         # when adjusting pressure, the number density of each level much change by less than this percentage (as a decimal) on each level to achieve convergence:
-        self.NewPressure_Ndens_tolerance = 0.5 
+        self.NewPressure_Ndens_tolerance = 1 
 
         # lookup table to connect Hitran gas codes to molecule names
         self.hitran_lookup = pd.read_csv('HitranTable.csv', index_col='Molecule')
@@ -564,10 +564,10 @@ class VPLModelingPipeline:
 
         # Print messages:
         if self.verbose == True:
-            #if HasItConverged:
-            #    print('Photochem run '+self.casename+' Try '+str(trynum)+' has converged!')
-            #else:
-            #    print('Photochem run '+self.casename+' Try '+str(trynum)+' has NOT converged.')
+            if HasItConverged:
+                print('Photochem run '+self.casename+' Try '+str(trynum)+' has converged!')
+            else:
+                print('Photochem run '+self.casename+' Try '+str(trynum)+' has NOT converged.')
             print('Normalized Gross error: '+str(NormGrosserr))
             print('L2 Error: '+str(L2err))
             print('Time of final timestep: '+str(FinalTime))
@@ -1405,10 +1405,9 @@ class VPLModelingPipeline:
 
         # Check if the pressure converged or if photochem needs to be rerun with new pressure
         pressure_converged = True
-        for c in change_in_Ndens:
-            if c > self.NewPressure_Ndens_tolerance:
-                pressure_converged = False
-                break
+        maxchange = max(change_in_Ndens)
+        if maxchange > self.NewPressure_Ndens_tolerance:
+            pressure_converged = False
         
         # Update in.dist file for new number densities
         new_VMR_species = new_mixing_rats(new_Ndens_species, new_Ndens_tot)
@@ -1440,7 +1439,7 @@ class VPLModelingPipeline:
         subprocess.run('rm '+self.photochem_InputsDir+'PLANET.dat', shell=True)
         subprocess.run('mv '+self.photochem_InputsDir+'New_PLANET.dat '+self.photochem_InputsDir+'PLANET.dat', shell=True)
 
-        return pressure_converged
+        return pressure_converged, maxchange
 
 
     ### Purpose: Change the T/EDD profiles from climate in photochems in.dist to rerun photochem after a climate run
@@ -1686,7 +1685,7 @@ class VPLModelingPipeline:
             # If the atmospheric pressure should be checked / updated, run that
             photochem_newPsurf_subtries = 0
             if self.adjust_atmospheric_pressure == True:
-                pressure_converged = self.change_atmospheric_pressure()
+                pressure_converged, maxchange = self.change_atmospheric_pressure()
 
                 if self.verbose == True:
                     print('New Pressure found: '+"{:.4e}".format(self.updated_atm_pressure)+' bars')
@@ -1725,14 +1724,33 @@ class VPLModelingPipeline:
                             photochem_newPsurf_inner_subtries += 1
                             local_photochem_conv, grosserr, l2err, finaltime, nsteps_photo = self.check_photochem_conv()
 
-                        pressure_converged = self.change_atmospheric_pressure()
+                        if photochem_newPsurf_inner_subtries > self.max_iterations_master:
+                                break
+
+                        pressure_converged, maxchange = self.change_atmospheric_pressure()
 
                         if pressure_converged == False and self.verbose == True:
                             ftestingoutput.write('Normalized Gross error: '+str(grosserr)+'\n')
                             ftestingoutput.write('L2 Error: '+str(l2err)+'\n')
                             ftestingoutput.write('Time of final timestep: '+str(finaltime)+'\n')
+                            ftestingoutput.write('Max change of a number density layer: '+str(maxchange)+'\n')
+                            ftestingoutput.write('New Pressure: '+str(self.updated_atm_pressure)+'\n')
                             print('Surf Pressure Subtry '+str(photochem_newPsurf_subtries)+' NOT converged')
                             ftestingoutput.write('Surf Pressure Subtry '+str(photochem_newPsurf_subtries)+' NOT converged\n\n')
+
+                    if photochem_newPsurf_inner_subtries > self.max_iterations_master and self.suppress_IOerrors == False:
+                        subprocess.run('cp '+self.photochemDir+'OUTPUT/out.dist '+self.DataOutPath+'FINAL_out_FAILED.dist', shell=True)
+                        subprocess.run('cp '+self.photochemDir+'OUTPUT/out.out '+self.DataOutPath+'FINAL_out_FAILED.out', shell=True)
+                        subprocess.run('cp '+self.photochemDir+'OUTPUT/PTZ_mixingratios_out.dist '+self.DataOutPath+'FINAL_PTZ_mixingratios_out_FAILED.dist', shell=True)
+                        raise IOError('Photochem attempted to use new pressure >'+str(self.max_iterations_master)+' times with no inner convergence. On photochem run number '+str(self.num_photochem_runs))
+                    elif photochem_newPsurf_inner_subtries > self.max_iterations_master and self.suppress_IOerrors == True:
+                        subprocess.run('cp '+self.photochemDir+'OUTPUT/out.dist '+self.DataOutPath+'FINAL_out_FAILED.dist', shell=True)
+                        subprocess.run('cp '+self.photochemDir+'OUTPUT/out.out '+self.DataOutPath+'FINAL_out_FAILED.out', shell=True)
+                        subprocess.run('cp '+self.photochemDir+'OUTPUT/PTZ_mixingratios_out.dist '+self.DataOutPath+'FINAL_PTZ_mixingratios_out_FAILED.dist', shell=True)
+                        if self.verbose == True:
+                            print('Max iterations reached ('+str(self.max_iterations_master)+'), using new pressure without finding inner convergence, ending run')
+                            ftestingoutput.write('Max iterations reached ('+str(self.max_iterations_master)+'), using new pressure without finding inner convergence, ending run\n')
+                        break
 
                     if pressure_converged == False and self.suppress_IOerrors == False:
                         subprocess.run('cp '+self.photochemDir+'OUTPUT/out.dist '+self.DataOutPath+'FINAL_out_FAILED.dist', shell=True)
