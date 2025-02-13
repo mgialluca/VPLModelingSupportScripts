@@ -332,7 +332,7 @@ class Generate_Atmosphere_Parameter_Sweep:
         
         # If you want to use starting points from a previous try, set self.Restart_Run to be the previous sweep name
         if type(self.Restart_Run) == str:
-            currmodel = VPLModelingPipeline('RunNumber'+str(modelID),  '/gscratch/vsm/gialluca/VPLModelingTools_Dev/'+self.Restart_Run+'RunNumber'+str(modelID)+'/PhotochemInputs/', 
+            currmodel = VPLModelingPipeline('RunNumber'+str(modelID),  '/gscratch/vsm/gialluca/VPLModelingTools_Dev/'+self.Restart_Run+'/RunNumber'+str(modelID)+'/PhotochemInputs/', 
                                             True, find_molecules_of_interest=False, hitran_year=self.hitran_year)
         else:
             currmodel = VPLModelingPipeline('RunNumber'+str(modelID), self.photochemInitial, True, find_molecules_of_interest=False, hitran_year=self.hitran_year)
