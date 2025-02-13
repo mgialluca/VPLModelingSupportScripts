@@ -39,31 +39,31 @@ class Generate_Atmosphere_Parameter_Sweep:
         self.outgass_species_gridsweep = ['H2O'] # Species to vary outgassing rates of
         self.outgass_species_molarmass = {} # Molar masses in g/mol
         self.outgass_species_molarmass['H2O'] = [18.015]*(u.g/u.mol)# Molar masses in g/mol
-        self.escape_species_gridsweep = []#['O'] # Species to vary escape rates of
+        self.escape_species_gridsweep = ['O'] # Species to vary escape rates of
         self.escape_species_molarmass = {}
-        #self.escape_species_molarmass['O'] = [15.999]*(u.g/u.mol) 
+        self.escape_species_molarmass['O'] = [15.999]*(u.g/u.mol) 
 
-        self.outgass_sample_type_gridsweep = ['Linear'] # How to sample outgassed molecules: 'Linear', 'Log', or 'UserDef' 
-        self.escape_sample_type_gridsweep = []#['UserDef']
+        self.outgass_sample_type_gridsweep = ['Log'] # How to sample outgassed molecules: 'Linear', 'Log', or 'UserDef' 
+        self.escape_sample_type_gridsweep = ['UserDef']
         # Linear - sample every flux on a linear grid (np.linspace) with some defined resolution
         # Log - sample every flux on a log grid (np.logspace) with some defined resolution
         # UserDef - User defined arrays of samples for every flux to vary 
 
         # Need to set Min / Max ranges for each molecule to vary in the form of a dictionary if using Linear or Log sampling
         self.outgass_species_MinMax_gridsweep = {}
-        self.outgass_species_MinMax_gridsweep['H2O'] = [1.65e8, 3.0e12] # min, max
+        self.outgass_species_MinMax_gridsweep['H2O'] = [1.65329797e8, 3.00359578e12] # min, max
 
         self.escape_species_MinMax_gridsweep = {}
-        #self.escape_species_MinMax_gridsweep['O'] = [0,0]
+        self.escape_species_MinMax_gridsweep['O'] = [0,0]
 
         # Sample resolution if using Linear / Log sampling 
-        self.outgass_sample_resolution_gridsweep = [2] # number of samples for each outgassed species
+        self.outgass_sample_resolution_gridsweep = [10] # number of samples for each outgassed species
         self.escape_sample_resolution_gridsweep = [0]
 
         # Need to pass samples for user defined option
         self.outgass_samples_gridsweep = {}
         self.escape_samples_gridsweep = {}
-        #self.escape_samples_gridsweep['O'] = [0]
+        self.escape_samples_gridsweep['O'] = [0, 1e23, 5e23, 1e24, 5e24, 1e25, 5e25, 1e26]
 
         # Units for either Min/Max values, or the user defined samples 
         self.outgass_species_units_gridsweep = 1 / (u.cm**2 * u.s) # molecules / cm2*s (can convert from mass/time with molar mass or mol/time)
@@ -113,10 +113,12 @@ class Generate_Atmosphere_Parameter_Sweep:
         pipelineobj.vplclimate_RunScriptDir = self.master_out+casename+'/' # path to put vpl climate runscripts in
         pipelineobj.photochem_InputsDir = self.master_out+casename+'/PhotochemInputs/' # The path to create new photochem inputs in
         pipelineobj.xsec_Path = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/xsec/' # The path where cross section files can be found
+        pipelineobj.SMART_RunScriptDir = self.master_out+casename+'/'
 
         # Adjust the atmospheric pressure
         pipelineobj.adjust_atmospheric_pressure = True
-        pipelineobj.suppress_IOerrors = False
+        pipelineobj.suppress_IOerrors = True
+        pipelineobj.run_spectra = True
 
         # Molecules for the type of atmosphere we're interested in 
 
@@ -380,8 +382,8 @@ class Generate_Atmosphere_Parameter_Sweep:
                                                                                           curr_species, 'outgass').value
 
                 # Log sampling at user requested resolution
-                self.outgass_samples_gridsweep[curr_species] = np.logspace(self.outgass_species_MinMax_gridsweep[curr_species][0], 
-                                                                            self.outgass_species_MinMax_gridsweep[curr_species][1], 
+                self.outgass_samples_gridsweep[curr_species] = np.logspace(np.log10(self.outgass_species_MinMax_gridsweep[curr_species][0]), 
+                                                                            np.log10(self.outgass_species_MinMax_gridsweep[curr_species][1]), 
                                                                             self.outgass_sample_resolution_gridsweep[curr_samp])
 
             elif self.outgass_sample_type_gridsweep[curr_samp] == 'UserDef':
@@ -413,8 +415,8 @@ class Generate_Atmosphere_Parameter_Sweep:
                                                                                           curr_species, 'escape').value
 
                 # Log sampling at user requested resolution
-                self.escape_samples_gridsweep[curr_species] = np.logspace(self.escape_species_MinMax_gridsweep[curr_species][0], 
-                                                                            self.escape_species_MinMax_gridsweep[curr_species][1], 
+                self.escape_samples_gridsweep[curr_species] = np.logspace(np.log10(self.escape_species_MinMax_gridsweep[curr_species][0]), 
+                                                                            np.log10(self.escape_species_MinMax_gridsweep[curr_species][1]), 
                                                                             self.escape_sample_resolution_gridsweep[curr_samp])
 
             elif self.escape_sample_type_gridsweep[curr_samp] == 'UserDef':
