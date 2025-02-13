@@ -67,7 +67,7 @@ class VPLModelingPipeline:
         self.photochem_global_converge = False
         self.climate_global_converge = False
         self.global_convergence = False
-        self.max_iterations_master = 10 # Never do anything more than 10x
+        self.max_iterations_master = 30 # Never do anything more than 10x
         self.suppress_IOerrors = False # if convergence fails, raise IO errors if False, or just break running function if True
         self.run_spectra = True # If true, finished a converged run with smart 
 
@@ -1588,6 +1588,9 @@ class VPLModelingPipeline:
             os.mkdir(self.SMART_RunScriptDir)
         # Prepare the Hyak environment
         #self.prepare_hyak_env()
+
+        if self.adjust_atmospheric_pressure == True:
+            self.updated_atm_pressure = -1
 
         if self.verbose == True:
             ftestingoutput = open(self.OutPath+self.casename+'_SavingInfoOut.txt', 'w')
