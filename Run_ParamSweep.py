@@ -1,7 +1,7 @@
 from Parameter_Sweep import *
 
 test_object = Generate_Atmosphere_Parameter_Sweep('SweepTry1', 
-                                  '/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/Bodies/PsurfTest/', 
+                                  '/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/Bodies/StartStateSweep1/', 
                                 restart_run= True, 
                                 hitran_year='2020')
 

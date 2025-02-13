@@ -67,7 +67,7 @@ class VPLModelingPipeline:
         self.photochem_global_converge = False
         self.climate_global_converge = False
         self.global_convergence = False
-        self.max_iterations_master = 30 # Never do anything more than 10x
+        self.max_iterations_master = 100 # Never do anything more than 10x
         self.suppress_IOerrors = False # if convergence fails, raise IO errors if False, or just break running function if True
         self.run_spectra = True # If true, finished a converged run with smart 
 
@@ -1711,9 +1711,16 @@ class VPLModelingPipeline:
 
                         pressure_converged = self.change_atmospheric_pressure()
 
+                        if pressure_converged == False and self.verbose == True:
+                            print('Surf Pressure Subtry '+str(photochem_newPsurf_subtries)+' NOT converged')
+                            ftestingoutput.write('Surf Pressure Subtry '+str(photochem_newPsurf_subtries)+' NOT converged\n')
+
                     if pressure_converged == False and self.suppress_IOerrors == False:
                         raise IOError('Photochem attempted to find new pressure >'+str(self.max_iterations_master)+' times with no pressure convergence. On photochem run number '+str(self.num_photochem_runs))
                     elif pressure_converged == False and self.suppress_IOerrors == True:
+                        if self.verbose == True:
+                            print('Max iterations reached ('+str(self.max_iterations_master)+'), couldnt find new pressure, ending run')
+                            ftestingoutput.write('Max iterations reached ('+str(self.max_iterations_master)+'), couldnt find new pressure, ending run\n')
                         break
 
                     if self.verbose == True:
@@ -1884,7 +1891,7 @@ class VPLModelingPipeline:
             ### Update in.dist section end ------------------------------
 
         if self.verbose == True:
-            ftestingoutput.write('Global Convergence, '+str(self.global_convergence))
+            ftestingoutput.write('Global Convergence, '+str(self.global_convergence)+'\n')
             ftestingoutput.close()
 
 
