@@ -329,7 +329,7 @@ class Generate_Atmosphere_Parameter_Sweep:
         fluxes = InputFlux[:hold]
 
         # Initialize model pipeline object
-        currmodel = VPLModelingPipeline('RunNumber'+str(modelID), self.photochemInitial, False, find_molecules_of_interest=False, hitran_year=self.hitran_year)
+        currmodel = VPLModelingPipeline('RunNumber'+str(modelID), self.photochemInitial, True, find_molecules_of_interest=False, hitran_year=self.hitran_year)
 
         # Set relevant values of object 
         self.set_pipeline_vars('RunNumber'+str(modelID), currmodel)

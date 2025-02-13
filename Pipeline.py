@@ -1861,7 +1861,7 @@ class VPLModelingPipeline:
 
             if local_climate_convergence == False and self.suppress_IOerrors == False:
                 raise IOError('Climate could not converge in >'+str(self.max_iterations_master)+' tries. For climate run number '+str(self.num_climate_runs))
-            elif local_climate_convergence == True and self.suppress_IOerrors == True:
+            elif local_climate_convergence == False and self.suppress_IOerrors == True:
                 break
 
             ### Run VPL Climate section end ------------------------------
@@ -1885,7 +1885,7 @@ class VPLModelingPipeline:
             ftestingoutput.close()
 
 
-        if self.run_spectra == True: 
+        if self.global_convergence == True and self.run_spectra == True: 
 
             if self.verbose == True:
                 ftestingoutput = open(self.OutPath+self.casename+'_SavingInfoOut.txt', 'a')
