@@ -4,7 +4,7 @@ from Pipeline import *
 casename = 'climatebug'
 master_out = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/testclimatebug/'
 pipelineobj = VPLModelingPipeline('climatebug', 
-                                  '/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/SweepTry4/RunNumber71/PhotochemInputs/', 
+                                  '/gscratch/vsm/gialluca/VPLModelingTools_Dev/SweepTry4/RunNumber71/PhotochemInputs/', 
                                   True, find_molecules_of_interest=False, hitran_year='2020')
 
 if not os.path.exists(master_out):
