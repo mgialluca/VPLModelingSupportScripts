@@ -49,7 +49,9 @@ for m in range(len(gas_names)):
     pipelineobj.molecule_dict[gas_names[m]] = pipelineobj.hitran_lookup.loc[gas_names[m]]['HitranNumber']
     pipelineobj.molecule_dict[gas_names[m]+'_RmixCol'] = m+2
 
+pipelineobj.run_automatic()
 
+'''
 casename2 = 'climatebug2'
 pipelineobj2 = VPLModelingPipeline('climatebug2', 
                                   '/gscratch/vsm/gialluca/VPLModelingTools_Dev/SweepTry4/RunNumber76/PhotochemInputs/', 
@@ -104,3 +106,5 @@ def run_it(obj):
 
 with Pool() as p:
     models = p.map(run_it, [pipelineobj, pipelineobj2])
+
+'''
