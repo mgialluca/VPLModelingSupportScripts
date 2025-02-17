@@ -1,8 +1,8 @@
 from Parameter_Sweep import *
 
-test_object = Generate_Atmosphere_Parameter_Sweep('SweepTry2', 
+test_object = Generate_Atmosphere_Parameter_Sweep('SweepTry3', 
                                   '/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/Bodies/StartStateSweep1/', 
-                                restart_run= 'SweepTry1', 
+                                restart_run= 'SweepTry2', 
                                 hitran_year='2020')
 
 

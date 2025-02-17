@@ -355,7 +355,7 @@ class Generate_Atmosphere_Parameter_Sweep:
         #subprocess.run('rm -rf '+currmodel.LBLABC_AbsFilesDir+'*.abs', shell=True)
 
         # Delete copied atmos directory
-        #subprocess.run('rm -rf '+currmodel.atmosDir, shell=True)
+        subprocess.run('rm -rf '+currmodel.atmosDir, shell=True)
 
         return currmodel
 
