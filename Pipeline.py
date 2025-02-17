@@ -82,7 +82,7 @@ class VPLModelingPipeline:
         # If the atmospheric pressure needs to be checked and adjusted outside of photochem, set this flag to True
         self.adjust_atmospheric_pressure = False
         # when adjusting pressure, the number density of each level much change by less than this percentage (as a decimal) on each level to achieve convergence:
-        self.NewPressure_Ndens_tolerance = 1 
+        self.NewPressure_Ndens_tolerance = 15
 
         # lookup table to connect Hitran gas codes to molecule names
         self.hitran_lookup = pd.read_csv('HitranTable.csv', index_col='Molecule')
@@ -132,7 +132,7 @@ class VPLModelingPipeline:
         self.photochem_InputsDir = '/home/mgialluca/Nextcloud/VPL_Modeling/VPLModelingSupportScripts/Bodies/'+self.casename+'/' # The path to create new photochem inputs in
 
         # The climate executable:
-        self.vplclimate_executable = 'something_Beta17?' # The VPL Climate executable you want to use WITH FULL PATH
+        self.vplclimate_executable = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/ClimateModel/vpl_climate/vpl_climate' # The VPL Climate executable you want to use WITH FULL PATH
 
         # Set the appropriate HITRAN variables
         if self.HITRAN_year == '2020':
@@ -1852,6 +1852,8 @@ class VPLModelingPipeline:
                 ftestingoutput.write('Climate Runscript created, beginning first climate run\n')
 
             # Now run climate 
+            ftestingoutput.write('The runscript: '+self.vplclimate_RunScriptDir+'RunVPLClimate_'+self.casename+'.script\n')
+            ftestingoutput.write('The executable: '+self.vplclimate_executable+'\n')
             self.run_climate_1instance(self.vplclimate_RunScriptDir+'RunVPLClimate_'+self.casename+'.script', self.vplclimate_executable, trynum=self.num_climate_runs)
 
             if self.verbose == True:
