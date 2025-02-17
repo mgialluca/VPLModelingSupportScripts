@@ -1806,6 +1806,7 @@ class VPLModelingPipeline:
                 if self.updated_atm_pressure < 1e-2:
                     self.degrade_PT(grid_spacing='log')
                     if self.verbose == True:
+                        ftestingoutput.write('Log Spacing Used\n')
                         print('log spacing used')
                 else:
                     self.degrade_PT()

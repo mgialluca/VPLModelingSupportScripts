@@ -119,6 +119,10 @@ class Generate_Atmosphere_Parameter_Sweep:
         pipelineobj.suppress_IOerrors = True
         pipelineobj.run_spectra = True
 
+        # Testing if climate executable needs to be copied
+        shutil.copy(pipelineobj.vplclimate_executable, pipelineobj.OutPath+'vplclimate')
+        pipelineobj.vplclimate_executable = pipelineobj.OutPath+'vplclimate'
+
         # Molecules for the type of atmosphere we're interested in 
 
         pipelineobj.molecule_dict = {} # key-value pairs of molecules of interest (keys, str) and their hitran codes (value, int)
