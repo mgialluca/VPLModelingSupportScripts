@@ -25,6 +25,7 @@ class Generate_Atmosphere_Parameter_Sweep:
         self.sweepname = sweepname # Naming convention for directory structure
         self.photochemInitial = photochemInitial # Input files for photochem to copy and change 
         self.hitran_year = hitran_year # hitran year, 2016 or 2020 (default should be latter)
+        self.supernode = True # If you are using the supernode on hyak, needs to be True
         if hitran_year == '2020':
             self.lblabc_qtxt_dir = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/lblabc/hitranQtips2020/' # For the hitran distribution you want
         elif hitran_year == '2016':
@@ -120,8 +121,8 @@ class Generate_Atmosphere_Parameter_Sweep:
         pipelineobj.run_spectra = True
 
         # Testing if climate executable needs to be copied
-        shutil.copy(pipelineobj.vplclimate_executable, pipelineobj.OutPath+'vplclimate')
-        pipelineobj.vplclimate_executable = pipelineobj.OutPath+'vplclimate'
+        if self.supernode == True:
+            pipelineobj.vplclimate_executable = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/ClimateModel/vpl_climate/vpl_climate_supernode'
 
         # Molecules for the type of atmosphere we're interested in 
 
