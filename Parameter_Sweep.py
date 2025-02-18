@@ -526,3 +526,88 @@ class Generate_Atmosphere_Parameter_Sweep:
         dh = json.dumps(d)
         json.dump(dh, f)
         f.close()
+
+
+    # Compile data (e.g., why things failed, etc) from a failed run
+    # Will also compile which runs suceeded, which timed out, etc. 
+    ## Input:
+    # Num_of_Models - the number of models in the master out, this just makes code easier
+    def compile_info_failed_run(self, Num_of_Models=80):
+
+        model_ID = []
+        final_state = [] # 'Converged', 'Failed', or 'Timeout'
+        final_pressure = [] # Last surface pressure of model
+
+        fail_reason = [] # Reason for failure, or NaN / None
+
+        '''
+        for species in self.outgass_samples_gridsweep.keys():
+            output_col_names.append(species+'_OutgassRate')
+        for species in self.escape_samples_gridsweep.keys():
+            output_col_names.append(species+'_EscapeRate')
+        '''
+
+        for i in range(Num_of_Models):
+
+            model_ID_hold = 'RunNumber'+str(i)
+            model_ID.append(model_ID_hold)
+            path_hold = self.master_out+model_ID_hold+'/'
+
+            # If the run failed, try to find out why
+            if os.path.exists(path_hold+'FINAL_out_FAILED.out'):
+                final_state.append('Failed')
+
+                f = open(path_hold+model_ID_hold+'_SavingInfoOut.txt', 'r')
+                lines = f.readlines()
+                f.close()
+                hold = lines[len(lines)-2]
+                hold = hold.split()
+                if 'Max' in hold and 'iterations' in hold:
+                    if 'inner' in hold and 'convergence' in hold:
+                        fail_reason_hold = 'Failed trying to find photochem convergence with a new pressure'
+                    else:
+                        hold2 = lines[len(lines)-4]
+                        hold2 = hold2.split()
+                        if 'Photochem' in hold2:
+                            fail_reason_hold = 'Failed running photochem (without new pressure)'
+                        elif 'Surf' in hold2 and 'Pressure' in hold2:
+                            hold3 = lines[len(lines)-6]
+                            hold3 = hold3.split()
+                            hold3 = "{:.5f}".format(float(hold3[len(hold3)-1]))
+                            fail_reason_hold = 'Failed trying to find new pressure, max change: '+hold3
+                        else:
+                            fail_reason_hold = 'Unclear'
+
+                elif 'Climate' in hold and 'convergence' in hold:
+                    fail_reason_hold = 'Failed trying to find climate convergence'
+
+                else:
+                    fail_reason_hold = 'Unclear'
+
+                fail_reason.append(fail_reason_hold)
+
+            elif os.path.exists(path_hold+'FINAL_out.out'):
+                final_state.append('Converged')
+                fail_reason.append('NA')
+
+            else:
+                final_state.append('Timeout')
+                fail_reason.append('NA')
+
+            # Now find the final pressure
+            f = open(path_hold+'PhotochemInputs/PLANET.dat', 'r')
+            lines = f.readlines()
+            for i in range(len(lines)):
+                hold = lines[i].split()
+                if 'surface' in hold and 'pressure' in hold:
+                    psurf_hold = float(hold[0])
+                    break
+
+            final_pressure.append(psurf_hold)
+
+        dat = [model_ID, final_state, final_pressure, fail_reason]
+        col_names = ['ModelNumber', 'FinalState', 'LastPsurf', 'FailReason']
+        tab = Table(dat, names=col_names)
+        ascii.write(tab, self.master_out+'ParameterSweep_RunStats_failedrun.dat', delimiter=' ', format='fixed_width')
+
+            
