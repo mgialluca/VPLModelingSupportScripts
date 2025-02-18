@@ -1597,18 +1597,23 @@ class VPLModelingPipeline:
         # Prepare the Hyak environment
         #self.prepare_hyak_env()
 
+        if self.verbose == True:
+            ftestingoutput = open(self.OutPath+self.casename+'_SavingInfoOut.txt', 'w')
+
         if self.adjust_atmospheric_pressure == True:
             self.updated_atm_pressure = -1
 
             # Get original pressure
+            planetdat = open(self.photochem_InputsDir+'PLANET.dat', 'r')
+            lines = planetdat.readlines()
+            planetdat.close()
             for i in lines:
                 fields = i.split()
                 if 'surface' in fields and 'pressure' in fields:
                     self.updated_atm_pressure = float(fields[0])
 
-
-        if self.verbose == True:
-            ftestingoutput = open(self.OutPath+self.casename+'_SavingInfoOut.txt', 'w')
+            if self.verbose == True:
+                ftestingoutput.write('Starting pressure: '+str(self.updated_atm_pressure)+' bars\n')
 
         # Start loop to find global convergence with photochem + lblabc + vpl climate
         while self.global_convergence == False:

@@ -1,6 +1,7 @@
 from Parameter_Sweep import *
 import subprocess
 
+subprocess.run('rm -rf /gscratch/vsm/gialluca/VPLModelingTools_Dev/SweepTry4/', shell=True)
 
 test_object = Generate_Atmosphere_Parameter_Sweep('SweepTry4', 
                                   '/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/Bodies/StartStateSweep1/', 
