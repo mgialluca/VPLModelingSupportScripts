@@ -562,21 +562,22 @@ class Generate_Atmosphere_Parameter_Sweep:
                 f.close()
                 hold = lines[len(lines)-2]
                 hold = hold.split()
-                if 'Max' in hold and 'iterations' in hold:
-                    if 'inner' in hold and 'convergence' in hold:
-                        fail_reason_hold = 'Failed trying to find photochem convergence with a new pressure'
-                    else:
-                        hold2 = lines[len(lines)-4]
-                        hold2 = hold2.split()
-                        if 'Photochem' in hold2:
-                            fail_reason_hold = 'Failed running photochem (without new pressure)'
-                        elif 'Surf' in hold2 and 'Pressure' in hold2:
-                            hold3 = lines[len(lines)-6]
-                            hold3 = hold3.split()
-                            hold3 = "{:.5f}".format(float(hold3[len(hold3)-1]))
-                            fail_reason_hold = 'Failed trying to find new pressure, max change: '+hold3
+                if 'Max' in hold:
+                    if 'iterations' in hold or 'Iterations' in hold:
+                        if 'inner' in hold and 'convergence' in hold:
+                            fail_reason_hold = 'Failed trying to find photochem convergence with a new pressure'
                         else:
-                            fail_reason_hold = 'Unclear'
+                            hold2 = lines[len(lines)-4]
+                            hold2 = hold2.split()
+                            if 'Photochem' in hold2:
+                                fail_reason_hold = 'Failed running photochem (without new pressure)'
+                            elif 'Surf' in hold2 and 'Pressure' in hold2:
+                                hold3 = lines[len(lines)-6]
+                                hold3 = hold3.split()
+                                hold3 = "{:.5f}".format(float(hold3[len(hold3)-1]))
+                                fail_reason_hold = 'Failed trying to find new pressure, max change: '+hold3
+                            else:
+                                fail_reason_hold = 'Unclear'
 
                 elif 'Climate' in hold and 'convergence' in hold:
                     fail_reason_hold = 'Failed trying to find climate convergence'
