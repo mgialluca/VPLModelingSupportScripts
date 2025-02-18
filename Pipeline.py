@@ -82,7 +82,8 @@ class VPLModelingPipeline:
         # If the atmospheric pressure needs to be checked and adjusted outside of photochem, set this flag to True
         self.adjust_atmospheric_pressure = False
         # when adjusting pressure, the number density of each level much change by less than this percentage (as a decimal) on each level to achieve convergence:
-        self.NewPressure_Ndens_tolerance = 15
+        self.NewPressure_Ndens_tolerance = 15 # DEPRECEATED
+        self.NewPressure_Psurf_tolerance = 0.007 # new surface pressure must change by <= to this (x100 percent)
 
         # lookup table to connect Hitran gas codes to molecule names
         self.hitran_lookup = pd.read_csv('HitranTable.csv', index_col='Molecule')
@@ -584,11 +585,11 @@ class VPLModelingPipeline:
     ## Fxn-specific Inputs:
     # trynum - the iteration number youre on for the specific case, defined by self.num_climate_runs
     # TropHeatingTolerance - Convergence check, last output value of avg trop heatin rate magnitude must be
-    #          <= this tolerance [K/day] to be converged
+    #          <= this tolerance [K/day] to be converged -> could maybe loosen this ()
     # AvgFluxTolerance - Convergence check, last output value of avg flux must be <= this tolerance
     #          [W/m^2] to be converged
     ##
-    def check_vplclimate_conv(self, trynum=1, TropHeatingTolerance=6e-2, AvgFluxTolerance=0.3):
+    def check_vplclimate_conv(self, trynum=1, TropHeatingTolerance=1e-2, AvgFluxTolerance=1):
         # Set the output flag of converged or not (boolean)
         # Guilty until proven innocent
         HasItConverged = False
@@ -620,10 +621,10 @@ class VPLModelingPipeline:
                 break
 
         # Do Convergence checking
-        if TropHeating <= TropHeatingTolerance:
+        if np.abs(TropHeating) <= TropHeatingTolerance:
             TropHeatingConverged = True
 
-        if AvgFlux <= AvgFluxTolerance:
+        if np.abs(AvgFlux) <= AvgFluxTolerance:
             AvgFluxConverged = True
 
         # Overall convergence check:
@@ -1402,12 +1403,6 @@ class VPLModelingPipeline:
 
         # New total number density and the change in number density on each level
         new_Ndens_tot, change_in_Ndens = new_total_Ndens(new_total_VMR, outdistdic['NDens'])
-
-        # Check if the pressure converged or if photochem needs to be rerun with new pressure
-        pressure_converged = True
-        maxchange = max(change_in_Ndens)
-        if maxchange > self.NewPressure_Ndens_tolerance:
-            pressure_converged = False
         
         # Update in.dist file for new number densities
         new_VMR_species = new_mixing_rats(new_Ndens_species, new_Ndens_tot)
@@ -1417,6 +1412,20 @@ class VPLModelingPipeline:
         loaded_ptz_out = ascii.read(self.photochemDir+'OUTPUT/PTZ_mixingratios_out.dist')
         colmass = find_tot_column_mass_dens(new_Ndens_tot, loaded_ptz_out['ALT'], self.MMW)
         new_surfP = (colmass*(self.planetary_gravity*(u.m*u.s**-2).to(u.cm*u.s**-2))*100)*u.Pa.to(u.bar) # 100 converts per cm to per m
+
+        # Check if the pressure converged or if photochem needs to be rerun with new pressure
+        maxchange = np.abs(self.updated_atm_pressure - new_surfP)/self.updated_atm_pressure
+        if maxchange <= self.NewPressure_Psurf_tolerance:
+            pressure_converged = True
+        else:
+            pressure_converged = False
+
+        '''
+        pressure_converged = True
+        maxchange = max(change_in_Ndens)
+        if maxchange > self.NewPressure_Ndens_tolerance:
+            pressure_converged = False
+        '''
 
         self.updated_atm_pressure = new_surfP
 
@@ -1590,6 +1599,13 @@ class VPLModelingPipeline:
 
         if self.adjust_atmospheric_pressure == True:
             self.updated_atm_pressure = -1
+
+            # Get original pressure
+            for i in lines:
+                fields = i.split()
+                if 'surface' in fields and 'pressure' in fields:
+                    self.updated_atm_pressure = float(fields[0])
+
 
         if self.verbose == True:
             ftestingoutput = open(self.OutPath+self.casename+'_SavingInfoOut.txt', 'w')
