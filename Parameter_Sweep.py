@@ -540,15 +540,20 @@ class Generate_Atmosphere_Parameter_Sweep:
 
         fail_reason = [] # Reason for failure, or NaN / None
 
-        '''
-        for species in self.outgass_samples_gridsweep.keys():
-            output_col_names.append(species+'_OutgassRate')
-        for species in self.escape_samples_gridsweep.keys():
-            output_col_names.append(species+'_EscapeRate')
-        '''
+        # Set up data calls for outgassing & escape rates
+        rate_cols = []
+        outgass_rates = []
+        escape_rates = []
+        for species in self.outgass_species_gridsweep:
+            rate_cols.append(species+'_OutgassRate')
+            outgass_rates.append([])
+        for species in self.escape_species_gridsweep:
+            rate_cols.append(species+'_EscapeRate')
+            escape_rates.append([])
 
         for i in range(Num_of_Models):
 
+            # Get the model ID ('RunNumber#')
             model_ID_hold = 'RunNumber'+str(i)
             model_ID.append(model_ID_hold)
             path_hold = self.master_out+model_ID_hold+'/'
@@ -563,7 +568,8 @@ class Generate_Atmosphere_Parameter_Sweep:
                 hold = lines[len(lines)-2]
                 hold = hold.split()
                 if 'Max' in hold:
-                    if 'iterations' in hold or 'Iterations' in hold:
+                    # If this was printed out, either failed running photochem or trying to converge on a surface pressure 
+                    if 'iterations' in hold or 'Iterations' in hold: 
                         if 'inner' in hold and 'convergence' in hold:
                             fail_reason_hold = 'Failed trying to find photochem convergence with a new pressure'
                         else:
@@ -579,7 +585,7 @@ class Generate_Atmosphere_Parameter_Sweep:
                             else:
                                 fail_reason_hold = 'Unclear'
 
-                elif 'Climate' in hold and 'convergence' in hold:
+                elif 'Climate' in hold and 'convergence' in hold: # failed in climate
                     fail_reason_hold = 'Failed trying to find climate convergence'
 
                 else:
@@ -587,10 +593,12 @@ class Generate_Atmosphere_Parameter_Sweep:
 
                 fail_reason.append(fail_reason_hold)
 
+            # The run was successful
             elif os.path.exists(path_hold+'FINAL_out.out'):
                 final_state.append('Converged')
                 fail_reason.append('NA')
 
+            # the run timed out
             else:
                 final_state.append('Timeout')
                 fail_reason.append('NA')
@@ -598,6 +606,7 @@ class Generate_Atmosphere_Parameter_Sweep:
             # Now find the final pressure
             f = open(path_hold+'PhotochemInputs/PLANET.dat', 'r')
             lines = f.readlines()
+            f.close()
             for i in range(len(lines)):
                 hold = lines[i].split()
                 if 'surface' in hold and 'pressure' in hold:
@@ -606,8 +615,36 @@ class Generate_Atmosphere_Parameter_Sweep:
 
             final_pressure.append(psurf_hold)
 
+            # Now retrieve the outgassing and escape rates
+            f = open(path_hold+'PhotochemInputs/species.dat', 'r')
+            lines = f.readlines()
+            f.close()
+
+            for species in range(len(self.outgass_species_gridsweep)):
+                gas_hold = self.outgass_species_gridsweep[species]
+                for l in lines:
+                    if l.split()[0][0] != '*':
+                        if l.split()[0] == gas_hold:
+                            outgass_rates[species].append(float(l.split()[11]))
+                            break
+
+            for species in range(len(self.escape_species_gridsweep)):
+                gas_hold = self.escape_species_gridsweep[species]
+                for l in lines:
+                    if l.split()[0][0] != '*':
+                        if l.split()[0] == gas_hold:
+                            escape_rates[species].append(float(l.split()[14]))
+                            break
+
+        # Compile the information
         dat = [model_ID, final_state, final_pressure, fail_reason]
         col_names = ['ModelNumber', 'FinalState', 'LastPsurf', 'FailReason']
+        for col in rate_cols:
+            col_names.append(col)
+        for col in outgass_rates:
+            dat.append(col)
+        for col in escape_rates:
+            dat.append(col)
         tab = Table(dat, names=col_names)
         ascii.write(tab, self.master_out+'ParameterSweep_RunStats_failedrun.dat', delimiter=' ', format='fixed_width')
 
