@@ -8,6 +8,8 @@ import os
 import copy
 from multiprocessing import Pool
 import shutil
+import re
+import json
 
 # Need to figure out how parameter sweeps are running:
 # 1. Run across a grid (every combination? Or strategic points? former is brute force method, could start with that)
@@ -532,7 +534,11 @@ class Generate_Atmosphere_Parameter_Sweep:
     # Will also compile which runs suceeded, which timed out, etc. 
     ## Input:
     # Num_of_Models - the number of models in the master out, this just makes code easier
-    def compile_info_failed_run(self, Num_of_Models=80):
+    def compile_info_failed_run(self, Num_of_Models=80, dict_output=True):
+
+        # To get atm profiles and convergence info in a dict (for later plotting purposes)
+        if dict_output == True:
+            d = {}
 
         model_ID = []
         final_state = [] # 'Converged', 'Failed', or 'Timeout'
@@ -558,9 +564,15 @@ class Generate_Atmosphere_Parameter_Sweep:
             model_ID.append(model_ID_hold)
             path_hold = self.master_out+model_ID_hold+'/'
 
+            if dict_output == True:
+                d[model_ID_hold] = {}
+
             # If the run failed, try to find out why
             if os.path.exists(path_hold+'FINAL_out_FAILED.out'):
                 final_state.append('Failed')
+
+                if dict_output == True:
+                    d[model_ID_hold]['FinalState'] = 'Failed'
 
                 f = open(path_hold+model_ID_hold+'_SavingInfoOut.txt', 'r')
                 lines = f.readlines()
@@ -598,10 +610,28 @@ class Generate_Atmosphere_Parameter_Sweep:
                 final_state.append('Converged')
                 fail_reason.append('NA')
 
+                if dict_output == True:
+                    d[model_ID_hold]['FinalState'] = 'Converged'
+
+                    ptz = ascii.read(path_hold+'FINAL_PTZ_mixingratios_out.dist')
+                    d[model_ID_hold]['PTZFile'] = {}
+
+                    for ptzcol in ptz.colnames:
+                        d[model_ID_hold]['PTZFile'][ptzcol] = list(ptz[ptzcol])
+
             # the run timed out
             else:
                 final_state.append('Timeout')
                 fail_reason.append('NA')
+
+                if dict_output == True:
+                    d[model_ID_hold]['FinalState'] = 'Timeout'
+
+                    ptz = ascii.read(path_hold+'atmos/PHOTOCHEM/OUTPUT/PTZ_mixingratios_out.dist')
+                    d[model_ID_hold]['PTZFile'] = {}
+
+                    for ptzcol in ptz.colnames:
+                        d[model_ID_hold]['PTZFile'][ptzcol] = list(ptz[ptzcol])
 
             # Now find the final pressure
             f = open(path_hold+'PhotochemInputs/PLANET.dat', 'r')
@@ -615,6 +645,9 @@ class Generate_Atmosphere_Parameter_Sweep:
 
             final_pressure.append(psurf_hold)
 
+            if dict_output == True:
+                d[model_ID_hold]['Psurf'] = psurf_hold
+
             # Now retrieve the outgassing and escape rates
             f = open(path_hold+'PhotochemInputs/species.dat', 'r')
             lines = f.readlines()
@@ -626,6 +659,10 @@ class Generate_Atmosphere_Parameter_Sweep:
                     if l.split()[0][0] != '*':
                         if l.split()[0] == gas_hold:
                             outgass_rates[species].append(float(l.split()[11]))
+
+                            if dict_output == True:
+                                d[model_ID_hold][gas_hold+'_OutgassRate'] = float(l.split()[11])
+
                             break
 
             for species in range(len(self.escape_species_gridsweep)):
@@ -634,6 +671,10 @@ class Generate_Atmosphere_Parameter_Sweep:
                     if l.split()[0][0] != '*':
                         if l.split()[0] == gas_hold:
                             escape_rates[species].append(float(l.split()[14]))
+
+                            if dict_output == True:
+                                d[model_ID_hold][gas_hold+'_EscapeRate'] = float(l.split()[14])
+
                             break
 
         # Compile the information
@@ -648,4 +689,41 @@ class Generate_Atmosphere_Parameter_Sweep:
         tab = Table(dat, names=col_names)
         ascii.write(tab, self.master_out+'ParameterSweep_RunStats_failedrun.dat', delimiter=' ', format='fixed_width')
 
-            
+        f = open(self.master_out+'DataCompilation_wAtmProfiles.json', 'w')
+        dh = json.dumps(d)
+        json.dump(dh, f)
+        f.close()
+
+
+    '''
+    # Find the last created climate run file 
+    def find_latest_climate_filename(self, directory):
+        # Regular expression to match filenames like "filename_TryXX.run"
+        pattern = r"filename_Try(\d+)\.run"
+
+        max_try_number = -1
+        latest_filename = None
+
+        # Loop through all files in the directory
+        for file in os.listdir(directory):
+            match = re.match(pattern, file)
+            if match:
+                try_number = int(match.group(1))  # Extract the Try number
+                if try_number > max_try_number:
+                    max_try_number = try_number
+                    latest_filename = file
+        
+        return latest_filename
+
+
+    def compile_last_available_atm_profiles(self, Num_of_Models=80):
+        # Example usage
+        directory = "/path/to/your/files"  # Replace with your directory path
+        latest_file = self.find_latest_climate_filename(directory)
+
+        if latest_file:
+            print(f"The latest file is: {latest_file}")
+        else:
+            print("No matching files found.")
+
+    '''
