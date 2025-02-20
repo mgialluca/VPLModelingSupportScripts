@@ -7,6 +7,6 @@ test_object = Generate_Atmosphere_Parameter_Sweep('SweepTry5',
                                 restart_run= False, 
                                 hitran_year='2020')
 
-test_object.compile_info_failed_run(dict_output=True)
+test_object.compile_restart_input_options()
 #test_object.run_grid_sweep()
 #test_object.compile_run_output()

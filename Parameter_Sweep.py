@@ -22,7 +22,7 @@ import json
 
 class Generate_Atmosphere_Parameter_Sweep:
 
-    def __init__(self, sweepname, photochemInitial, restart_run=False, hitran_year='2020'):
+    def __init__(self, sweepname, photochemInitial, restart_run=False, starting_point='Exact', hitran_year='2020'):
 
         self.sweepname = sweepname # Naming convention for directory structure
         self.photochemInitial = photochemInitial # Input files for photochem to copy and change 
@@ -77,6 +77,9 @@ class Generate_Atmosphere_Parameter_Sweep:
         #########  Setting output paths  #########
 
         self.Restart_Run = restart_run
+        self.Starting_Point = starting_point # If restart_run is a string, it gives the initial files to use separately ...
+        # ... if this is 'Exact', that means the runs inputs will be the exact same ...
+        # ... otherwise this will point to a run statistics file to use to determine the closest available input files
         self.master_out = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/'+self.sweepname+'/'
 
         # UNCOMMENT BEFORE RUNNING:
@@ -324,6 +327,10 @@ class Generate_Atmosphere_Parameter_Sweep:
         subprocess.run('mv '+pipelineobj.photochem_InputsDir+'species_new.dat '+pipelineobj.photochem_InputsDir+'species.dat', shell=True)
 
 
+    #def find_Euclidean_closeness(self, prev_run_number, fluxes):
+
+
+
     # For a given suite of inputs, run the photochem/climate pipeline 
     # InputFlux - list of input fluxes for both outgassing and escaping species built up in a run function 
     ##    samples for all outgassed species in their order followed by escaping species, plus a number to indicate the unique casename 
@@ -338,8 +345,11 @@ class Generate_Atmosphere_Parameter_Sweep:
         
         # If you want to use starting points from a previous try, set self.Restart_Run to be the previous sweep name
         if type(self.Restart_Run) == str:
-            currmodel = VPLModelingPipeline('RunNumber'+str(modelID),  '/gscratch/vsm/gialluca/VPLModelingTools_Dev/'+self.Restart_Run+'/RunNumber'+str(modelID)+'/PhotochemInputs/', 
-                                            True, find_molecules_of_interest=False, hitran_year=self.hitran_year)
+            if self.Starting_Point == 'Exact':
+                currmodel = VPLModelingPipeline('RunNumber'+str(modelID),  '/gscratch/vsm/gialluca/VPLModelingTools_Dev/'+self.Restart_Run+'/RunNumber'+str(modelID)+'/PhotochemInputs/', 
+                                                True, find_molecules_of_interest=False, hitran_year=self.hitran_year)
+            #else:
+
         else:
             currmodel = VPLModelingPipeline('RunNumber'+str(modelID), self.photochemInitial, True, find_molecules_of_interest=False, hitran_year=self.hitran_year)
 
@@ -466,7 +476,7 @@ class Generate_Atmosphere_Parameter_Sweep:
         final_pressures = [m.updated_atm_pressure for m in models]
         convergence = [m.global_convergence for m in models]
         run_names = [m.casename for m in models]
-        output_col_names = ['RunLabel', 'Converged', 'FinalPressure']
+        output_col_names = ['ModelNumber', 'FinalState', 'LastPsurf']
         data_for_table = []
         data_for_table.append(run_names)
         data_for_table.append(convergence)
@@ -693,6 +703,99 @@ class Generate_Atmosphere_Parameter_Sweep:
         dh = json.dumps(d)
         json.dump(dh, f)
         f.close()
+
+
+    # Compile the data from a gridsweep into a python dictionary
+    # Need to make sure restart_run is false when initializing a class object from scratch
+    def compile_run_output(self, photochem=True):
+
+        # put run statistics into dictionary from output file of run
+        stats = ascii.read(self.master_out+'ParameterSweep_RunStats.dat')
+        d = {}
+        for run in range(len(stats['RunLabel'])):
+            d[stats['RunLabel'][run]] = {}
+            d[stats['RunLabel'][run]]['Converged'] = stats['Converged'][run]
+            d[stats['RunLabel'][run]]['SurfacePress[bar]'] = stats['FinalPressure'][run]
+            for rate in stats.colnames:
+                if rate not in ['RunLabel', 'Converged', 'FinalPressure']:
+                    d[stats['RunLabel'][run]][rate] = stats[rate][run]
+
+        # if photochem is True, compile the data from final PTZ mixingratios photochem output
+        if photochem == True:
+            for runlabel in stats['RunLabel']:
+                if d[runlabel]['Converged'] == True:
+                    ptz = ascii.read(self.master_out+runlabel+'/FINAL_PTZ_mixingratios_out.dist')
+                    d[runlabel]['PTZMixingRatiosOut'] = {}
+                    for col in ptz.colnames:
+                        d[runlabel]['PTZMixingRatiosOut'][col] = list(ptz[col])
+
+        # save as json
+        f = open(self.sweepname+'_OutputDict.json', 'w')
+        dh = json.dumps(d)
+        json.dump(dh, f)
+        f.close()
+
+
+    # Compile data outgassing/escape rates from previous runs to determine which will be closest starting points for future runs
+    # Specifically used if you want to start a new run using the final state of a previous sweep but not the exact same sweep 
+    ## Input:
+    # Num_of_Models - the number of models in the master out, this just makes code easier
+    def compile_restart_input_options(self, Num_of_Models=80):
+
+        model_ID = []
+        
+        # Set up data calls for outgassing & escape rates
+        rate_cols = []
+        outgass_rates = []
+        escape_rates = []
+        for species in self.outgass_species_gridsweep:
+            rate_cols.append(species+'_OutgassRate')
+            outgass_rates.append([])
+        for species in self.escape_species_gridsweep:
+            rate_cols.append(species+'_EscapeRate')
+            escape_rates.append([])
+
+        for i in range(Num_of_Models):
+
+            # Get the model ID ('RunNumber#')
+            model_ID_hold = 'RunNumber'+str(i)
+            model_ID.append(model_ID_hold)
+            path_hold = self.master_out+model_ID_hold+'/'
+
+            # Now retrieve the outgassing and escape rates
+            f = open(path_hold+'PhotochemInputs/species.dat', 'r')
+            lines = f.readlines()
+            f.close()
+
+            for species in range(len(self.outgass_species_gridsweep)):
+                gas_hold = self.outgass_species_gridsweep[species]
+                for l in lines:
+                    if l.split()[0][0] != '*':
+                        if l.split()[0] == gas_hold:
+                            outgass_rates[species].append(float(l.split()[11]))
+
+                            break
+
+            for species in range(len(self.escape_species_gridsweep)):
+                gas_hold = self.escape_species_gridsweep[species]
+                for l in lines:
+                    if l.split()[0][0] != '*':
+                        if l.split()[0] == gas_hold:
+                            escape_rates[species].append(float(l.split()[14]))
+
+                            break
+
+        # Compile the information
+        dat = [model_ID]
+        col_names = ['ModelNumber']
+        for col in rate_cols:
+            col_names.append(col)
+        for col in outgass_rates:
+            dat.append(col)
+        for col in escape_rates:
+            dat.append(col)
+        tab = Table(dat, names=col_names)
+        ascii.write(tab, self.master_out+'RatesInSweep_ForFutureInputOptions.dat', delimiter=' ', format='fixed_width')
 
 
     '''
