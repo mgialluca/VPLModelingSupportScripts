@@ -326,8 +326,65 @@ class Generate_Atmosphere_Parameter_Sweep:
         subprocess.run('rm '+pipelineobj.photochem_InputsDir+'species.dat', shell=True)
         subprocess.run('mv '+pipelineobj.photochem_InputsDir+'species_new.dat '+pipelineobj.photochem_InputsDir+'species.dat', shell=True)
 
+    # Euclidean distance metric to find out which previous run is closest to the current one
+    def euclidean_distance(self, a, b):
+        return np.sqrt(np.sum((a - b) ** 2))
+    
+    # Find the closest model from a previous sweep to use as a starting point
+    # Compare to the newfluxes for the current model that overlap with the previous sweep
+    def find_closest_prev_model(self, input_options, newfluxes):
 
-    #def find_Euclidean_closeness(self, prev_run_number, fluxes):
+        # Get the outgassed and escaped species from the previous run
+        prev_gases = list(input_options.columns)
+        prev_outgassed = []
+        prev_escaped = []
+        for prev in prev_gases:
+            if len(prev.split('_Outgass')) == 2:
+                prev_outgassed.append(prev.split('_Outgass')[0])
+            elif len(prev.split('_Escape')) == 2:
+                prev_escaped.append(prev.split('_Escape')[0])
+
+        # Find which gasses will overlap between the previous run and the current run
+        overlap_outgass = list(np.intersect1d(np.array(self.outgass_species_gridsweep), np.array(prev_outgassed)))
+        overlap_escape = list(np.intersect1d(np.array(self.escape_species_gridsweep), np.array(prev_escaped)))
+
+        # Extract the fluxes need to be matched for this current model, in the correct order
+        compare_to_curr_run = np.zeros(len(overlap_outgass)+len(overlap_escape))
+        fluxind = 0
+        for currgas in self.outgass_species_gridsweep:
+            if currgas in overlap_outgass:
+                compareind = overlap_outgass.index(currgas)
+                compare_to_curr_run[compareind] = newfluxes[fluxind]
+            fluxind += 1
+        
+        for currgas in self.escape_species_gridsweep:
+            if currgas in overlap_escape:
+                compareind = overlap_escape.index(currgas) + len(overlap_outgass)
+                compare_to_curr_run[compareind] = (newfluxes[fluxind])
+            fluxind += 1
+
+        # Find closest model from previous sweep
+        closestmodel = None
+        closestdist = np.inf
+
+        for i in input_options.index:
+            # Get overlapping fluxes from previous sweep in correct order
+            compare_prev_run = []
+            for currgas in overlap_outgass:
+                compare_prev_run.append(input_options.loc[i][currgas+'_OutgassRate'])
+            for currgas in overlap_escape:
+                compare_prev_run.append(input_options.loc[i][currgas+'_EscapeRate'])
+
+            # Find distance of model
+            if self.Starting_Point == 'Euclidean':
+                curr_dist = self.euclidean_distance(compare_to_curr_run, np.array(compare_prev_run))
+
+            # Determine if it's the closest model
+            if curr_dist < closestdist:
+                closestdist = curr_dist
+                closestmodel = i 
+
+        return closestmodel
 
 
 
@@ -348,7 +405,16 @@ class Generate_Atmosphere_Parameter_Sweep:
             if self.Starting_Point == 'Exact':
                 currmodel = VPLModelingPipeline('RunNumber'+str(modelID),  '/gscratch/vsm/gialluca/VPLModelingTools_Dev/'+self.Restart_Run+'/RunNumber'+str(modelID)+'/PhotochemInputs/', 
                                                 True, find_molecules_of_interest=False, hitran_year=self.hitran_year)
-            #else:
+            else:
+
+                # Read in the csv file that compiled the rates used in the previous run
+                input_options = pd.read_csv('/gscratch/vsm/gialluca/VPLModelingTools_Dev/'+self.Restart_Run+'/RatesInSweep_ForFutureInputOptions.dat', delimiter=' ', index_col=['ModelNumber'])
+                
+                # Find the closest model
+                use_starting_point = self.find_closest_prev_model(input_options, fluxes)
+
+                currmodel = VPLModelingPipeline('RunNumber'+str(modelID),  '/gscratch/vsm/gialluca/VPLModelingTools_Dev/'+self.Restart_Run+'/'+use_starting_point+'/PhotochemInputs/', 
+                                                True, find_molecules_of_interest=False, hitran_year=self.hitran_year)
 
         else:
             currmodel = VPLModelingPipeline('RunNumber'+str(modelID), self.photochemInitial, True, find_molecules_of_interest=False, hitran_year=self.hitran_year)
@@ -830,3 +896,4 @@ class Generate_Atmosphere_Parameter_Sweep:
             print("No matching files found.")
 
     '''
+
