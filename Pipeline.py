@@ -83,7 +83,7 @@ class VPLModelingPipeline:
         self.adjust_atmospheric_pressure = False
         # when adjusting pressure, the number density of each level much change by less than this percentage (as a decimal) on each level to achieve convergence:
         self.NewPressure_Ndens_tolerance = 15 # DEPRECEATED
-        self.NewPressure_Psurf_tolerance = 0.007 # new surface pressure must change by <= to this (x100 percent)
+        self.NewPressure_Psurf_tolerance = 0.02 # new surface pressure must change by <= to this (x100 percent)
 
         # lookup table to connect Hitran gas codes to molecule names
         self.hitran_lookup = pd.read_csv('HitranTable.csv', index_col='Molecule')
@@ -589,7 +589,7 @@ class VPLModelingPipeline:
     # AvgFluxTolerance - Convergence check, last output value of avg flux must be <= this tolerance
     #          [W/m^2] to be converged
     ##
-    def check_vplclimate_conv(self, trynum=1, TropHeatingTolerance=1e-2, AvgFluxTolerance=1):
+    def check_vplclimate_conv(self, trynum=1, TropHeatingTolerance=9e-2, AvgFluxTolerance=1):
         # Set the output flag of converged or not (boolean)
         # Guilty until proven innocent
         HasItConverged = False
@@ -1647,7 +1647,7 @@ class VPLModelingPipeline:
 
             photochem_subtries = 1
             # Currently, the trynum will only refer to the converged case (should we save every single try no matter what?)
-            local_photochem_conv, grosserr, l2err, finaltime, nsteps_photo = self.check_photochem_conv()
+            local_photochem_conv, grosserr, l2err, finaltime, nsteps_photo = self.check_photochem_conv(trynum=self.num_photochem_runs)
 
             # If photochem did not converge, try try again
             while local_photochem_conv == False:
@@ -1659,7 +1659,7 @@ class VPLModelingPipeline:
                 subprocess.run('cp '+self.photochemDir+'OUTPUT/out.dist '+self.photochemDir+'in.dist', shell=True)
                 self.run_photochem_1instance(CleanMake=False, InputCopy=False, trynum=self.num_photochem_runs)
                 photochem_subtries += 1
-                local_photochem_conv, grosserr, l2err, finaltime, nsteps_photo = self.check_photochem_conv()
+                local_photochem_conv, grosserr, l2err, finaltime, nsteps_photo = self.check_photochem_conv(trynum=self.num_photochem_runs)
 
                 if self.verbose == True:
                     ftestingoutput.write('Normalized Gross error: '+str(grosserr)+'\n')
@@ -1730,7 +1730,7 @@ class VPLModelingPipeline:
 
                         photochem_newPsurf_subtries += 1
                         # Currently, the trynum will only refer to the converged case (should we save every single try no matter what?)
-                        local_photochem_conv, grosserr, l2err, finaltime, nsteps_photo = self.check_photochem_conv()
+                        local_photochem_conv, grosserr, l2err, finaltime, nsteps_photo = self.check_photochem_conv(trynum=self.num_photochem_runs)
                         photochem_newPsurf_inner_subtries = 1
 
                         # If photochem did not converge, try try again
@@ -1743,7 +1743,7 @@ class VPLModelingPipeline:
                             subprocess.run('cp '+self.photochemDir+'OUTPUT/out.dist '+self.photochemDir+'in.dist', shell=True)
                             self.run_photochem_1instance(CleanMake=False, InputCopy=False, trynum=self.num_photochem_runs)
                             photochem_newPsurf_inner_subtries += 1
-                            local_photochem_conv, grosserr, l2err, finaltime, nsteps_photo = self.check_photochem_conv()
+                            local_photochem_conv, grosserr, l2err, finaltime, nsteps_photo = self.check_photochem_conv(trynum=self.num_photochem_runs)
 
                         if photochem_newPsurf_inner_subtries > self.max_iterations_master:
                                 break
