@@ -67,7 +67,8 @@ class VPLModelingPipeline:
         self.photochem_global_converge = False
         self.climate_global_converge = False
         self.global_convergence = False
-        self.max_iterations_master = 100 # Never do anything more than 10x
+        self.max_iterations_master = 100 # Never do anything more than 100x
+        self.max_iterations_climate = 15 # Never run climate more than 15x
         self.suppress_IOerrors = False # if convergence fails, raise IO errors if False, or just break running function if True
         self.run_spectra = True # If true, finished a converged run with smart 
 
@@ -1797,26 +1798,26 @@ class VPLModelingPipeline:
 
             # If you only had 1 subtry, and its not the first run, check for global convergence
             if photochem_subtries == 1 and self.num_photochem_runs != 1 and photochem_newPsurf_subtries == 0:
-                if nsteps_photo < 1000:
-                    self.global_convergence = True
-                    if self.verbose == True:
-                        print('Global Convergence achieved')
-                        ftestingoutput.write('Global Convergence achieved')
-                    subprocess.run('cp '+self.photochemDir+'OUTPUT/out.dist '+self.DataOutPath+'FINAL_out.dist', shell=True)
-                    subprocess.run('cp '+self.photochemDir+'OUTPUT/out.out '+self.DataOutPath+'FINAL_out.out', shell=True)
-                    subprocess.run('cp '+self.photochemDir+'OUTPUT/PTZ_mixingratios_out.dist '+self.DataOutPath+'FINAL_PTZ_mixingratios_out.dist', shell=True)
-                    break
-                else:
-                    self.global_convergence = False
-                    if self.num_photochem_runs > self.max_iterations_master:
-                        subprocess.run('cp '+self.photochemDir+'OUTPUT/out.dist '+self.DataOutPath+'FINAL_out_FAILED.dist', shell=True)
-                        subprocess.run('cp '+self.photochemDir+'OUTPUT/out.out '+self.DataOutPath+'FINAL_out_FAILED.out', shell=True)
-                        subprocess.run('cp '+self.photochemDir+'OUTPUT/PTZ_mixingratios_out.dist '+self.DataOutPath+'FINAL_PTZ_mixingratios_out_FAILED.dist', shell=True)
+                #if nsteps_photo < 1000:
+                self.global_convergence = True
+                if self.verbose == True:
+                    print('Global Convergence achieved')
+                    ftestingoutput.write('Global Convergence achieved')
+                subprocess.run('cp '+self.photochemDir+'OUTPUT/out.dist '+self.DataOutPath+'FINAL_out.dist', shell=True)
+                subprocess.run('cp '+self.photochemDir+'OUTPUT/out.out '+self.DataOutPath+'FINAL_out.out', shell=True)
+                subprocess.run('cp '+self.photochemDir+'OUTPUT/PTZ_mixingratios_out.dist '+self.DataOutPath+'FINAL_PTZ_mixingratios_out.dist', shell=True)
+                break
+            else:
+                self.global_convergence = False
+                if self.num_photochem_runs > self.max_iterations_master or self.num_climate_runs > self.max_iterations_climate:
+                    subprocess.run('cp '+self.photochemDir+'OUTPUT/out.dist '+self.DataOutPath+'FINAL_out_FAILED.dist', shell=True)
+                    subprocess.run('cp '+self.photochemDir+'OUTPUT/out.out '+self.DataOutPath+'FINAL_out_FAILED.out', shell=True)
+                    subprocess.run('cp '+self.photochemDir+'OUTPUT/PTZ_mixingratios_out.dist '+self.DataOutPath+'FINAL_PTZ_mixingratios_out_FAILED.dist', shell=True)
 
-                        if self.suppress_IOerrors == False:
-                            raise IOError('Photochem+Climate have run together >'+str(self.max_iterations_master)+' without finding global convergence, run failed.')
-                        elif self.suppress_IOerrors == True:
-                            break
+                    if self.suppress_IOerrors == False:
+                        raise IOError('Photochem+Climate have run together >'+str(self.max_iterations_master)+' without finding global convergence, run failed.')
+                    elif self.suppress_IOerrors == True:
+                        break
 
                 #self.global_convergence = True
 
@@ -1897,7 +1898,7 @@ class VPLModelingPipeline:
             # Until climate converges, loop through taking new temp profile
             while local_climate_convergence == False:
 
-                if climate_subtries == self.max_iterations_master:
+                if climate_subtries == self.max_iterations_climate:
                     break
 
                 climate_subtries += 1
