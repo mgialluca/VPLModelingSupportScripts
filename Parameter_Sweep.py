@@ -795,7 +795,7 @@ class Generate_Atmosphere_Parameter_Sweep:
         for col in escape_rates:
             dat.append(col)
         tab = Table(dat, names=col_names)
-        ascii.write(tab, self.master_out+'RatesInSweep_ForFutureInputOptions.dat', delimiter=' ', format='fixed_width')
+        ascii.write(tab, self.master_out+'RatesInSweep_ForFutureInputOptions.dat', delimiter=' ')
 
 
     '''
