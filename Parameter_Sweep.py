@@ -703,11 +703,12 @@ class Generate_Atmosphere_Parameter_Sweep:
                 if dict_output == True:
                     d[model_ID_hold]['FinalState'] = 'Timeout'
 
-                    ptz = ascii.read(path_hold+'atmos/PHOTOCHEM/OUTPUT/PTZ_mixingratios_out.dist')
-                    d[model_ID_hold]['PTZFile'] = {}
+                    if os.path.exists(path_hold+'atmos/PHOTOCHEM/OUTPUT/PTZ_mixingratios_out.dist'):
+                        ptz = ascii.read(path_hold+'atmos/PHOTOCHEM/OUTPUT/PTZ_mixingratios_out.dist')
+                        d[model_ID_hold]['PTZFile'] = {}
 
-                    for ptzcol in ptz.colnames:
-                        d[model_ID_hold]['PTZFile'][ptzcol] = list(ptz[ptzcol])
+                        for ptzcol in ptz.colnames:
+                            d[model_ID_hold]['PTZFile'][ptzcol] = list(ptz[ptzcol])
 
             # Now find the final pressure
             f = open(path_hold+'PhotochemInputs/PLANET.dat', 'r')
