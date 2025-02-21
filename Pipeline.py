@@ -68,7 +68,7 @@ class VPLModelingPipeline:
         self.climate_global_converge = False
         self.global_convergence = False
         self.max_iterations_master = 100 # Never do anything more than 100x
-        self.max_iterations_climate = 15 # Never run climate more than 15x
+        self.max_iterations_climate = 18 # Never run climate more than 15x
         self.suppress_IOerrors = False # if convergence fails, raise IO errors if False, or just break running function if True
         self.run_spectra = True # If true, finished a converged run with smart 
 
@@ -1616,6 +1616,8 @@ class VPLModelingPipeline:
             if self.verbose == True:
                 ftestingoutput.write('Starting pressure: '+str(self.updated_atm_pressure)+' bars\n')
 
+        climate_subtries = 0
+
         # Start loop to find global convergence with photochem + lblabc + vpl climate
         while self.global_convergence == False:
 
@@ -1797,7 +1799,8 @@ class VPLModelingPipeline:
                 self.backup_photochem_run(trynum=self.num_photochem_runs)
 
             # If you only had 1 subtry, and its not the first run, check for global convergence
-            if photochem_subtries == 1 and self.num_photochem_runs != 1 and photochem_newPsurf_subtries == 0:
+            #if photochem_subtries == 1 and self.num_photochem_runs != 1 and photochem_newPsurf_subtries == 0:
+            if photochem_subtries <= 3 and self.num_photochem_runs != 1 and photochem_newPsurf_subtries == 0 and climate_subtries == 1:
                 #if nsteps_photo < 1000:
                 self.global_convergence = True
                 if self.verbose == True:
