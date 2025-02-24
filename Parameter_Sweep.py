@@ -54,13 +54,14 @@ class Generate_Atmosphere_Parameter_Sweep:
 
         # Need to set Min / Max ranges for each molecule to vary in the form of a dictionary if using Linear or Log sampling
         self.outgass_species_MinMax_gridsweep = {}
-        self.outgass_species_MinMax_gridsweep['H2O'] = [1.65329797e8, 3.00359578e12] # min, max
+        self.outgass_species_MinMax_gridsweep['H2O'] = [3.8e10, 1e11] # min, max
+        #self.outgass_species_MinMax_gridsweep['H2O'] = [1.65329797e8, 3.00359578e12] # min, max
 
         self.escape_species_MinMax_gridsweep = {}
         self.escape_species_MinMax_gridsweep['O'] = [0,0]
 
         # Sample resolution if using Linear / Log sampling 
-        self.outgass_sample_resolution_gridsweep = [10] # number of samples for each outgassed species
+        self.outgass_sample_resolution_gridsweep = [20] # number of samples for each outgassed species
         self.escape_sample_resolution_gridsweep = [0]
 
         # Need to pass samples for user defined option
@@ -383,6 +384,8 @@ class Generate_Atmosphere_Parameter_Sweep:
             if curr_dist < closestdist:
                 closestdist = curr_dist
                 closestmodel = i 
+
+        print('Closest Model: '+closestmodel)
 
         return closestmodel
 
