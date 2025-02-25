@@ -34,6 +34,7 @@ for Psurfsubtry, Innertry, file in file_data:
     # print(f"Processing file: {file} (Psurfsubtry: {Psurfsubtry}, Innertry: {Innertry})")
     
     if float(Psurfsubtry) > currPsurfSubtry:
+        d['PTry'+str(currPsurfSubtry)] = {}
         d['PTry'+str(currPsurfSubtry)]['toa_press'] = toa_press
         d['PTry'+str(currPsurfSubtry)]['toa_alt'] = toa_alt
         d['PTry'+str(currPsurfSubtry)]['toa_o'] = toa_o
@@ -94,6 +95,7 @@ for Psurfsubtry, Innertry, file in file_data:
     boa_h = ptz['H'][boa]
 
 
+d['PTry'+str(currPsurfSubtry)] = {}
 d['PTry'+str(currPsurfSubtry)]['toa_press'] = toa_press
 d['PTry'+str(currPsurfSubtry)]['toa_alt'] = toa_alt
 d['PTry'+str(currPsurfSubtry)]['toa_o'] = toa_o
