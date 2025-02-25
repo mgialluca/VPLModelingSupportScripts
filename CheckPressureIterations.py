@@ -33,7 +33,7 @@ for Psurfsubtry, Innertry, file in file_data:
     # Perform the operation on each file
     # print(f"Processing file: {file} (Psurfsubtry: {Psurfsubtry}, Innertry: {Innertry})")
     
-    if Psurfsubtry > currPsurfSubtry:
+    if float(Psurfsubtry) > currPsurfSubtry:
         d['PTry'+str(currPsurfSubtry)]['toa_press'] = toa_press
         d['PTry'+str(currPsurfSubtry)]['toa_alt'] = toa_alt
         d['PTry'+str(currPsurfSubtry)]['toa_o'] = toa_o
@@ -52,7 +52,7 @@ for Psurfsubtry, Innertry, file in file_data:
         
         print('Convergence found, moved to next pressure iteration\n')
     
-    currPsurfSubtry = Psurfsubtry
+    currPsurfSubtry = float(Psurfsubtry)
 
     ptz = ascii.read(file)
     boa = len(ptz)-1
