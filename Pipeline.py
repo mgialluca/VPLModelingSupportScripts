@@ -1443,7 +1443,7 @@ class VPLModelingPipeline:
             else:
                 if 'DZGRID' in hold:
                     if new_surfP >= 1:
-                        planetdat_new.write('0.50E5   = DZGRID [cm] \n')
+                        planetdat_new.write('1.00e+05 = DZGRID [cm] \n')
                     else:
                         planetdat_new.write('4.95e+04 = DZGRID [cm] \n')
                 else:
@@ -1610,14 +1610,31 @@ class VPLModelingPipeline:
         if self.adjust_atmospheric_pressure == True:
             self.updated_atm_pressure = -1
 
-            # Get original pressure
-            planetdat = open(self.photochem_InputsDir+'PLANET.dat', 'r')
-            lines = planetdat.readlines()
-            planetdat.close()
-            for i in lines:
-                fields = i.split()
-                if 'surface' in fields and 'pressure' in fields:
-                    self.updated_atm_pressure = float(fields[0])
+            # Get original pressure and update DZGrid
+            planetdat_new = open(self.photochem_InputsDir+'New_PLANET.dat', 'w')
+            planetdat_old = open(self.photochem_InputsDir+'PLANET.dat', 'r')
+
+            planetdat_lines = planetdat_old.readlines()
+            for l in planetdat_lines:
+                hold = l.split()
+                if 'surface' in hold and 'pressure' in hold:
+                    self.updated_atm_pressure = float(hold[0])
+                    planetdat_new.write(l)
+                else:
+                    if 'DZGRID' in hold:
+                        if self.updated_atm_pressure >= 1:
+                            planetdat_new.write('1.00e+05 = DZGRID [cm] \n')
+                        else:
+                            planetdat_new.write('4.95e+04 = DZGRID [cm] \n')
+                    else:
+                        planetdat_new.write(l)
+
+            planetdat_new.close()
+            planetdat_old.close()
+
+            subprocess.run('rm '+self.photochem_InputsDir+'PLANET.dat', shell=True)
+            subprocess.run('mv '+self.photochem_InputsDir+'New_PLANET.dat '+self.photochem_InputsDir+'PLANET.dat', shell=True)
+
 
             if self.verbose == True:
                 ftestingoutput.write('Starting pressure: '+str(self.updated_atm_pressure)+' bars\n')
