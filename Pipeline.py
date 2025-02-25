@@ -511,7 +511,7 @@ class VPLModelingPipeline:
     #          tolerance to be converged
     # TimeTolerance - Convergence check, time of last step must be >= this tolerance to be converged
     ##
-    def check_photochem_conv(self, trynum=1, NormGrossTolerance=10, L2Tolerance=400, TimeTolerance=1e16):
+    def check_photochem_conv(self, trynum=1, NormGrossTolerance=1, L2Tolerance=np.inf, TimeTolerance=1e16):
         # Set the output flag of converged or not (boolean)
         # Guilty until proven innocent
         HasItConverged = False
