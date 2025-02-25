@@ -10,7 +10,7 @@ directory = '../TestPress2/RunNumber7/'
 files = os.listdir(directory)
 
 # Define a regex pattern to extract the numbers after 'Psurfsubtry' and 'Innertry'
-pattern = r"PTZMix_Psurfsubtry(\d+)_Innertry_(\d+).run"
+pattern = r"PTZMix_Psurfsubtry(\d+)_Innertry_(\d+).dist"
 
 # Create a list to store tuples of the form (Psurfsubtry, Innertry, file_path)
 file_data = []
