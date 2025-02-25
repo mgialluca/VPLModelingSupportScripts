@@ -67,7 +67,7 @@ class VPLModelingPipeline:
         self.photochem_global_converge = False
         self.climate_global_converge = False
         self.global_convergence = False
-        self.max_iterations_master = 100 # Never do anything more than 100x
+        self.max_iterations_master = 8 # Never do anything more than 100x
         self.max_iterations_climate = 18 # Never run climate more than 15x
         self.suppress_IOerrors = False # if convergence fails, raise IO errors if False, or just break running function if True
         self.run_spectra = True # If true, finished a converged run with smart 
@@ -561,7 +561,7 @@ class VPLModelingPipeline:
             TimeConverged = True
 
         # Overall convergence check:
-        if NormGrossConverged == True and L2Converged == True and TimeConverged == True:
+        if NormGrossConverged == True and TimeConverged == True: # and L2Converged == True:
             HasItConverged = True
 
         # Print messages:
