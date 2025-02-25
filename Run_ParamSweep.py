@@ -2,7 +2,7 @@ from Parameter_Sweep import *
 import subprocess
 
 
-test_object = Generate_Atmosphere_Parameter_Sweep('TestPress', 
+test_object = Generate_Atmosphere_Parameter_Sweep('TestPress2', 
                                   '/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/Bodies/StartStateSweep1/', 
                                 restart_run= 'SweepTry7', 
                                 starting_point='Euclidean',

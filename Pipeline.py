@@ -1441,7 +1441,13 @@ class VPLModelingPipeline:
                 planetdat_new.write("{:.2e}".format(new_surfP))
                 planetdat_new.write(' = P0, surface pressure [bar] \n')
             else:
-                planetdat_new.write(l)
+                if 'DZGRID' in hold:
+                    if new_surfP >= 1:
+                        planetdat_new.write('0.50E5   = DZGRID [cm] \n')
+                    else:
+                        planetdat_new.write('4.95e+04 = DZGRID [cm] \n')
+                else:
+                    planetdat_new.write(l)
 
         planetdat_new.close()
         planetdat_old.close()
