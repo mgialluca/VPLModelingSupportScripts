@@ -54,7 +54,7 @@ for Psurfsubtry, Innertry, file in file_data:
     
     currPsurfSubtry = float(Psurfsubtry)
 
-    ptz = ascii.read(file)
+    ptz = ascii.read(directory+file)
     boa = len(ptz)-1
 
     print(f"Psurfsubtry: {Psurfsubtry}, Innertry: {Innertry}")
