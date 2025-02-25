@@ -1623,7 +1623,7 @@ class VPLModelingPipeline:
                 else:
                     if 'DZGRID' in hold:
                         if self.updated_atm_pressure >= 1:
-                            planetdat_new.write('1.00e+05 = DZGRID [cm] \n')
+                            planetdat_new.write('0.70e+05 = DZGRID [cm] \n')
                         else:
                             planetdat_new.write('4.95e+04 = DZGRID [cm] \n')
                     else:
