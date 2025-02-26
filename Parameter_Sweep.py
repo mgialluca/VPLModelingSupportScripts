@@ -42,9 +42,11 @@ class Generate_Atmosphere_Parameter_Sweep:
         self.outgass_species_gridsweep = ['H2O'] # Species to vary outgassing rates of
         self.outgass_species_molarmass = {} # Molar masses in g/mol
         self.outgass_species_molarmass['H2O'] = [18.015]*(u.g/u.mol)# Molar masses in g/mol
-        self.escape_species_gridsweep = ['O'] # Species to vary escape rates of
+        self.escape_species_gridsweep = ['O3'] # Species to vary escape rates of
+        self.escape_species_losstype = ['Vdep'] # Vdep (depositional velocity at surface) or TOA (flux at top of atmosphere)
         self.escape_species_molarmass = {}
-        self.escape_species_molarmass['O'] = [15.999]*(u.g/u.mol) 
+        #self.escape_species_molarmass['O'] = [15.999]*(u.g/u.mol) 
+        self.escape_species_molarmass['O3'] = [47.997]*(u.g/u.mol) 
 
         self.outgass_sample_type_gridsweep = ['UserDef'] #['Log'] # How to sample outgassed molecules: 'Linear', 'Log', or 'UserDef' 
         self.escape_sample_type_gridsweep = ['UserDef']
@@ -58,7 +60,7 @@ class Generate_Atmosphere_Parameter_Sweep:
         #self.outgass_species_MinMax_gridsweep['H2O'] = [1.65329797e8, 3.00359578e12] # min, max
 
         self.escape_species_MinMax_gridsweep = {}
-        self.escape_species_MinMax_gridsweep['O'] = [0,0]
+        self.escape_species_MinMax_gridsweep['O3'] = [0,0]
 
         # Sample resolution if using Linear / Log sampling 
         self.outgass_sample_resolution_gridsweep = [0] # number of samples for each outgassed species
@@ -68,11 +70,14 @@ class Generate_Atmosphere_Parameter_Sweep:
         self.outgass_samples_gridsweep = {}
         self.outgass_samples_gridsweep['H2O'] = [78000000000.0]
         self.escape_samples_gridsweep = {}
-        self.escape_samples_gridsweep['O'] = [0, 1e23, 5e23, 1e24, 5e24, 1e25, 5e25, 1e26]
+        #self.escape_samples_gridsweep['O'] = [0, 1e23, 5e23, 1e24, 5e24, 1e25, 5e25, 1e26]
+        self.escape_samples_gridsweep['O3'] = [0.01, 0.1, 0.4, 0.7]
+
 
         # Units for either Min/Max values, or the user defined samples 
         self.outgass_species_units_gridsweep = 1 / (u.cm**2 * u.s) # molecules / cm2*s (can convert from mass/time with molar mass or mol/time)
-        self.escape_species_units_gridsweep = 1 / u.s # Molecules per second
+        #self.escape_species_units_gridsweep = 1 / u.s # Molecules per second
+        self.escape_species_units_gridsweep = u.cm / u.s # Molecules per second
 
         #######################################################################
 
@@ -153,37 +158,44 @@ class Generate_Atmosphere_Parameter_Sweep:
     ## var - variable to convert
     ## species - the species the variable corresponds to (to use molar mass properly)
     ## fluxtype - 'escape' or 'outgass' 
-    def fix_flux_units(self, var, species, fluxtype):
+    def fix_flux_units(self, var, species, fluxtype, loss_type='TOA'):
 
-        try:
-            var = var.to(1 / (u.cm**2 * u.s))
-        except:
+        if (fluxtype == 'escape' and loss_type == 'TOA') or fluxtype == 'outgass':
             try:
-                var = var.to(u.mol / (u.cm**2 * u.s))
-                var = (var*const.N_A).to(1 / (u.cm**2 * u.s))
+                var = var.to(1 / (u.cm**2 * u.s))
             except:
                 try:
-                    var = var.to(u.mol / u.s)
-                    var = var / (4*np.pi*(self.R_p**2))
                     var = var.to(u.mol / (u.cm**2 * u.s))
                     var = (var*const.N_A).to(1 / (u.cm**2 * u.s))
                 except:
                     try:
-                        var = var.to(u.kg / u.s)
-                        if fluxtype == 'outgass':
-                            var = (var / self.outgass_species_molarmass[species]).to(u.mol/u.s)
-                        elif fluxtype == 'escape':
-                            var = (var / self.escape_species_molarmass[species]).to(u.mol/u.s)
+                        var = var.to(u.mol / u.s)
                         var = var / (4*np.pi*(self.R_p**2))
                         var = var.to(u.mol / (u.cm**2 * u.s))
                         var = (var*const.N_A).to(1 / (u.cm**2 * u.s))
                     except:
                         try:
-                            var = var.to(1/u.s)
+                            var = var.to(u.kg / u.s)
+                            if fluxtype == 'outgass':
+                                var = (var / self.outgass_species_molarmass[species]).to(u.mol/u.s)
+                            elif fluxtype == 'escape':
+                                var = (var / self.escape_species_molarmass[species]).to(u.mol/u.s)
                             var = var / (4*np.pi*(self.R_p**2))
-                            var = var.to(1 / (u.cm**2 * u.s))
+                            var = var.to(u.mol / (u.cm**2 * u.s))
+                            var = (var*const.N_A).to(1 / (u.cm**2 * u.s))
                         except:
-                            raise IOError('Could not properly convert flux units to molecules/cm^2/s for '+species+' ('+fluxtype+')')
+                            try:
+                                var = var.to(1/u.s)
+                                var = var / (4*np.pi*(self.R_p**2))
+                                var = var.to(1 / (u.cm**2 * u.s))
+                            except:
+                                raise IOError('Could not properly convert flux units to molecules/cm^2/s for '+species+' ('+fluxtype+')')
+            
+        elif fluxtype == 'escape' and loss_type == 'Vdep':
+            try:
+                var = var.to(u.cm/u.s)
+            except:
+                raise IOError('Could not properly convert depositional velocity units to cm/s for '+species+' ('+fluxtype+')')
         
         return var
     
@@ -247,52 +259,98 @@ class Generate_Atmosphere_Parameter_Sweep:
                         # Now DISTH is set to '0.' with fixed spaces
                         nsp_new.write('0.      ')
 
-                    else: # Need to preserve the lines LBOUND through DISTH (line indicies 8-12)
+                    else: 
 
-                        # First is the LBOUND with 5 spaces 
-                        nsp_new.write(currline[8]+'     ')
+                        speciesind = self.escape_species_gridsweep.index(currgas)
+                        loss_type = self.escape_species_losstype[speciesind]
 
-                        # Then VDEP0 with 8 characters total
-                        nsp_new.write(currline[9])
-                        add_spaces = 8 - len(currline[9])
-                        for space in range(add_spaces):
-                            nsp_new.write(' ')
+                        if loss_type == 'Vdep' or loss_type == 'vdep': # Need the LBOUND to be a depositional velocity loss of the species
+                            # Get the index of the new value in fluxes array
+                            fluxind_hold = np.where(np.array(all_affected_species) == currgas)[0] # escape will always come last so need to be length agnostic
+                            fluxind = fluxind_hold[len(fluxind_hold)-1]
 
-                        # Then FIXEDMR with 8 characters total
-                        nsp_new.write(currline[10])
-                        add_spaces = 8 - len(currline[10])
-                        for space in range(add_spaces):
-                            nsp_new.write(' ')
+                            # since we're using a depositional velocity, LBOUND will be '0' and VDEP0 and FIXEDMR will be '0.' with fixed amount of spaces
+                            nsp_new.write('0     ')
 
-                        # Then SGFLUX with 10 characters total
-                        nsp_new.write(currline[11])
-                        add_spaces = 10 - len(currline[11])
-                        for space in range(add_spaces):
-                            nsp_new.write(' ')
-                        
-                        # Then DITSH with 8 characters total
-                        nsp_new.write(currline[12])
-                        add_spaces = 8 - len(currline[12])
-                        for space in range(add_spaces):
-                            nsp_new.write(' ')
+                            # Now SGFLUX is set to be the new flux value 
+                            newvdval = "{:.1E}".format(fluxes[fluxind])
+                            nsp_new.write(newvdval+' ')
+                            
+                            # Now DISTH is set to '0.' with fixed spaces
+                            nsp_new.write('0.      0.      0.      ')
+
+                        else: # Need to preserve the lines LBOUND through DISTH (line indicies 8-12)
+                            # First is the LBOUND with 5 spaces 
+                            nsp_new.write(currline[8]+'     ')
+
+                            # Then VDEP0 with 8 characters total
+                            nsp_new.write(currline[9])
+                            add_spaces = 8 - len(currline[9])
+                            for space in range(add_spaces):
+                                nsp_new.write(' ')
+
+                            # Then FIXEDMR with 8 characters total
+                            nsp_new.write(currline[10])
+                            add_spaces = 8 - len(currline[10])
+                            for space in range(add_spaces):
+                                nsp_new.write(' ')
+
+                            # Then SGFLUX with 10 characters total
+                            nsp_new.write(currline[11])
+                            add_spaces = 10 - len(currline[11])
+                            for space in range(add_spaces):
+                                nsp_new.write(' ')
+                            
+                            # Then DITSH with 8 characters total
+                            nsp_new.write(currline[12])
+                            add_spaces = 8 - len(currline[12])
+                            for space in range(add_spaces):
+                                nsp_new.write(' ')
 
                     # if the Escape flux is changing, we can now explicitly set that at MBOUND
                     if currgas in self.escape_species_gridsweep:
 
-                        # Get the index of the new value in fluxes array
-                        fluxind_hold = np.where(np.array(all_affected_species) == currgas)[0] # escape will always come last so need to be length agnostic
-                        fluxind = fluxind_hold[len(fluxind_hold)-1]
+                        speciesind = self.escape_species_gridsweep.index(currgas)
+                        loss_type = self.escape_species_losstype[speciesind]
 
-                        # MBOUND explicitly set to 2
-                        nsp_new.write('2      ')
+                        if loss_type == 'TOA' or loss_type == 'toa':
 
-                        # Set the new flux as SMFLUX, always put one space after but NOTE if the exponent is >=100 there could be a character error in fortran file reading
-                        newsmval = "{:.1E}".format(fluxes[fluxind])
-                        nsp_new.write(newsmval+' ')
+                            # Get the index of the new value in fluxes array
+                            fluxind_hold = np.where(np.array(all_affected_species) == currgas)[0] # escape will always come last so need to be length agnostic
+                            fluxind = fluxind_hold[len(fluxind_hold)-1]
 
-                        # VEFF0 set to 0. with fixed spaces, and then you're done
-                        nsp_new.write('0.   ')
-                        nsp_new.write('\n')
+                            # MBOUND explicitly set to 2
+                            nsp_new.write('2      ')
+
+                            # Set the new flux as SMFLUX, always put one space after but NOTE if the exponent is >=100 there could be a character error in fortran file reading
+                            newsmval = "{:.1E}".format(fluxes[fluxind])
+                            nsp_new.write(newsmval+' ')
+
+                            # VEFF0 set to 0. with fixed spaces, and then you're done
+                            nsp_new.write('0.   ')
+                            nsp_new.write('\n')
+
+                        else: # Need to preserve the lines MBOUND through VEFF0 (line indicies 13-15)
+
+                            # First MBOUND with 6 spaces
+                            nsp_new.write(currline[13]+'      ')
+
+                            # Then SMFLUX with 8 characters
+                            nsp_new.write(currline[14])
+                            add_spaces = 8 - len(currline[14])
+                            if add_spaces < 0:
+                                add_spaces == 0
+                            for space in range(add_spaces):
+                                nsp_new.write(' ')
+
+                            # Finally VEFF0 with 5 characters
+                            nsp_new.write(currline[15])
+                            add_spaces = 8 - len(currline[15])
+                            if add_spaces < 0:
+                                add_spaces == 0
+                            for space in range(add_spaces):
+                                nsp_new.write(' ')
+                            nsp_new.write('\n')
 
                     else: # Need to preserve the lines MBOUND through VEFF0 (line indicies 13-15)
 
@@ -492,7 +550,7 @@ class Generate_Atmosphere_Parameter_Sweep:
 
                 # Ensure Min / Max flux units are correct
                 self.escape_species_MinMax_gridsweep[curr_species] = self.fix_flux_units(self.escape_species_MinMax_gridsweep[curr_species]*self.escape_species_units_gridsweep, 
-                                                                                          curr_species, 'escape').value
+                                                                                          curr_species, 'escape', loss_type=self.escape_species_losstype[curr_samp]).value
 
                 # Linear sampling at user requested resolution
                 self.escape_samples_gridsweep[curr_species] = np.linspace(self.escape_species_MinMax_gridsweep[curr_species][0], 
@@ -504,7 +562,7 @@ class Generate_Atmosphere_Parameter_Sweep:
 
                 # Ensure Min / Max flux units are correct
                 self.escape_species_MinMax_gridsweep[curr_species] = self.fix_flux_units(self.escape_species_MinMax_gridsweep[curr_species]*self.escape_species_units_gridsweep, 
-                                                                                          curr_species, 'escape').value
+                                                                                          curr_species, 'escape', loss_type=self.escape_species_losstype[curr_samp]).value
 
                 # Log sampling at user requested resolution
                 self.escape_samples_gridsweep[curr_species] = np.logspace(np.log10(self.escape_species_MinMax_gridsweep[curr_species][0]), 
@@ -516,7 +574,7 @@ class Generate_Atmosphere_Parameter_Sweep:
 
                 # Fix flux units
                 self.escape_samples_gridsweep[curr_species] = self.fix_flux_units(self.escape_samples_gridsweep[curr_species]*self.escape_species_units_gridsweep, 
-                                                                                          curr_species, 'escape').value
+                                                                                          curr_species, 'escape', loss_type=self.escape_species_losstype[curr_samp]).value
                 
         ### Define all input combinations
         ### Syntax will be samples for all outgassed species in their order followed by escaping species 
@@ -586,18 +644,18 @@ class Generate_Atmosphere_Parameter_Sweep:
         # put run statistics into dictionary from output file of run
         stats = ascii.read(self.master_out+'ParameterSweep_RunStats.dat')
         d = {}
-        for run in range(len(stats['RunLabel'])):
-            d[stats['RunLabel'][run]] = {}
-            d[stats['RunLabel'][run]]['Converged'] = stats['Converged'][run]
-            d[stats['RunLabel'][run]]['SurfacePress[bar]'] = stats['FinalPressure'][run]
+        for run in range(len(stats['ModelNumber'])):
+            d[stats['ModelNumber'][run]] = {}
+            d[stats['ModelNumber'][run]]['FinalState'] = stats['FinalState'][run]
+            d[stats['ModelNumber'][run]]['SurfacePress[bar]'] = stats['LastPsurf'][run]
             for rate in stats.colnames:
-                if rate not in ['RunLabel', 'Converged', 'FinalPressure']:
-                    d[stats['RunLabel'][run]][rate] = stats[rate][run]
+                if rate not in ['ModelNumber', 'FinalState', 'LastPsurf']:
+                    d[stats['ModelNumber'][run]][rate] = stats[rate][run]
 
         # if photochem is True, compile the data from final PTZ mixingratios photochem output
         if photochem == True:
-            for runlabel in stats['RunLabel']:
-                if d[runlabel]['Converged'] == True:
+            for runlabel in stats['ModelNumber']:
+                if d[runlabel]['FinalState'] == True:
                     ptz = ascii.read(self.master_out+runlabel+'/FINAL_PTZ_mixingratios_out.dist')
                     d[runlabel]['PTZMixingRatiosOut'] = {}
                     for col in ptz.colnames:
@@ -774,37 +832,6 @@ class Generate_Atmosphere_Parameter_Sweep:
         ascii.write(tab, self.master_out+'ParameterSweep_RunStats_failedrun.dat', delimiter=' ', format='fixed_width')
 
         f = open(self.master_out+'DataCompilation_wAtmProfiles.json', 'w')
-        dh = json.dumps(d)
-        json.dump(dh, f)
-        f.close()
-
-
-    # Compile the data from a gridsweep into a python dictionary
-    # Need to make sure restart_run is false when initializing a class object from scratch
-    def compile_run_output(self, photochem=True):
-
-        # put run statistics into dictionary from output file of run
-        stats = ascii.read(self.master_out+'ParameterSweep_RunStats.dat')
-        d = {}
-        for run in range(len(stats['RunLabel'])):
-            d[stats['RunLabel'][run]] = {}
-            d[stats['RunLabel'][run]]['Converged'] = stats['Converged'][run]
-            d[stats['RunLabel'][run]]['SurfacePress[bar]'] = stats['FinalPressure'][run]
-            for rate in stats.colnames:
-                if rate not in ['RunLabel', 'Converged', 'FinalPressure']:
-                    d[stats['RunLabel'][run]][rate] = stats[rate][run]
-
-        # if photochem is True, compile the data from final PTZ mixingratios photochem output
-        if photochem == True:
-            for runlabel in stats['RunLabel']:
-                if d[runlabel]['Converged'] == True:
-                    ptz = ascii.read(self.master_out+runlabel+'/FINAL_PTZ_mixingratios_out.dist')
-                    d[runlabel]['PTZMixingRatiosOut'] = {}
-                    for col in ptz.colnames:
-                        d[runlabel]['PTZMixingRatiosOut'][col] = list(ptz[col])
-
-        # save as json
-        f = open(self.sweepname+'_OutputDict.json', 'w')
         dh = json.dumps(d)
         json.dump(dh, f)
         f.close()
