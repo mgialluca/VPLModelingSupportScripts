@@ -4,7 +4,7 @@ from astropy.io import ascii
 import json
 
 # Define the directory containing the files
-directory = '../TestPress2/RunNumber7/'
+directory = '../TestPress2/RunNumber0/'
 
 # Get all files in the directory
 files = os.listdir(directory)

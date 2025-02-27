@@ -2,7 +2,7 @@ from Parameter_Sweep import *
 import subprocess
 
 
-test_object = Generate_Atmosphere_Parameter_Sweep('TestPress3', 
+test_object = Generate_Atmosphere_Parameter_Sweep('TestVDEP', 
                                   '/gscratch/vsm/gialluca/VPLModelingTools_Dev/SmallerRange/RunNumber53/PhotochemInputs/', 
                                 restart_run= True, 
                                 starting_point=None,
