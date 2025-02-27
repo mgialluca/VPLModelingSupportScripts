@@ -2,10 +2,11 @@ from Parameter_Sweep import *
 import subprocess
 
 
+#SmallerRange/RunNumber53/PhotochemInputs/', 
 test_object = Generate_Atmosphere_Parameter_Sweep('TestVDEP2', 
-                                  '/gscratch/vsm/gialluca/VPLModelingTools_Dev/SmallerRange/RunNumber53/PhotochemInputs/', 
-                                restart_run= 'TestVDEP', 
-                                starting_point='Exact',
+                                  '/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/InputDir_Testing_higherP/', 
+                                restart_run= True, 
+                                starting_point=None,
                                 hitran_year='2020')
 
 #test_object.compile_info_failed_run()

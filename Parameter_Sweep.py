@@ -71,7 +71,7 @@ class Generate_Atmosphere_Parameter_Sweep:
         self.outgass_samples_gridsweep['H2O'] = [78000000000.0]
         self.escape_samples_gridsweep = {}
         #self.escape_samples_gridsweep['O'] = [0, 1e23, 5e23, 1e24, 5e24, 1e25, 5e25, 1e26]
-        self.escape_samples_gridsweep['O3'] = [0.01, 0.1, 0.4, 0.7]
+        self.escape_samples_gridsweep['O3'] = [0.01, 0.02, 0.1] #
 
 
         # Units for either Min/Max values, or the user defined samples 
