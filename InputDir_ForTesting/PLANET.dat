@@ -4,7 +4,7 @@
 0.0e+00  = ZTROP, height of the tropopause [cm]
 0.000    = FAR, Ar partial pressure
 6.99e+08 = R0, radius of planet [cm]
-1.000    = P0, surface pressure [bar]
+0.100    = P0, surface pressure [bar]
 VENUS    = PLANET, string naming planet type
 0.00    = TIMEGA, for modifying solar flux (SUN ONLY)
 0        = IRESET

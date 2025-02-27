@@ -42,42 +42,42 @@ class Generate_Atmosphere_Parameter_Sweep:
         self.outgass_species_gridsweep = ['H2O'] # Species to vary outgassing rates of
         self.outgass_species_molarmass = {} # Molar masses in g/mol
         self.outgass_species_molarmass['H2O'] = [18.015]*(u.g/u.mol)# Molar masses in g/mol
-        self.escape_species_gridsweep = ['O3'] # Species to vary escape rates of
-        self.escape_species_losstype = ['Vdep'] # Vdep (depositional velocity at surface) or TOA (flux at top of atmosphere)
+        self.escape_species_gridsweep = ['O', 'O3'] # Species to vary escape rates of
+        self.escape_species_losstype = ['TOA', 'Vdep'] # Vdep (depositional velocity at surface) or TOA (flux at top of atmosphere)
         self.escape_species_molarmass = {}
-        #self.escape_species_molarmass['O'] = [15.999]*(u.g/u.mol) 
+        self.escape_species_molarmass['O'] = [15.999]*(u.g/u.mol) 
         self.escape_species_molarmass['O3'] = [47.997]*(u.g/u.mol) 
 
-        self.outgass_sample_type_gridsweep = ['UserDef'] #['Log'] # How to sample outgassed molecules: 'Linear', 'Log', or 'UserDef' 
-        self.escape_sample_type_gridsweep = ['UserDef']
+        self.outgass_sample_type_gridsweep = ['Log'] # How to sample outgassed molecules: 'Linear', 'Log', or 'UserDef' 
+        self.escape_sample_type_gridsweep = ['UserDef', 'UserDef']
         # Linear - sample every flux on a linear grid (np.linspace) with some defined resolution
         # Log - sample every flux on a log grid (np.logspace) with some defined resolution
         # UserDef - User defined arrays of samples for every flux to vary 
 
         # Need to set Min / Max ranges for each molecule to vary in the form of a dictionary if using Linear or Log sampling
         self.outgass_species_MinMax_gridsweep = {}
-        self.outgass_species_MinMax_gridsweep['H2O'] = [3.8e10, 1e11] # min, max
-        #self.outgass_species_MinMax_gridsweep['H2O'] = [1.65329797e8, 3.00359578e12] # min, max
+        self.outgass_species_MinMax_gridsweep['H2O'] = [1.65329797e8, 3.00359578e12] # min, max
 
         self.escape_species_MinMax_gridsweep = {}
+        self.escape_species_MinMax_gridsweep['O'] = [0,0]
         self.escape_species_MinMax_gridsweep['O3'] = [0,0]
 
         # Sample resolution if using Linear / Log sampling 
-        self.outgass_sample_resolution_gridsweep = [0] # number of samples for each outgassed species
+        self.outgass_sample_resolution_gridsweep = [50] # number of samples for each outgassed species
         self.escape_sample_resolution_gridsweep = [0]
 
         # Need to pass samples for user defined option
         self.outgass_samples_gridsweep = {}
-        self.outgass_samples_gridsweep['H2O'] = [78000000000.0]
+        #self.outgass_samples_gridsweep['H2O'] = [78000000000.0]
         self.escape_samples_gridsweep = {}
-        #self.escape_samples_gridsweep['O'] = [0, 1e23, 5e23, 1e24, 5e24, 1e25, 5e25, 1e26]
-        self.escape_samples_gridsweep['O3'] = [0.01, 0.02, 0.1] #
+        self.escape_samples_gridsweep['O'] = [0, 1e26, 1e27] #[0, 1e23, 5e23, 1e24, 5e24, 1e25, 5e25, 1e26]
+        self.escape_samples_gridsweep['O3'] = [0.4] #
 
 
         # Units for either Min/Max values, or the user defined samples 
         self.outgass_species_units_gridsweep = 1 / (u.cm**2 * u.s) # molecules / cm2*s (can convert from mass/time with molar mass or mol/time)
         #self.escape_species_units_gridsweep = 1 / u.s # Molecules per second
-        self.escape_species_units_gridsweep = u.cm / u.s # Molecules per second
+        self.escape_species_units_gridsweep = [1/u.s, u.cm / u.s] # Molecules per second
 
         #######################################################################
 
@@ -549,7 +549,7 @@ class Generate_Atmosphere_Parameter_Sweep:
                 curr_species = self.escape_species_gridsweep[curr_samp]
 
                 # Ensure Min / Max flux units are correct
-                self.escape_species_MinMax_gridsweep[curr_species] = self.fix_flux_units(self.escape_species_MinMax_gridsweep[curr_species]*self.escape_species_units_gridsweep, 
+                self.escape_species_MinMax_gridsweep[curr_species] = self.fix_flux_units(self.escape_species_MinMax_gridsweep[curr_species]*self.escape_species_units_gridsweep[curr_samp], 
                                                                                           curr_species, 'escape', loss_type=self.escape_species_losstype[curr_samp]).value
 
                 # Linear sampling at user requested resolution
@@ -561,7 +561,7 @@ class Generate_Atmosphere_Parameter_Sweep:
                 curr_species = self.escape_species_gridsweep[curr_samp]
 
                 # Ensure Min / Max flux units are correct
-                self.escape_species_MinMax_gridsweep[curr_species] = self.fix_flux_units(self.escape_species_MinMax_gridsweep[curr_species]*self.escape_species_units_gridsweep, 
+                self.escape_species_MinMax_gridsweep[curr_species] = self.fix_flux_units(self.escape_species_MinMax_gridsweep[curr_species]*self.escape_species_units_gridsweep[curr_samp], 
                                                                                           curr_species, 'escape', loss_type=self.escape_species_losstype[curr_samp]).value
 
                 # Log sampling at user requested resolution
@@ -573,7 +573,7 @@ class Generate_Atmosphere_Parameter_Sweep:
                 curr_species = self.escape_species_gridsweep[curr_samp]
 
                 # Fix flux units
-                self.escape_samples_gridsweep[curr_species] = self.fix_flux_units(self.escape_samples_gridsweep[curr_species]*self.escape_species_units_gridsweep, 
+                self.escape_samples_gridsweep[curr_species] = self.fix_flux_units(self.escape_samples_gridsweep[curr_species]*self.escape_species_units_gridsweep[curr_samp], 
                                                                                           curr_species, 'escape', loss_type=self.escape_species_losstype[curr_samp]).value
                 
         ### Define all input combinations
