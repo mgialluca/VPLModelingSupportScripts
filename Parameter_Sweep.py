@@ -277,7 +277,7 @@ class Generate_Atmosphere_Parameter_Sweep:
                             nsp_new.write(newvdval+' ')
                             
                             # Now DISTH is set to '0.' with fixed spaces
-                            nsp_new.write('0.      0.      0.      ')
+                            nsp_new.write('0.      0.        0.      ')
 
                         else: # Need to preserve the lines LBOUND through DISTH (line indicies 8-12)
                             # First is the LBOUND with 5 spaces 
