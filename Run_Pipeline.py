@@ -1,8 +1,8 @@
 
 from Pipeline import *
 
-pipelineobj = VPLModelingPipeline('climatebug', 
-                                  '/gscratch/vsm/gialluca/VPLModelingTools_Dev/SweepTry4/RunNumber71/PhotochemInputs/', 
+pipelineobj = VPLModelingPipeline('InputDir_1bar', 
+                                  '/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/InputDir_1bar/', 
                                   True, find_molecules_of_interest=False, hitran_year='2020')
 
 

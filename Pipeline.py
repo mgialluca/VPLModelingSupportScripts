@@ -32,7 +32,7 @@ class VPLModelingPipeline:
         self.LBLABC_AbsFilesDir = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/LinebyLine_absFiles/'+casename+'/' # path to put the created lbl .abs files in 
         self.lblabc_RunScriptDir = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/LBLABC/'+casename+'/' # path to put lbl runscripts in
         self.vplclimate_RunScriptDir = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/VPLClimate/'+casename+'/' # path to put vpl climate runscripts in
-        self.photochem_InputsDir = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/Bodies/'+casename+'/' # The path to create new photochem inputs in
+        self.photochem_InputsDir = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/'+casename+'/' # The path to create new photochem inputs in
         self.xsec_Path = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/xsec/' # The path where cross section files can be found
         self.SMARTDir = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/smart/' # path to smart/ dir (such that smart/smart_spectra is the executable) ??????????? may need to fix these when klones online again 
         self.SMART_RunScriptDir = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/SMART/'+casename+'/' # path to put SMART runscripts in
