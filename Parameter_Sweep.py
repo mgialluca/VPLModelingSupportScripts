@@ -866,14 +866,14 @@ class Generate_Atmosphere_Parameter_Sweep:
                 d[model_ID_hold]['Psurf'] = psurf_hold
 
                 # Read in the trnst spectrum
-                trnst = ascii.read(model_ID_hold+'_SMART.trnst')
+                trnst = ascii.read(path_hold+model_ID_hold+'_SMART.trnst')
 
                 # Save trnst spectrum
                 d[model_ID_hold]['Trnst_Wavlength_um'] = list(trnst['col1'])
                 d[model_ID_hold]['Trnst_Depth'] = list(trnst['col4'])
 
                 # Read in emission spectrum
-                emiss = ascii.read(model_ID_hold+'_SMART_toa.rad')
+                emiss = ascii.read(path_hold+model_ID_hold+'_SMART_toa.rad')
 
                 # Save emission spectrum
                 d[model_ID_hold]['TOA_Wavelength_um'] = list(emiss['col1'])
