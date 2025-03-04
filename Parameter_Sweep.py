@@ -836,6 +836,54 @@ class Generate_Atmosphere_Parameter_Sweep:
         json.dump(dh, f)
         f.close()
 
+    # Compile the SMART spectra from converged runs for plotting
+    def compile_smart_spectra(self, Num_of_Models=150):
+
+        # Start dict to save output
+        d = {}
+
+        # Loop through models
+        for i in range(Num_of_Models):
+
+            # Get the model ID ('RunNumber#')
+            model_ID_hold = 'RunNumber'+str(i)
+            path_hold = self.master_out+model_ID_hold+'/'
+
+            # smart spectra only created if the run converges
+            if os.path.exists(path_hold+'FINAL_out.out'):
+                d[model_ID_hold] = {}
+
+                # Get the final surface pressure used
+                f = open(path_hold+'PhotochemInputs/PLANET.dat', 'r')
+                lines = f.readlines()
+                f.close()
+                for i in range(len(lines)):
+                    hold = lines[i].split()
+                    if 'surface' in hold and 'pressure' in hold:
+                        psurf_hold = float(hold[0])
+                        break
+
+                d[model_ID_hold]['Psurf'] = psurf_hold
+
+                # Read in the trnst spectrum
+                trnst = ascii.read(model_ID_hold+'_SMART.trnst')
+
+                # Save trnst spectrum
+                d[model_ID_hold]['Trnst_Wavlength_um'] = list(trnst['col1'])
+                d[model_ID_hold]['Trnst_Depth'] = list(trnst['col4'])
+
+                # Read in emission spectrum
+                emiss = ascii.read(model_ID_hold+'_SMART_toa.rad')
+
+                # Save emission spectrum
+                d[model_ID_hold]['TOA_Wavelength_um'] = list(emiss['col1'])
+                d[model_ID_hold]['TOA_StarFlux_Wm-2um-1'] = list(emiss['col3'])
+                d[model_ID_hold]['TOA_PlanetFlux_Wm-2um-1'] = list(emiss['col4'])
+
+        f = open(self.master_out+'SpectraCompilation.json', 'w')
+        dh = json.dumps(d)
+        json.dump(dh, f)
+        f.close()
 
     # Compile data outgassing/escape rates from previous runs to determine which will be closest starting points for future runs
     # Specifically used if you want to start a new run using the final state of a previous sweep but not the exact same sweep 
