@@ -67,7 +67,7 @@ class VPLModelingPipeline:
         self.photochem_global_converge = False
         self.climate_global_converge = False
         self.global_convergence = False
-        self.max_iterations_master = 50 # Never do anything more than 100x
+        self.max_iterations_master = 75 # Never do anything more than 100x
         self.max_iterations_climate = 20 # Never run climate more than 15x
         self.suppress_IOerrors = False # if convergence fails, raise IO errors if False, or just break running function if True
         self.run_spectra = True # If true, finished a converged run with smart 
@@ -1418,17 +1418,10 @@ class VPLModelingPipeline:
         maxchange = np.abs(self.updated_atm_pressure - new_surfP)/self.updated_atm_pressure
         if maxchange <= self.NewPressure_Psurf_tolerance:
             pressure_converged = True
+            self.updated_atm_pressure = new_surfP 
         else:
             pressure_converged = False
-
-        '''
-        pressure_converged = True
-        maxchange = max(change_in_Ndens)
-        if maxchange > self.NewPressure_Ndens_tolerance:
-            pressure_converged = False
-        '''
-
-        self.updated_atm_pressure = new_surfP
+            self.updated_atm_pressure = (self.updated_atm_pressure + new_surfP)/2
 
         # Change surface pressure in PLANET.dat
         planetdat_new = open(self.photochem_InputsDir+'New_PLANET.dat', 'w')
@@ -1438,11 +1431,11 @@ class VPLModelingPipeline:
         for l in planetdat_lines:
             hold = l.split()
             if 'surface' in hold and 'pressure' in hold:
-                planetdat_new.write("{:.2e}".format(new_surfP))
+                planetdat_new.write("{:.2e}".format(self.updated_atm_pressure))
                 planetdat_new.write(' = P0, surface pressure [bar] \n')
             else:
                 if 'DZGRID' in hold:
-                    if new_surfP >= 1:
+                    if self.updated_atm_pressure >= 1:
                         planetdat_new.write('0.75e+05 = DZGRID [cm] \n')
                     else:
                         planetdat_new.write('4.95e+04 = DZGRID [cm] \n')
@@ -1455,7 +1448,7 @@ class VPLModelingPipeline:
         subprocess.run('rm '+self.photochem_InputsDir+'PLANET.dat', shell=True)
         subprocess.run('mv '+self.photochem_InputsDir+'New_PLANET.dat '+self.photochem_InputsDir+'PLANET.dat', shell=True)
 
-        return pressure_converged, maxchange
+        return pressure_converged, maxchange, new_surfP
 
 
     ### Purpose: Change the T/EDD profiles from climate in photochems in.dist to rerun photochem after a climate run
@@ -1741,7 +1734,7 @@ class VPLModelingPipeline:
             # If the atmospheric pressure should be checked / updated, run that
             photochem_newPsurf_subtries = 0
             if self.adjust_atmospheric_pressure == True:
-                pressure_converged, maxchange = self.change_atmospheric_pressure()
+                pressure_converged, maxchange, holdnewsurfp = self.change_atmospheric_pressure()
 
                 if self.verbose == True:
                     print('New Pressure found: '+"{:.4e}".format(self.updated_atm_pressure)+' bars')
@@ -1753,8 +1746,8 @@ class VPLModelingPipeline:
                 if pressure_converged == False:
 
                     if self.verbose == True:
-                        print('Pressure NOT converged, rerunning photochem')
-                        ftestingoutput.write('Pressure NOT converged, rerunning photochem\n')
+                        print('Pressure NOT converged, rerunning photochem using '+str(holdnewsurfp)+' bars')
+                        ftestingoutput.write('Pressure NOT converged, rerunning photochem using '+str(holdnewsurfp)+' bars \n')
 
                     while pressure_converged == False:
 
@@ -1800,14 +1793,14 @@ class VPLModelingPipeline:
                         if photochem_newPsurf_inner_subtries > self.max_iterations_master:
                                 break
 
-                        pressure_converged, maxchange = self.change_atmospheric_pressure()
+                        pressure_converged, maxchange, holdnewsurfp = self.change_atmospheric_pressure()
 
                         if pressure_converged == False and self.verbose == True:
                             ftestingoutput.write('Normalized Gross error: '+str(grosserr)+'\n')
                             ftestingoutput.write('L2 Error: '+str(l2err)+'\n')
                             ftestingoutput.write('Time of final timestep: '+str(finaltime)+'\n')
                             ftestingoutput.write('Max change of a number density layer: '+str(maxchange)+'\n')
-                            ftestingoutput.write('New Pressure: '+str(self.updated_atm_pressure)+'\n')
+                            ftestingoutput.write('New Pressure: '+str(self.updated_atm_pressure)+', using '+str(holdnewsurfp)+' Bars \n')
                             print('Surf Pressure Subtry '+str(photochem_newPsurf_subtries)+' NOT converged')
                             ftestingoutput.write('Surf Pressure Subtry '+str(photochem_newPsurf_subtries)+' NOT converged\n\n')
 
@@ -1842,6 +1835,7 @@ class VPLModelingPipeline:
                     if self.verbose == True:
                         print('Pressure converged after '+str(photochem_newPsurf_subtries)+' iterations, with '+str(photochem_newPsurf_inner_subtries)+' number of photochem reruns at this pressure')
                         ftestingoutput.write('Pressure converged after '+str(photochem_newPsurf_subtries)+' iterations, with '+str(photochem_newPsurf_inner_subtries)+' number of photochem reruns at this pressure\n')
+                        ftestingoutput.write('Converged pressure: '+str(self.updated_atm_pressure)+' bars\n')
 
             # Save backup of photochem output if desired
             if self.BackupPhotochemRuns == True:
