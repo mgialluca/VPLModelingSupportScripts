@@ -1737,8 +1737,8 @@ class VPLModelingPipeline:
                 pressure_converged, maxchange, holdnewsurfp = self.change_atmospheric_pressure()
 
                 if self.verbose == True:
-                    print('New Pressure found: '+"{:.4e}".format(self.updated_atm_pressure)+' bars')
-                    ftestingoutput.write('New Pressure found: '+"{:.4e}".format(self.updated_atm_pressure)+' bars\n')
+                    print('New Pressure found: '+"{:.4e}".format(holdnewsurfp)+' bars')
+                    ftestingoutput.write('New Pressure found: '+"{:.4e}".format(holdnewsurfp)+' bars\n')
                     if pressure_converged == True:
                         print('Pressure converged, no need to rerun photochem')
                         ftestingoutput.write('Pressure converged, no need to rerun photochem\n')
@@ -1746,8 +1746,8 @@ class VPLModelingPipeline:
                 if pressure_converged == False:
 
                     if self.verbose == True:
-                        print('Pressure NOT converged, rerunning photochem using '+str(holdnewsurfp)+' bars')
-                        ftestingoutput.write('Pressure NOT converged, rerunning photochem using '+str(holdnewsurfp)+' bars \n')
+                        print('Pressure NOT converged, rerunning photochem using '+str(self.updated_atm_pressure)+' bars')
+                        ftestingoutput.write('Pressure NOT converged, rerunning photochem using '+str(self.updated_atm_pressure)+' bars \n')
 
                     while pressure_converged == False:
 

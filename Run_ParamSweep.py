@@ -3,10 +3,10 @@ import subprocess
 
 
 #SmallerRange/RunNumber53/PhotochemInputs/', 
-test_object = Generate_Atmosphere_Parameter_Sweep('Vdep4e-1T4', 
-                                  '/gscratch/vsm/gialluca/VPLModelingTools_Dev/SmallerRange/RunNumber53/PhotochemInputs/', 
-                                restart_run= 'Vdep4e-1T3', 
-                                starting_point='Exact',
+test_object = Generate_Atmosphere_Parameter_Sweep('Vdep4e-1Res', 
+                                  '/gscratch/vsm/gialluca/VPLModelingTools_Dev/Vdep4e-1T5/RunNumber131/PhotochemInputs/', 
+                                restart_run= True, 
+                                starting_point=None,
                                 hitran_year='2020')
 
 #test_object.compile_info_failed_run()
