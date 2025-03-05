@@ -250,7 +250,7 @@ class Generate_Atmosphere_Parameter_Sweep:
                         nsp_new.write('2     0.      0.      ')
 
                         # Now SGFLUX is set to be the new flux value 
-                        newsgval = "{:.1E}".format(fluxes[fluxind])
+                        newsgval = "{:.2E}".format(fluxes[fluxind])
                         nsp_new.write(newsgval)
                         add_spaces = 10-len(newsgval)
                         for space in range(add_spaces):
