@@ -1680,6 +1680,19 @@ class VPLModelingPipeline:
                 
                 # If SGBSL error occured and youre allowed to update pressure, try updating pressure and running to convergence
                 if self.adjust_atmospheric_pressure == True:
+                    # Need to set MMW early 
+                    # Retrieve atmosphere MMW for use moving forward:
+                    if self.num_photochem_runs == 1:
+                        fi = open(self.OutPath+'photochem_run_output_'+self.casename+'.run', 'r')
+                    else:
+                        fi = open(self.OutPath+'photochem_run_output_'+self.casename+'_Try'+str(self.num_photochem_runs)+'.run', 'r')
+                    lines = fi.readlines()
+                    fi.close()
+                    for i in lines:
+                        if len(i.split('Molecular weight of atmosphere')) > 1:
+                            self.MMW = float(i.split()[len(i.split())-1])
+                            break
+
                     pressure_converged, maxchange, holdnewsurfp = self.change_atmospheric_pressure()
                     if self.verbose == True:
                         print('Attempting to adjust pressure to fix SGBSL error')
@@ -1724,6 +1737,18 @@ class VPLModelingPipeline:
                         ftestingoutput.write('Photochem subtry '+str(photochem_subtries)+' NOT converged\n\n')
 
                 if sgbslerror == True and self.adjust_atmospheric_pressure == True:
+                    # Need to reset MMW early 
+                    # Retrieve atmosphere MMW for use moving forward:
+                    if self.num_photochem_runs == 1:
+                        fi = open(self.OutPath+'photochem_run_output_'+self.casename+'.run', 'r')
+                    else:
+                        fi = open(self.OutPath+'photochem_run_output_'+self.casename+'_Try'+str(self.num_photochem_runs)+'.run', 'r')
+                    lines = fi.readlines()
+                    fi.close()
+                    for i in lines:
+                        if len(i.split('Molecular weight of atmosphere')) > 1:
+                            self.MMW = float(i.split()[len(i.split())-1])
+                            break
                     pressure_converged, maxchange, holdnewsurfp = self.change_atmospheric_pressure()
                     if self.verbose == True:
                         print('Attempting to adjust pressure to fix SGBSL error')
@@ -1842,6 +1867,19 @@ class VPLModelingPipeline:
 
 
                         if photochem_newPsurf_inner_subtries > self.max_iterations_master:
+                                break
+                        
+                        # Need to reset MMW 
+                        # Retrieve atmosphere MMW for use moving forward:
+                        if self.num_photochem_runs == 1:
+                            fi = open(self.OutPath+'photochem_run_output_'+self.casename+'.run', 'r')
+                        else:
+                            fi = open(self.OutPath+'photochem_run_output_'+self.casename+'_Try'+str(self.num_photochem_runs)+'.run', 'r')
+                        lines = fi.readlines()
+                        fi.close()
+                        for i in lines:
+                            if len(i.split('Molecular weight of atmosphere')) > 1:
+                                self.MMW = float(i.split()[len(i.split())-1])
                                 break
 
                         pressure_converged, maxchange, holdnewsurfp = self.change_atmospheric_pressure()
