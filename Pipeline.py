@@ -1396,7 +1396,7 @@ class VPLModelingPipeline:
     # None
     #  
     ##
-    def change_atmospheric_pressure(self):
+    def change_atmospheric_pressure(self, after_sgbsl_err=False):
 
         # Load the current out.dist values
         outdistdic = self.ingest_outdist()
@@ -1412,7 +1412,8 @@ class VPLModelingPipeline:
         
         # Update in.dist file for new number densities
         new_VMR_species = new_mixing_rats(new_Ndens_species, new_Ndens_tot)
-        self.new_indist_new_pressure(new_Ndens_species, new_Ndens_tot, new_VMR_species, outdistdic)
+        if after_sgbsl_err == False: # only update if it wasn't following an error
+            self.new_indist_new_pressure(new_Ndens_species, new_Ndens_tot, new_VMR_species, outdistdic)
 
         # Find new surface pressure
         loaded_ptz_out = ascii.read(self.photochemDir+'OUTPUT/PTZ_mixingratios_out.dist')
@@ -1693,7 +1694,7 @@ class VPLModelingPipeline:
                             self.MMW = float(i.split()[len(i.split())-1])
                             break
 
-                    pressure_converged, maxchange, holdnewsurfp = self.change_atmospheric_pressure()
+                    pressure_converged, maxchange, holdnewsurfp = self.change_atmospheric_pressure(after_sgbsl_err=True)
                     if self.verbose == True:
                         print('Attempting to adjust pressure to fix SGBSL error')
                         print('New Pressure: '+str(holdnewsurfp)+' bars, using pressure of: '+str(self.updated_atm_pressure)+' bars')
@@ -1749,7 +1750,7 @@ class VPLModelingPipeline:
                         if len(i.split('Molecular weight of atmosphere')) > 1:
                             self.MMW = float(i.split()[len(i.split())-1])
                             break
-                    pressure_converged, maxchange, holdnewsurfp = self.change_atmospheric_pressure()
+                    pressure_converged, maxchange, holdnewsurfp = self.change_atmospheric_pressure(after_sgbsl_err=True)
                     if self.verbose == True:
                         print('Attempting to adjust pressure to fix SGBSL error')
                         print('New Pressure: '+str(holdnewsurfp)+' bars, using pressure of: '+str(self.updated_atm_pressure)+' bars')
@@ -1882,7 +1883,7 @@ class VPLModelingPipeline:
                                 self.MMW = float(i.split()[len(i.split())-1])
                                 break
 
-                        pressure_converged, maxchange, holdnewsurfp = self.change_atmospheric_pressure()
+                        pressure_converged, maxchange, holdnewsurfp = self.change_atmospheric_pressure(after_sgbsl_err=sgbslerror)
 
                         if pressure_converged == True and sgbslerror == True:
                             pressure_converged = False
@@ -1929,6 +1930,8 @@ class VPLModelingPipeline:
                         ftestingoutput.write('Pressure converged after '+str(photochem_newPsurf_subtries)+' iterations, with '+str(photochem_newPsurf_inner_subtries)+' number of photochem reruns at this pressure\n')
                         ftestingoutput.write('Converged pressure: '+str(self.updated_atm_pressure)+' bars\n')
 
+            ftestingoutput.close()
+            break # for testing
             # Save backup of photochem output if desired
             if self.BackupPhotochemRuns == True:
                 self.backup_photochem_run(trynum=self.num_photochem_runs)
