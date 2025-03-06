@@ -67,7 +67,7 @@ class VPLModelingPipeline:
         self.photochem_global_converge = False
         self.climate_global_converge = False
         self.global_convergence = False
-        self.max_iterations_master = 50 # Never do anything more than 100x
+        self.max_iterations_master = 100 # Never do anything more than 100x
         self.max_iterations_climate = 20 # Never run climate more than 15x
         self.suppress_IOerrors = False # if convergence fails, raise IO errors if False, or just break running function if True
         self.run_spectra = True # If true, finished a converged run with smart 
@@ -1929,7 +1929,6 @@ class VPLModelingPipeline:
                         ftestingoutput.write('Pressure converged after '+str(photochem_newPsurf_subtries)+' iterations, with '+str(photochem_newPsurf_inner_subtries)+' number of photochem reruns at this pressure\n')
                         ftestingoutput.write('Converged pressure: '+str(self.updated_atm_pressure)+' bars\n')
 
-            break # Kill for testing
             # Save backup of photochem output if desired
             if self.BackupPhotochemRuns == True:
                 self.backup_photochem_run(trynum=self.num_photochem_runs)
