@@ -2,7 +2,7 @@
 from Pipeline import *
 
 pipelineobj = VPLModelingPipeline('TestSGBSL', 
-                                  '/gscratch/vsm/gialluca/VPLModelingTools_Dev/Vdep4e-1Res3/RunNumber102/PhotochemInputs/', 
+                                  '/gscratch/vsm/gialluca/VPLModelingTools_Dev/Vdep4e-1Res3/RunNumber101/PhotochemInputs/', 
                                   True, find_molecules_of_interest=False, hitran_year='2020')
 
 
