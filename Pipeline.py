@@ -21,8 +21,8 @@ class VPLModelingPipeline:
     # Set Global and initialize atmosphere object:
     def __init__(self, casename, photochemInitial, verbose, find_molecules_of_interest=False, hitran_year='2020') -> None:
         # Set any and all needed paths
-        self.photochemDir = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/atmos/PHOTOCHEM/' # path to PHOTOCHEM/ dir
-        self.atmosDir = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/atmos/' # path to atmos/ dir
+        self.photochemDir = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/megan_atmos/atmos/PHOTOCHEM/' #'/gscratch/vsm/gialluca/VPLModelingTools_Dev/atmos/PHOTOCHEM/' # path to PHOTOCHEM/ dir
+        self.atmosDir = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/megan_atmos/atmos/'# '/gscratch/vsm/gialluca/VPLModelingTools_Dev/atmos/' # path to atmos/ dir
         self.lblabcDir = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/lblabc/' # path to lblabc/ dir (such that lblabcDir/lblabc is the executable to call)
         self.OutPath = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/ModelRunOutputs/'+casename+'/' # path for the raw model run outputs (NOT for created data products like dictionaries)
         self.DataOutPath = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/ModelRunOutputs/'+casename+'/' # path for created data products like dictionaries
