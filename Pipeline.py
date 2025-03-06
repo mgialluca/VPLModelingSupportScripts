@@ -67,7 +67,7 @@ class VPLModelingPipeline:
         self.photochem_global_converge = False
         self.climate_global_converge = False
         self.global_convergence = False
-        self.max_iterations_master = 100 # Never do anything more than 100x
+        self.max_iterations_master = 50 # Never do anything more than 100x
         self.max_iterations_climate = 20 # Never run climate more than 15x
         self.suppress_IOerrors = False # if convergence fails, raise IO errors if False, or just break running function if True
         self.run_spectra = True # If true, finished a converged run with smart 
@@ -84,7 +84,7 @@ class VPLModelingPipeline:
         self.adjust_atmospheric_pressure = False
         # when adjusting pressure, the number density of each level much change by less than this percentage (as a decimal) on each level to achieve convergence:
         self.NewPressure_Ndens_tolerance = 15 # DEPRECEATED
-        self.NewPressure_Psurf_tolerance = 0.03 # new surface pressure must change by <= to this (x100 percent)
+        self.NewPressure_Psurf_tolerance = 0.02 # new surface pressure must change by <= to this (x100 percent)
 
         # lookup table to connect Hitran gas codes to molecule names
         self.hitran_lookup = pd.read_csv('HitranTable.csv', index_col='Molecule')
@@ -1800,7 +1800,7 @@ class VPLModelingPipeline:
                             ftestingoutput.write('L2 Error: '+str(l2err)+'\n')
                             ftestingoutput.write('Time of final timestep: '+str(finaltime)+'\n')
                             ftestingoutput.write('Max change of a number density layer: '+str(maxchange)+'\n')
-                            ftestingoutput.write('New Pressure: '+str(self.updated_atm_pressure)+', using '+str(holdnewsurfp)+' Bars \n')
+                            ftestingoutput.write('New Pressure: '+str(holdnewsurfp)+', using '+str(self.updated_atm_pressure)+' Bars \n')
                             print('Surf Pressure Subtry '+str(photochem_newPsurf_subtries)+' NOT converged')
                             ftestingoutput.write('Surf Pressure Subtry '+str(photochem_newPsurf_subtries)+' NOT converged\n\n')
 
