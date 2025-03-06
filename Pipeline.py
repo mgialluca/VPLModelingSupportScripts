@@ -530,6 +530,7 @@ class VPLModelingPipeline:
         lines = fi.readlines()
         fi.close()
 
+        sgbslerror = False
         # Want to get the normalized gross error, l2 error, and last outputed time
         # These are all at the end of the file, loop through backwards and break iteration to convserve efficiency
         for i in reversed(range(len(lines))):
@@ -539,6 +540,10 @@ class VPLModelingPipeline:
                     vals = lines[i+1].split() # Get Normalized Gross and L2 error
                     NormGrosserr = float(vals[0])
                     L2err = float(vals[1])
+
+                elif lines[i].split()[0] == 'ERROR' and lines[i].split()[2] == 'SGBSL-RHS': # Check if there was an SGBSL error
+                    sgbslerror = True
+                
                 # Check if youre at the last timestep line
                 elif lines[i].split()[0] == 'N':
                     hold = lines[i].split()
@@ -574,8 +579,8 @@ class VPLModelingPipeline:
             print('L2 Error: '+str(L2err))
             print('Time of final timestep: '+str(FinalTime))
 
-        return HasItConverged, NormGrosserr, L2err, FinalTime, Nstep_photochemrun
-    # usage should be 'convergence, grosserr, l2err, finaltime, nstepsphoto = check_photochem_conv()
+        return HasItConverged, NormGrosserr, L2err, FinalTime, Nstep_photochemrun, sgbslerror
+    # usage should be 'convergence, grosserr, l2err, finaltime, nstepsphoto, sgbslerror = check_photochem_conv()
 
     ### Check the vpl climate output for convergence, might need more work currently pretty unconstrained
     ##
@@ -1666,7 +1671,21 @@ class VPLModelingPipeline:
 
             photochem_subtries = 1
             # Currently, the trynum will only refer to the converged case (should we save every single try no matter what?)
-            local_photochem_conv, grosserr, l2err, finaltime, nsteps_photo = self.check_photochem_conv(trynum=self.num_photochem_runs)
+            local_photochem_conv, grosserr, l2err, finaltime, nsteps_photo, sgbslerror = self.check_photochem_conv(trynum=self.num_photochem_runs)
+
+            if sgbslerror == True and local_photochem_conv == False:
+                if self.verbose == True:
+                    print('SGBSL Error occured in photochem run')
+                    ftestingoutput.write('\n SGBSL Error occured in photochem run\n')
+                
+                # If SGBSL error occured and youre allowed to update pressure, try updating pressure and running to convergence
+                if self.adjust_atmospheric_pressure == True:
+                    pressure_converged, maxchange, holdnewsurfp = self.change_atmospheric_pressure()
+                    if self.verbose == True:
+                        print('Attempting to adjust pressure to fix SGBSL error')
+                        print('New Pressure: '+str(holdnewsurfp)+' bars, using pressure of: '+str(self.updated_atm_pressure)+' bars')
+                        ftestingoutput.write('Attempting to adjust pressure to fix SGBSL error\n')
+                        ftestingoutput.write('New Pressure: '+str(holdnewsurfp)+' bars, using pressure of: '+str(self.updated_atm_pressure)+' bars\n\n')
 
             # If photochem did not converge, try try again
             while local_photochem_conv == False:
@@ -1682,19 +1701,37 @@ class VPLModelingPipeline:
                 if photochem_subtries > self.max_iterations_master:
                     break
                     
-                subprocess.run('rm -rf '+self.photochemDir+'in.dist', shell=True)
-                subprocess.run('rm -rf '+self.photochemDir+'PTZ_mixingratios_in.dist', shell=True)
-                subprocess.run('cp '+self.photochemDir+'OUTPUT/out.dist '+self.photochemDir+'in.dist', shell=True)
-                self.run_photochem_1instance(CleanMake=False, InputCopy=False, trynum=self.num_photochem_runs)
+                # If you had an SGBSL error that is being fixed by pressure change, need a clean make of photochem
+                if sgbslerror == True and self.adjust_atmospheric_pressure == True:
+                    self.run_photochem_1instance(CleanMake=True, InputCopy=self.photochem_InputsDir, trynum=self.num_photochem_runs)
+                
+                else:
+                    subprocess.run('rm -rf '+self.photochemDir+'in.dist', shell=True)
+                    subprocess.run('rm -rf '+self.photochemDir+'PTZ_mixingratios_in.dist', shell=True)
+                    subprocess.run('cp '+self.photochemDir+'OUTPUT/out.dist '+self.photochemDir+'in.dist', shell=True)
+                    self.run_photochem_1instance(CleanMake=False, InputCopy=False, trynum=self.num_photochem_runs)
+
                 photochem_subtries += 1
-                local_photochem_conv, grosserr, l2err, finaltime, nsteps_photo = self.check_photochem_conv(trynum=self.num_photochem_runs)
+                local_photochem_conv, grosserr, l2err, finaltime, nsteps_photo, sgbslerror = self.check_photochem_conv(trynum=self.num_photochem_runs)
 
                 if self.verbose == True:
                     ftestingoutput.write('Normalized Gross error: '+str(grosserr)+'\n')
                     ftestingoutput.write('L2 Error: '+str(l2err)+'\n')
                     ftestingoutput.write('Time of final timestep: '+str(finaltime)+'\n')
+                    if sgbslerror == True:
+                        ftestingoutput.write('SGBSL Error occured\n')
                     if local_photochem_conv == False:
-                        ftestingoutput.write('Photochem subtry '+str(photochem_subtries)+' NOT converged\n\n')                        
+                        ftestingoutput.write('Photochem subtry '+str(photochem_subtries)+' NOT converged\n\n')
+
+                if sgbslerror == True and self.adjust_atmospheric_pressure == True:
+                    pressure_converged, maxchange, holdnewsurfp = self.change_atmospheric_pressure()
+                    if self.verbose == True:
+                        print('Attempting to adjust pressure to fix SGBSL error')
+                        print('New Pressure: '+str(holdnewsurfp)+' bars, using pressure of: '+str(self.updated_atm_pressure)+' bars')
+                        ftestingoutput.write('Attempting to adjust pressure to fix SGBSL error\n')
+                        ftestingoutput.write('New Pressure: '+str(holdnewsurfp)+' bars, using pressure of: '+str(self.updated_atm_pressure)+' bars\n\n')
+
+
 
             # Copy the out.dist to be the new in.dist in the photochem inputs directory
             subprocess.run('rm -rf '+self.photochem_InputsDir+'in.dist', shell=True)
@@ -1747,7 +1784,7 @@ class VPLModelingPipeline:
 
                     if self.verbose == True:
                         print('Pressure NOT converged, rerunning photochem using '+str(self.updated_atm_pressure)+' bars')
-                        ftestingoutput.write('Pressure NOT converged, rerunning photochem using '+str(self.updated_atm_pressure)+' bars \n')
+                        ftestingoutput.write('Pressure NOT converged, rerunning photochem using '+str(self.updated_atm_pressure)+' bars \n\n')
 
                     while pressure_converged == False:
 
@@ -1758,8 +1795,15 @@ class VPLModelingPipeline:
 
                         photochem_newPsurf_subtries += 1
                         # Currently, the trynum will only refer to the converged case (should we save every single try no matter what?)
-                        local_photochem_conv, grosserr, l2err, finaltime, nsteps_photo = self.check_photochem_conv(trynum=self.num_photochem_runs)
+                        local_photochem_conv, grosserr, l2err, finaltime, nsteps_photo, sgbslerror = self.check_photochem_conv(trynum=self.num_photochem_runs)
                         photochem_newPsurf_inner_subtries = 1
+
+                        # If SGBSL Error occured, just set local conv to True so it skips the next bit and tries to find a different pressure 
+                        if sgbslerror == True:
+                            if self.verbose == True:
+                                print('SGBSL Error Occured, retrying for pressure')
+                                ftestingoutput.write('SGBSL Error Occured, retrying for pressure\n')
+                            local_photochem_conv = True
 
                         # If photochem did not converge, try try again
                         while local_photochem_conv == False:
@@ -1779,7 +1823,14 @@ class VPLModelingPipeline:
                             subprocess.run('cp '+self.photochemDir+'OUTPUT/out.dist '+self.photochemDir+'in.dist', shell=True)
                             self.run_photochem_1instance(CleanMake=False, InputCopy=False, trynum=self.num_photochem_runs)
                             photochem_newPsurf_inner_subtries += 1
-                            local_photochem_conv, grosserr, l2err, finaltime, nsteps_photo = self.check_photochem_conv(trynum=self.num_photochem_runs)
+                            local_photochem_conv, grosserr, l2err, finaltime, nsteps_photo, sgbslerror = self.check_photochem_conv(trynum=self.num_photochem_runs)
+
+                            # If SGBSL error occured, break and pick a new pressure
+                            if sgbslerror == True:
+                                if self.verbose == True:
+                                    ftestingoutput.write('SGBSL error occured in inner convergence loop on inner subtry '+str(photochem_newPsurf_inner_subtries)+'\n')
+                                    ftestingoutput.write('Breaking loop to pick new pressure\n')
+                                break
 
                         if self.num_photochem_runs == 1:
                             subprocess.run('cp '+self.OutPath+'photochem_run_output_'+self.casename+'.run '+self.OutPath+'photochem_run_output_'+self.casename+'_Psurfsubtry'+str(photochem_newPsurf_subtries)+'_Innertry_'+str(photochem_newPsurf_inner_subtries)+'.run', shell=True)
@@ -1794,6 +1845,9 @@ class VPLModelingPipeline:
                                 break
 
                         pressure_converged, maxchange, holdnewsurfp = self.change_atmospheric_pressure()
+
+                        if pressure_converged == True and sgbslerror == True:
+                            pressure_converged = False
 
                         if pressure_converged == False and self.verbose == True:
                             ftestingoutput.write('Normalized Gross error: '+str(grosserr)+'\n')
