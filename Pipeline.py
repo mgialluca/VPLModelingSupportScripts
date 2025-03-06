@@ -81,7 +81,7 @@ class VPLModelingPipeline:
         # MOLECULES MUST BE ALL CAPITAL LETTERS AS THEY WILL PRINT OUT FROM PHOTOCHEM
 
         # If the atmospheric pressure needs to be checked and adjusted outside of photochem, set this flag to True
-        self.adjust_atmospheric_pressure = False
+        self.adjust_atmospheric_pressure = True
         # when adjusting pressure, the number density of each level much change by less than this percentage (as a decimal) on each level to achieve convergence:
         self.NewPressure_Ndens_tolerance = 15 # DEPRECEATED
         self.NewPressure_Psurf_tolerance = 0.02 # new surface pressure must change by <= to this (x100 percent)
