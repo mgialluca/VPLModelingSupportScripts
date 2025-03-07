@@ -1427,7 +1427,10 @@ class VPLModelingPipeline:
             self.updated_atm_pressure = new_surfP 
         else:
             pressure_converged = False
-            self.updated_atm_pressure = (self.updated_atm_pressure + new_surfP)/2
+            if after_sgbsl_err == True:
+                self.updated_atm_pressure = 2*self.updated_atm_pressure
+            else:
+                self.updated_atm_pressure = (self.updated_atm_pressure + new_surfP)/2
 
         # Change surface pressure in PLANET.dat
         planetdat_new = open(self.photochem_InputsDir+'New_PLANET.dat', 'w')
@@ -1697,9 +1700,9 @@ class VPLModelingPipeline:
                     pressure_converged, maxchange, holdnewsurfp = self.change_atmospheric_pressure(after_sgbsl_err=True)
                     if self.verbose == True:
                         print('Attempting to adjust pressure to fix SGBSL error')
-                        print('New Pressure: '+str(holdnewsurfp)+' bars, using pressure of: '+str(self.updated_atm_pressure)+' bars')
+                        print('New Pressure would be: '+str(holdnewsurfp)+' bars, using pressure of: '+str(self.updated_atm_pressure)+' bars')
                         ftestingoutput.write('Attempting to adjust pressure to fix SGBSL error\n')
-                        ftestingoutput.write('New Pressure: '+str(holdnewsurfp)+' bars, using pressure of: '+str(self.updated_atm_pressure)+' bars\n\n')
+                        ftestingoutput.write('New Pressure would be: '+str(holdnewsurfp)+' bars, using pressure of: '+str(self.updated_atm_pressure)+' bars\n\n')
 
             # If photochem did not converge, try try again
             while local_photochem_conv == False:
@@ -1755,7 +1758,7 @@ class VPLModelingPipeline:
                         print('Attempting to adjust pressure to fix SGBSL error')
                         print('New Pressure: '+str(holdnewsurfp)+' bars, using pressure of: '+str(self.updated_atm_pressure)+' bars')
                         ftestingoutput.write('Attempting to adjust pressure to fix SGBSL error\n')
-                        ftestingoutput.write('New Pressure: '+str(holdnewsurfp)+' bars, using pressure of: '+str(self.updated_atm_pressure)+' bars\n\n')
+                        ftestingoutput.write('New Pressure would be: '+str(holdnewsurfp)+' bars, using pressure of: '+str(self.updated_atm_pressure)+' bars\n\n')
 
 
 
