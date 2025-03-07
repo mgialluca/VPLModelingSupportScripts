@@ -1417,7 +1417,7 @@ class VPLModelingPipeline:
 
         # Find new surface pressure
         loaded_ptz_out = ascii.read(self.photochemDir+'OUTPUT/PTZ_mixingratios_out.dist')
-        colmass = find_tot_column_mass_dens(new_Ndens_tot, loaded_ptz_out['ALT'], self.MMW)
+        colmass = find_tot_column_mass_dens(new_Ndens_tot[:150], loaded_ptz_out['ALT'][:150], self.MMW)
         new_surfP = (colmass*(self.planetary_gravity*(u.m*u.s**-2).to(u.cm*u.s**-2))*100)*u.Pa.to(u.bar) # 100 converts per cm to per m
 
         # Check if the pressure converged or if photochem needs to be rerun with new pressure
