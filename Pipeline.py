@@ -1351,10 +1351,16 @@ class VPLModelingPipeline:
                     fnew.write("{:.8E}".format(val)+'   ')
                 fnew.write('\n')
 
+        testndens = []
+        for i in range(151):
+            testndens.append(newtotndens[i])
+        for i in range(151, len(oldoutdict['NDens'])):
+            testndens.append(oldoutdict['NDens'][i])
+
         write_table = Table()
         write_table.add_column(oldoutdict['Temp'], name='col1')
         write_table.add_column(oldoutdict['Edd'], name='col2')
-        write_table.add_column(newtotndens, name='col3')
+        write_table.add_column(testndens, name='col3')
         write_table.add_column(newmixings['O3'], name='col4')
         write_table.add_column(newndens_perspecies['CO2'], name='col5')
 
@@ -1933,8 +1939,9 @@ class VPLModelingPipeline:
                         ftestingoutput.write('Pressure converged after '+str(photochem_newPsurf_subtries)+' iterations, with '+str(photochem_newPsurf_inner_subtries)+' number of photochem reruns at this pressure\n')
                         ftestingoutput.write('Converged pressure: '+str(self.updated_atm_pressure)+' bars\n')
 
-            ftestingoutput.close()
-            break # for testing
+            if self.verbose == True:
+                ftestingoutput.close()
+                ftestingoutput = open(self.OutPath+self.casename+'_SavingInfoOut.txt', 'a')
             # Save backup of photochem output if desired
             if self.BackupPhotochemRuns == True:
                 self.backup_photochem_run(trynum=self.num_photochem_runs)
