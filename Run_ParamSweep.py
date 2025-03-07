@@ -4,7 +4,7 @@ import subprocess
 
 #SmallerRange/RunNumber53/PhotochemInputs/', 
 test_object = Generate_Atmosphere_Parameter_Sweep('Vdep4e-1Res5', 
-                                  '/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/InputDir_ForTesting/', 
+                                  '/gscratch/vsm/gialluca/VPLModelingTools_Dev/Vdep4e-1Res/RunNumber123/', 
                                 restart_run= True, 
                                 starting_point=None,
                                 hitran_year='2020')
