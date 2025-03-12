@@ -1351,16 +1351,10 @@ class VPLModelingPipeline:
                     fnew.write("{:.8E}".format(val)+'   ')
                 fnew.write('\n')
 
-        testndens = []
-        for i in range(151):
-            testndens.append(newtotndens[i])
-        for i in range(151, len(oldoutdict['NDens'])):
-            testndens.append(oldoutdict['NDens'][i])
-
         write_table = Table()
         write_table.add_column(oldoutdict['Temp'], name='col1')
         write_table.add_column(oldoutdict['Edd'], name='col2')
-        write_table.add_column(testndens, name='col3')
+        write_table.add_column(newtotndens, name='col3')
         write_table.add_column(newmixings['O3'], name='col4')
         write_table.add_column(newndens_perspecies['CO2'], name='col5')
 
@@ -1423,7 +1417,7 @@ class VPLModelingPipeline:
 
         # Find new surface pressure
         loaded_ptz_out = ascii.read(self.photochemDir+'OUTPUT/PTZ_mixingratios_out.dist')
-        colmass = find_tot_column_mass_dens(new_Ndens_tot[:150], loaded_ptz_out['ALT'][:150], self.MMW)
+        colmass = find_tot_column_mass_dens(new_Ndens_tot, loaded_ptz_out['ALT'], self.MMW)
         new_surfP = (colmass*(self.planetary_gravity*(u.m*u.s**-2).to(u.cm*u.s**-2))*100)*u.Pa.to(u.bar) # 100 converts per cm to per m
 
         # Check if the pressure converged or if photochem needs to be rerun with new pressure
@@ -1715,11 +1709,14 @@ class VPLModelingPipeline:
                 
                 if self.num_photochem_runs == 1:
                     subprocess.run('cp '+self.OutPath+'photochem_run_output_'+self.casename+'.run '+self.OutPath+'photochem_run_output_'+self.casename+'_subtry'+str(photochem_subtries)+'.run', shell=True)
+                    subprocess.run('cp '+self.photochemDir+'OUTPUT/PTZ_mixingratios_out.dist '+self.OutPath+'PTZMix_subtry'+str(photochem_subtries)+'.dist', shell=True)
+                    subprocess.run('cp '+self.photochemDir+'OUTPUT/out.dist '+self.OutPath+'outdist_subtry'+str(photochem_subtries)+'.dist', shell=True)
+                    subprocess.run('cp '+self.photochemDir+'OUTPUT/out.out '+self.OutPath+'outout_subtry'+str(photochem_subtries)+'.out', shell=True)
                 else:
                     subprocess.run('cp '+self.OutPath+'photochem_run_output_'+self.casename+'_Try'+str(self.num_photochem_runs)+'.run '+self.OutPath+'photochem_run_output_'+self.casename+'_Try'+str(self.num_photochem_runs)+'_subtry'+str(photochem_subtries)+'.run', shell=True)
-
-                subprocess.run('cp '+self.photochemDir+'OUTPUT/PTZ_mixingratios_out.dist '+self.OutPath+'PTZMix_subtry'+str(photochem_subtries)+'.dist', shell=True)
-                subprocess.run('cp '+self.photochemDir+'OUTPUT/out.dist '+self.OutPath+'outdist_subtry'+str(photochem_subtries)+'.dist', shell=True)                
+                    subprocess.run('cp '+self.photochemDir+'OUTPUT/PTZ_mixingratios_out.dist '+self.OutPath+'PTZMix_Try'+str(self.num_photochem_runs)+'_subtry'+str(photochem_subtries)+'.dist', shell=True)
+                    subprocess.run('cp '+self.photochemDir+'OUTPUT/out.dist '+self.OutPath+'outdist_Try'+str(self.num_photochem_runs)+'_subtry'+str(photochem_subtries)+'.dist', shell=True)                
+                    subprocess.run('cp '+self.photochemDir+'OUTPUT/out.out '+self.OutPath+'outout_Try'+str(self.num_photochem_runs)+'_subtry'+str(photochem_subtries)+'.out', shell=True)
 
                 if photochem_subtries > self.max_iterations_master:
                     break
@@ -1847,8 +1844,10 @@ class VPLModelingPipeline:
 
                             if self.num_photochem_runs == 1:
                                 subprocess.run('cp '+self.OutPath+'photochem_run_output_'+self.casename+'.run '+self.OutPath+'photochem_run_output_'+self.casename+'_Psurfsubtry'+str(photochem_newPsurf_subtries)+'_Innertry_'+str(photochem_newPsurf_inner_subtries)+'.run', shell=True)
+                                subprocess.run('cp '+self.photochemDir+'OUTPUT/out.out '+self.OutPath+'outout_Psurfsubtry'+str(photochem_newPsurf_subtries)+'_Innertry_'+str(photochem_newPsurf_inner_subtries)+'.out', shell=True)
                             else:
                                 subprocess.run('cp '+self.OutPath+'photochem_run_output_'+self.casename+'_Try'+str(self.num_photochem_runs)+'.run '+self.OutPath+'photochem_run_output_'+self.casename+'_Try'+str(self.num_photochem_runs)+'_Psurfsubtry'+str(photochem_newPsurf_subtries)+'_Innertry_'+str(photochem_newPsurf_inner_subtries)+'.run', shell=True)
+                                subprocess.run('cp '+self.photochemDir+'OUTPUT/out.out '+self.OutPath+'outout_Try'+str(self.num_photochem_runs)+'_Psurfsubtry'+str(photochem_newPsurf_subtries)+'_Innertry_'+str(photochem_newPsurf_inner_subtries)+'.out', shell=True)
 
                             subprocess.run('cp '+self.photochemDir+'OUTPUT/PTZ_mixingratios_out.dist '+self.OutPath+'PTZMix_Psurfsubtry'+str(photochem_newPsurf_subtries)+'_Innertry_'+str(photochem_newPsurf_inner_subtries)+'.dist', shell=True)
                             subprocess.run('cp '+self.photochemDir+'OUTPUT/out.dist '+self.OutPath+'outdist_Psurfsubtry'+str(photochem_newPsurf_subtries)+'_Innertry_'+str(photochem_newPsurf_inner_subtries)+'.dist', shell=True) 
@@ -1869,9 +1868,11 @@ class VPLModelingPipeline:
 
                         if self.num_photochem_runs == 1:
                             subprocess.run('cp '+self.OutPath+'photochem_run_output_'+self.casename+'.run '+self.OutPath+'photochem_run_output_'+self.casename+'_Psurfsubtry'+str(photochem_newPsurf_subtries)+'_Innertry_'+str(photochem_newPsurf_inner_subtries)+'.run', shell=True)
+                            subprocess.run('cp '+self.photochemDir+'OUTPUT/out.out '+self.OutPath+'outout_Psurfsubtry'+str(photochem_newPsurf_subtries)+'_Innertry_'+str(photochem_newPsurf_inner_subtries)+'.out', shell=True)
                         else:
                             subprocess.run('cp '+self.OutPath+'photochem_run_output_'+self.casename+'_Try'+str(self.num_photochem_runs)+'.run '+self.OutPath+'photochem_run_output_'+self.casename+'_Try'+str(self.num_photochem_runs)+'_Psurfsubtry'+str(photochem_newPsurf_subtries)+'_Innertry_'+str(photochem_newPsurf_inner_subtries)+'.run', shell=True)
-
+                            subprocess.run('cp '+self.photochemDir+'OUTPUT/out.out '+self.OutPath+'outout_Try'+str(self.num_photochem_runs)+'_Psurfsubtry'+str(photochem_newPsurf_subtries)+'_Innertry_'+str(photochem_newPsurf_inner_subtries)+'.out', shell=True)
+                        
                         subprocess.run('cp '+self.photochemDir+'OUTPUT/PTZ_mixingratios_out.dist '+self.OutPath+'PTZMix_Psurfsubtry'+str(photochem_newPsurf_subtries)+'_Innertry_'+str(photochem_newPsurf_inner_subtries)+'.dist', shell=True)
                         subprocess.run('cp '+self.photochemDir+'OUTPUT/out.dist '+self.OutPath+'outdist_Psurfsubtry'+str(photochem_newPsurf_subtries)+'_Innertry_'+str(photochem_newPsurf_inner_subtries)+'.dist', shell=True) 
 

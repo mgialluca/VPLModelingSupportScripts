@@ -1,8 +1,8 @@
 
 from Pipeline import *
 
-pipelineobj = VPLModelingPipeline('TestSGBSL', 
-                                  '/gscratch/vsm/gialluca/VPLModelingTools_Dev/Vdep4e-1Res2/RunNumber101/PhotochemInputs/', 
+pipelineobj = VPLModelingPipeline('TestBlowup', 
+                                  '/gscratch/vsm/gialluca/VPLModelingTools_Dev/Vdep4e-1Res/RunNumber123/PhotochemInputs/', 
                                   True, find_molecules_of_interest=False, hitran_year='2020')
 
 
