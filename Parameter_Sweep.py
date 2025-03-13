@@ -683,6 +683,7 @@ class Generate_Atmosphere_Parameter_Sweep:
         final_pressure = [] # Last surface pressure of model
 
         fail_reason = [] # Reason for failure, or NaN / None
+        climate_ran = [] # If climate has starting running
 
         # Set up data calls for outgassing & escape rates
         rate_cols = []
@@ -819,9 +820,24 @@ class Generate_Atmosphere_Parameter_Sweep:
 
                             break
 
+            # Find out if climate has run yet:
+            for dirs, subdirs, files in os.walk('../Vdep4e-1HighEsc/RunNumber0/'):
+                files = files
+                break
+
+            for fih in files:
+                if len(fih.split('climate')) > 1:
+                    climate_ran_hold = True
+                    break
+                else:
+                    climate_ran_hold = False
+            
+            climate_ran.append(climate_ran_hold)
+
+
         # Compile the information
-        dat = [model_ID, final_state, final_pressure, fail_reason]
-        col_names = ['ModelNumber', 'FinalState', 'LastPsurf', 'FailReason']
+        dat = [model_ID, final_state, final_pressure, climate_ran, fail_reason]
+        col_names = ['ModelNumber', 'FinalState', 'LastPsurf', 'ClimateRan', 'FailReason']
         for col in rate_cols:
             col_names.append(col)
         for col in outgass_rates:
