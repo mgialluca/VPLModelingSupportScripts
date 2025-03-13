@@ -42,42 +42,46 @@ class Generate_Atmosphere_Parameter_Sweep:
         self.outgass_species_gridsweep = ['H2O'] # Species to vary outgassing rates of
         self.outgass_species_molarmass = {} # Molar masses in g/mol
         self.outgass_species_molarmass['H2O'] = [18.015]*(u.g/u.mol)# Molar masses in g/mol
-        self.escape_species_gridsweep = ['O', 'O3'] # Species to vary escape rates of
-        self.escape_species_losstype = ['TOA', 'Vdep'] # Vdep (depositional velocity at surface) or TOA (flux at top of atmosphere)
+        self.escape_species_gridsweep = ['O', 'O3', 'H2O2'] # Species to vary escape rates of
+        self.escape_species_losstype = ['TOA', 'Vdep', 'Vdep'] # Vdep (depositional velocity at surface) or TOA (flux at top of atmosphere)
         self.escape_species_molarmass = {}
         self.escape_species_molarmass['O'] = [15.999]*(u.g/u.mol) 
         self.escape_species_molarmass['O3'] = [47.997]*(u.g/u.mol) 
+        self.escape_species_molarmass['H2O2'] = [34.014]*(u.g/u.mol) 
 
         self.outgass_sample_type_gridsweep = ['Log'] # How to sample outgassed molecules: 'Linear', 'Log', or 'UserDef' 
-        self.escape_sample_type_gridsweep = ['UserDef', 'UserDef']
+        self.escape_sample_type_gridsweep = ['UserDef', 'UserDef', 'UserDef']
         # Linear - sample every flux on a linear grid (np.linspace) with some defined resolution
         # Log - sample every flux on a log grid (np.logspace) with some defined resolution
         # UserDef - User defined arrays of samples for every flux to vary 
 
         # Need to set Min / Max ranges for each molecule to vary in the form of a dictionary if using Linear or Log sampling
         self.outgass_species_MinMax_gridsweep = {}
-        self.outgass_species_MinMax_gridsweep['H2O'] = [90000000000.0, 100000000000.0] #[1.65329797e8, 3.00359578e12] # min, max
+        self.outgass_species_MinMax_gridsweep['H2O'] = [44552887.2545331, 9.47899801e11] #[90000000000.0, 100000000000.0] #[1.65329797e8, 3.00359578e12] # min, max
 
         self.escape_species_MinMax_gridsweep = {}
         self.escape_species_MinMax_gridsweep['O'] = [0,0]
         self.escape_species_MinMax_gridsweep['O3'] = [0,0]
+        self.escape_species_MinMax_gridsweep['H2O2'] = [0,0]
 
         # Sample resolution if using Linear / Log sampling 
-        self.outgass_sample_resolution_gridsweep = [35] # number of samples for each outgassed species
+        self.outgass_sample_resolution_gridsweep = [3] # number of samples for each outgassed species
         self.escape_sample_resolution_gridsweep = [0]
 
         # Need to pass samples for user defined option
         self.outgass_samples_gridsweep = {}
         #self.outgass_samples_gridsweep['H2O'] = [78000000000.0]
         self.escape_samples_gridsweep = {}
-        self.escape_samples_gridsweep['O'] = [2e29, 3e29, 4e29, 5e29, 6e29] #[1e28, 1e29, 1e30] #[0, 1e26, 1e27] #[0, 1e23, 5e23, 1e24, 5e24, 1e25, 5e25, 1e26]
-        self.escape_samples_gridsweep['O3'] = [0.4] #
+        self.escape_samples_gridsweep['O'] = [0, 1e27, 1e28, 1e29] #[1e28, 1e29, 1e30] #[0, 1e26, 1e27] #[0, 1e23, 5e23, 1e24, 5e24, 1e25, 5e25, 1e26]
+        self.escape_samples_gridsweep['O3'] = [0.01, 0.02, 0.2, 0.4] 
+        self.escape_samples_gridsweep['H2O2'] = [0.005, 0.1, 0.3, 0.6]
+        
 
 
         # Units for either Min/Max values, or the user defined samples 
         self.outgass_species_units_gridsweep = 1 / (u.cm**2 * u.s) # molecules / cm2*s (can convert from mass/time with molar mass or mol/time)
         #self.escape_species_units_gridsweep = 1 / u.s # Molecules per second
-        self.escape_species_units_gridsweep = [1/u.s, u.cm / u.s] # Molecules per second
+        self.escape_species_units_gridsweep = [1/u.s, u.cm / u.s, u.cm/u.s] # Molecules per second
 
         #######################################################################
 
@@ -810,13 +814,20 @@ class Generate_Atmosphere_Parameter_Sweep:
 
             for species in range(len(self.escape_species_gridsweep)):
                 gas_hold = self.escape_species_gridsweep[species]
+                esctypehold = self.escape_species_losstype[species]
                 for l in lines:
                     if l.split()[0][0] != '*':
                         if l.split()[0] == gas_hold:
-                            escape_rates[species].append(float(l.split()[14]))
+                            if esctypehold == 'TOA' or esctypehold == 'toa':
+                                escape_rates[species].append(float(l.split()[14]))
+                            elif esctypehold == 'Vdep' or esctypehold == 'vdep':
+                                escape_rates[species].append(float(l.split()[9]))
 
                             if dict_output == True:
-                                d[model_ID_hold][gas_hold+'_EscapeRate'] = float(l.split()[14])
+                                if esctypehold == 'TOA' or esctypehold == 'toa':
+                                    d[model_ID_hold][gas_hold+'_EscapeRate'] = float(l.split()[14])
+                                elif esctypehold == 'Vdep' or esctypehold == 'vdep':
+                                    escape_rates[species].append(float(l.split()[9]))
 
                             break
 
