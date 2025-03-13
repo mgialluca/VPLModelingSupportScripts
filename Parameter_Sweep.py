@@ -812,7 +812,6 @@ class Generate_Atmosphere_Parameter_Sweep:
 
                             break
 
-            print(self.escape_species_gridsweep)
             for species in range(len(self.escape_species_gridsweep)):
                 gas_hold = self.escape_species_gridsweep[species]
                 esctypehold = self.escape_species_losstype[species]
@@ -822,14 +821,13 @@ class Generate_Atmosphere_Parameter_Sweep:
                             if esctypehold == 'TOA' or esctypehold == 'toa':
                                 escape_rates[species].append(float(l.split()[14]))
                             elif esctypehold == 'Vdep' or esctypehold == 'vdep':
-                                print('appended '+gas_hold)
                                 escape_rates[species].append(float(l.split()[9]))
 
                             if dict_output == True:
                                 if esctypehold == 'TOA' or esctypehold == 'toa':
                                     d[model_ID_hold][gas_hold+'_EscapeRate'] = float(l.split()[14])
                                 elif esctypehold == 'Vdep' or esctypehold == 'vdep':
-                                    escape_rates[species].append(float(l.split()[9]))
+                                    d[model_ID_hold][gas_hold+'_EscapeRate'] = float(l.split()[9])
 
                             break
 
@@ -850,21 +848,13 @@ class Generate_Atmosphere_Parameter_Sweep:
 
         # Compile the information
         dat = [model_ID, final_state, final_pressure, climate_ran, fail_reason]
-        print('Model Id: ', len(model_ID))
-        print('final state: ', len(final_state))
-        print('final psurf: ', len(final_pressure))
-        print('climate: ', len(climate_ran))
-        print('fail reason: ', len(fail_reason))
         col_names = ['ModelNumber', 'FinalState', 'LastPsurf', 'ClimateRan', 'FailReason']
         for col in rate_cols:
             col_names.append(col)
         for col in outgass_rates:
             dat.append(col)
-            print(len(col))
         for col in escape_rates:
             dat.append(col)
-            print(len(col))
-            print(col)
         tab = Table(dat, names=col_names)
         ascii.write(tab, self.master_out+'ParameterSweep_RunStats_failedrun.dat', delimiter=' ', format='fixed_width')
 
