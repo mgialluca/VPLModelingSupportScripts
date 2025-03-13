@@ -812,6 +812,7 @@ class Generate_Atmosphere_Parameter_Sweep:
 
                             break
 
+            print(self.escape_species_gridsweep)
             for species in range(len(self.escape_species_gridsweep)):
                 gas_hold = self.escape_species_gridsweep[species]
                 esctypehold = self.escape_species_losstype[species]
@@ -821,6 +822,7 @@ class Generate_Atmosphere_Parameter_Sweep:
                             if esctypehold == 'TOA' or esctypehold == 'toa':
                                 escape_rates[species].append(float(l.split()[14]))
                             elif esctypehold == 'Vdep' or esctypehold == 'vdep':
+                                print('appended')
                                 escape_rates[species].append(float(l.split()[9]))
 
                             if dict_output == True:
