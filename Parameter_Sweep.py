@@ -821,7 +821,7 @@ class Generate_Atmosphere_Parameter_Sweep:
                             break
 
             # Find out if climate has run yet:
-            for dirs, subdirs, files in os.walk('../Vdep4e-1HighEsc/RunNumber0/'):
+            for dirs, subdirs, files in os.walk(path_hold):
                 files = files
                 break
 
