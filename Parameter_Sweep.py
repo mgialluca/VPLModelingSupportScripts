@@ -848,13 +848,20 @@ class Generate_Atmosphere_Parameter_Sweep:
 
         # Compile the information
         dat = [model_ID, final_state, final_pressure, climate_ran, fail_reason]
+        print('Model Id: ', len(model_ID))
+        print('final state: ', len(final_state))
+        print('final psurf: ', len(final_pressure))
+        print('climate: ', len(climate_ran))
+        print('fail reason: ', len(fail_reason))
         col_names = ['ModelNumber', 'FinalState', 'LastPsurf', 'ClimateRan', 'FailReason']
         for col in rate_cols:
             col_names.append(col)
         for col in outgass_rates:
             dat.append(col)
+            print(len(col))
         for col in escape_rates:
             dat.append(col)
+            print(len(col))
         tab = Table(dat, names=col_names)
         ascii.write(tab, self.master_out+'ParameterSweep_RunStats_failedrun.dat', delimiter=' ', format='fixed_width')
 
