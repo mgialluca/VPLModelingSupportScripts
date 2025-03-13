@@ -822,7 +822,7 @@ class Generate_Atmosphere_Parameter_Sweep:
                             if esctypehold == 'TOA' or esctypehold == 'toa':
                                 escape_rates[species].append(float(l.split()[14]))
                             elif esctypehold == 'Vdep' or esctypehold == 'vdep':
-                                print('appended')
+                                print('appended '+gas_hold)
                                 escape_rates[species].append(float(l.split()[9]))
 
                             if dict_output == True:
@@ -864,6 +864,7 @@ class Generate_Atmosphere_Parameter_Sweep:
         for col in escape_rates:
             dat.append(col)
             print(len(col))
+            print(col)
         tab = Table(dat, names=col_names)
         ascii.write(tab, self.master_out+'ParameterSweep_RunStats_failedrun.dat', delimiter=' ', format='fixed_width')
 
