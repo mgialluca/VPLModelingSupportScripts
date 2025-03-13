@@ -3,7 +3,7 @@ import subprocess
 
 
 #SmallerRange/RunNumber53/PhotochemInputs/', 
-test_object = Generate_Atmosphere_Parameter_Sweep('Vdep4e-1HighEsc', 
+test_object = Generate_Atmosphere_Parameter_Sweep('Vdep4e-1EscRes', 
                                   '/gscratch/vsm/gialluca/VPLModelingTools_Dev/Vdep4e-1Res/RunNumber123/PhotochemInputs/', 
                                 restart_run= True, 
                                 starting_point=None,
