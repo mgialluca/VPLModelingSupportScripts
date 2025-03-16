@@ -2,7 +2,7 @@ from Parameter_Sweep import *
 import subprocess
 
 
-test_object = Generate_Atmosphere_Parameter_Sweep('SensitTest', 
+test_object = Generate_Atmosphere_Parameter_Sweep('SensTestH2O', 
                                   '/gscratch/vsm/gialluca/VPLModelingTools_Dev/SmallerRange/RunNumber53/PhotochemInputs/', 
                                 restart_run= False, 
                                 hitran_year='2020')

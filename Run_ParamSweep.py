@@ -3,8 +3,8 @@ import subprocess
 
 
 #SmallerRange/RunNumber53/PhotochemInputs/', 
-test_object = Generate_Atmosphere_Parameter_Sweep('SensitTest', 
-                                  '/gscratch/vsm/gialluca/VPLModelingTools_Dev/Vdep4e-1Res/RunNumber123/PhotochemInputs/', 
+test_object = Generate_Atmosphere_Parameter_Sweep('SensTestH2O', 
+                                  '/gscratch/vsm/gialluca/VPLModelingTools_Dev/SensitTest/RunNumber61/PhotochemInputs', 
                                 restart_run= True, 
                                 starting_point=None,
                                 hitran_year='2020')
