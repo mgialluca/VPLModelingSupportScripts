@@ -57,7 +57,9 @@ class Generate_Atmosphere_Parameter_Sweep:
 
         # Need to set Min / Max ranges for each molecule to vary in the form of a dictionary if using Linear or Log sampling
         self.outgass_species_MinMax_gridsweep = {}
-        self.outgass_species_MinMax_gridsweep['H2O'] = [9.97550516e+10, 9.99980399e+10]
+        self.outgass_species_MinMax_gridsweep['H2O'] = [1.00028455e+11, 1.00089313e+11]
+        #[9.97550516e+10, 9.99980399e+10]
+        #[9.96337789e+10, 1.00608103e+11]
         #[8.48538802e+10, 9.91501611e+10] 
         #[1.07177663e+11, 1.99798009e+11]#[2.25884849e+10, 2.72793861e+11]# full bound: [44552887.2545331, 9.47899801e11] 
         #[90000000000.0, 100000000000.0] #[1.65329797e8, 3.00359578e12] # min, max
@@ -257,9 +259,9 @@ class Generate_Atmosphere_Parameter_Sweep:
                         nsp_new.write('2     0.      0.      ')
 
                         # Now SGFLUX is set to be the new flux value 
-                        newsgval = "{:.2E}".format(fluxes[fluxind])
+                        newsgval = "{:.4E}".format(fluxes[fluxind])
                         nsp_new.write(newsgval)
-                        add_spaces = 10-len(newsgval)
+                        add_spaces = 1#10-len(newsgval)
                         for space in range(add_spaces):
                             nsp_new.write(' ')
                         
