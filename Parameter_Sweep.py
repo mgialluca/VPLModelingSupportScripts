@@ -58,7 +58,7 @@ class Generate_Atmosphere_Parameter_Sweep:
 
         # Need to set Min / Max ranges for each molecule to vary in the form of a dictionary if using Linear or Log sampling
         self.outgass_species_MinMax_gridsweep = {}
-        self.outgass_species_MinMax_gridsweep['H2O'] = [8.48538802e+10, 9.91501611e+10]
+        self.outgass_species_MinMax_gridsweep['H2O'] = [9.96337789e+10, 1.00608103e+11]
         #[1.00028455e+11, 1.00089313e+11]
         #[9.97550516e+10, 9.99980399e+10]
         #[9.96337789e+10, 1.00608103e+11]
