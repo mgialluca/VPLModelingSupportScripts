@@ -10,6 +10,9 @@ from multiprocessing import Pool
 import shutil
 import re
 import json
+import emcee
+from functools import partial
+
 
 # Need to figure out how parameter sweeps are running:
 # 1. Run across a grid (every combination? Or strategic points? former is brute force method, could start with that)
@@ -58,7 +61,7 @@ class Generate_Atmosphere_Parameter_Sweep:
 
         # Need to set Min / Max ranges for each molecule to vary in the form of a dictionary if using Linear or Log sampling
         self.outgass_species_MinMax_gridsweep = {}
-        self.outgass_species_MinMax_gridsweep['H2O'] = [1.1e11, 9e11]#[9.96337789e+10, 1.00608103e+11]
+        self.outgass_species_MinMax_gridsweep['H2O'] = [1.00608103e+11, 2e11]#[9.96337789e+10, 1.00608103e+11]
         #[1.00028455e+11, 1.00089313e+11]
         #[9.97550516e+10, 9.99980399e+10]
         #[9.96337789e+10, 1.00608103e+11]
@@ -73,7 +76,7 @@ class Generate_Atmosphere_Parameter_Sweep:
         self.escape_species_MinMax_gridsweep['H2O2'] = [0,0]
 
         # Sample resolution if using Linear / Log sampling 
-        self.outgass_sample_resolution_gridsweep = [32] # number of samples for each outgassed species
+        self.outgass_sample_resolution_gridsweep = [21] # number of samples for each outgassed species
         self.escape_sample_resolution_gridsweep = [0]
 
         # Need to pass samples for user defined option
@@ -81,7 +84,7 @@ class Generate_Atmosphere_Parameter_Sweep:
         #self.outgass_samples_gridsweep['H2O'] = [78000000000.0]
         self.escape_samples_gridsweep = {}
         self.escape_samples_gridsweep['O'] = [0, 1e27, 1e29]#[0, 1e27, 1e28, 1e29] #[1e28, 1e29, 1e30] #[0, 1e26, 1e27] #[0, 1e23, 5e23, 1e24, 5e24, 1e25, 5e25, 1e26]
-        self.escape_samples_gridsweep['O2'] = [1e26, 1e29]
+        self.escape_samples_gridsweep['O2'] = [1e26, 1e27, 1e29]
         self.escape_samples_gridsweep['O3'] = [0.4]#[0.01, 0.02, 0.2, 0.4] 
         self.escape_samples_gridsweep['H2O2'] = [0.6]#[0.005, 0.1, 0.3, 0.6]
         
@@ -731,29 +734,37 @@ class Generate_Atmosphere_Parameter_Sweep:
                 f.close()
                 hold = lines[len(lines)-2]
                 hold = hold.split()
-                if 'Max' in hold:
-                    # If this was printed out, either failed running photochem or trying to converge on a surface pressure 
-                    if 'iterations' in hold or 'Iterations' in hold: 
-                        if 'inner' in hold and 'convergence' in hold:
-                            fail_reason_hold = 'Failed trying to find photochem convergence with a new pressure'
-                        else:
-                            hold2 = lines[len(lines)-4]
-                            hold2 = hold2.split()
-                            if 'Photochem' in hold2:
-                                fail_reason_hold = 'Failed running photochem (without new pressure)'
-                            elif 'Surf' in hold2 and 'Pressure' in hold2:
-                                hold3 = lines[len(lines)-6]
-                                hold3 = hold3.split()
-                                hold3 = "{:.5f}".format(float(hold3[len(hold3)-1]))
-                                fail_reason_hold = 'Failed trying to find new pressure, max change: '+hold3
+                fail_reason_hold = 'Unclear'
+                for lihold in lines:
+                    hold4 = lihold.split()
+                    if 'SGBSL' in hold4:
+                        fail_reason_hold = 'SGBSL Error'
+                        break
+                if fail_reason_hold == 'Unclear':
+                    if 'Max' in hold:
+                        # If this was printed out, either failed running photochem or trying to converge on a surface pressure 
+                        if 'iterations' in hold or 'Iterations' in hold: 
+                            if 'inner' in hold and 'convergence' in hold:
+                                fail_reason_hold = 'Failed trying to find photochem convergence with a new pressure'
                             else:
-                                fail_reason_hold = 'Unclear'
+                                hold2 = lines[len(lines)-4]
+                                hold2 = hold2.split()
+                                if 'Photochem' in hold2:
+                                    fail_reason_hold = 'Failed running photochem (without new pressure)'
+                                elif 'Surf' in hold2 and 'Pressure' in hold2:
+                                    hold3 = lines[len(lines)-6]
+                                    hold3 = hold3.split()
+                                    hold3 = "{:.5f}".format(float(hold3[len(hold3)-1]))
+                                    fail_reason_hold = 'Failed trying to find new pressure, max change: '+hold3
+                                else:
+                                    fail_reason_hold = 'Unclear'
+                                    
 
-                elif 'Climate' in hold and 'convergence' in hold: # failed in climate
-                    fail_reason_hold = 'Failed trying to find climate convergence'
+                    elif 'Climate' in hold and 'convergence' in hold: # failed in climate
+                        fail_reason_hold = 'Failed trying to find climate convergence'
 
-                else:
-                    fail_reason_hold = 'Unclear'
+                    else:
+                        fail_reason_hold = 'Unclear'
 
                 fail_reason.append(fail_reason_hold)
 
@@ -1015,4 +1026,19 @@ class Generate_Atmosphere_Parameter_Sweep:
             print("No matching files found.")
 
     '''
+
+# Run MCMC to find a matching pressure 
+def match_surf_pressure_MCMC(self, target_press=0.1):
+
+    # Set MCMC relevant parameters
+    self.mcmc_ndim = 5 # H2O outgassing, O TOA loss, O2 TOA loss, H2O2 vdep, O3 vdep
+    self.mcmc_nwalkers = 100
+    self.mcmc_nsteps = 100
+    #self.mcmc_burnin = 0 # Start with no burnin
+
+    h2o_outgass_initguess = 100610000000.0 # molec/cm2s
+    o_toaloss_initguess = 1e27 # 1/s
+    o2_toaloss_initguess = 1e26 # 1/s
+    h2o2_vdep_initguess = 0.3 # cm/s
+    o3_vdep_initguess = 0.4 # cm/s
 
