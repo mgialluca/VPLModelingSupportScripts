@@ -1,5 +1,8 @@
 # Units of fluxes are molecules / cm^2 / s
 
+import sys
+sys.path.append("/gscratch/vsm/gialluca/anaconda3/bin/python")
+
 from Pipeline import *
 import numpy as np
 import astropy.units as u
@@ -1041,4 +1044,6 @@ def match_surf_pressure_MCMC(self, target_press=0.1):
     o2_toaloss_initguess = 1e26 # 1/s
     h2o2_vdep_initguess = 0.3 # cm/s
     o3_vdep_initguess = 0.4 # cm/s
+
+
 
