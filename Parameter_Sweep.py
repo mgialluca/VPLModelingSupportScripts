@@ -1038,9 +1038,10 @@ class Generate_Atmosphere_Parameter_Sweep:
         
         # Run the pipeline to get pressure, convergence, etc
         modelID = np.random.randint(1e5)
-        inputfluxes = [modelID]
+        inputfluxes = []
         for flx in x:
             inputfluxes.append(flx)
+        inputfluxes.append(modelID)
 
         model = self.run_one_model(inputfluxes, verbose=False)
 
@@ -1124,7 +1125,7 @@ class Generate_Atmosphere_Parameter_Sweep:
 
         # Set MCMC relevant parameters
         self.mcmc_ndim = 5 # H2O outgassing, O TOA loss, O2 TOA loss, H2O2 vdep, O3 vdep
-        self.mcmc_nwalkers = 10
+        self.mcmc_nwalkers = 20
         self.mcmc_nsteps = 1000
         self.mcmc_burnin = 100 # Start with no burnin
 
