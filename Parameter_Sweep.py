@@ -295,7 +295,7 @@ class Generate_Atmosphere_Parameter_Sweep:
                             nsp_new.write('0     ')
 
                             # Now SGFLUX is set to be the new flux value 
-                            newvdval = "{:.1E}".format(fluxes[fluxind])
+                            newvdval = "{:.3E}".format(fluxes[fluxind])
                             nsp_new.write(newvdval+' ')
                             
                             # Now DISTH is set to '0.' with fixed spaces
@@ -345,7 +345,7 @@ class Generate_Atmosphere_Parameter_Sweep:
                             nsp_new.write('2      ')
 
                             # Set the new flux as SMFLUX, always put one space after but NOTE if the exponent is >=100 there could be a character error in fortran file reading
-                            newsmval = "{:.1E}".format(fluxes[fluxind])
+                            newsmval = "{:.4E}".format(fluxes[fluxind])
                             nsp_new.write(newsmval+' ')
 
                             # VEFF0 set to 0. with fixed spaces, and then you're done
@@ -1036,26 +1036,97 @@ class Generate_Atmosphere_Parameter_Sweep:
     # log likelihood for mcmc run
     def mcmc_lnlike(self, x):
         
+        # Run the pipeline to get pressure, convergence, etc
         modelID = np.random.randint(1e5)
         inputfluxes = [modelID]
         for flx in x:
-            inputfluxes.append(x)
+            inputfluxes.append(flx)
 
         model = self.run_one_model(inputfluxes, verbose=False)
-        
 
+        #updated_atm_pressure, global_convergence, casename
+
+        # Attempt to save some info to a text file for quick assessment
+        outstr = str(modelID)
+        outstr = outstr+' '+str(model.global_convergence)
+        outstr = outstr+' '+str(model.updated_atm_pressure)
+        outstr = outstr+' '+str(x[0])
+        outstr = outstr+' '+"{:.4E}".format(x[0])
+        outstr = outstr+' '+"{:.4E}".format(x[1])
+        outstr = outstr+' '+"{:.4E}".format(x[2])
+        outstr = outstr+' '+"{:.3E}".format(x[3])
+        outstr = outstr+' '+"{:.3E}".format(x[4])
+        outstr = outstr+'\n'
+
+        fsimoutputs = open(self.master_out+'EmceeSimulationOutputs.txt', 'a')
+        fsimoutputs.write(outstr)
+        fsimoutputs.close()
+
+        # If the model blew up, etc, this run is discarded, likelihood set to neg infinity
+        if model.global_convergence == False:
+            L = -np.inf
+        
+        else:
+            # Fit chi sq to the likelihood of 0.1 bar atmosphere +/- sigma bars
+            sigma = 0.09 
+            s = ((model.updated_atm_pressure-0.1)**2)/(sigma**2)
+            L = -0.5*s
+        
+        return L
+
+    # Priors for MCMC
+    def mcmc_priors(self, x):
+
+        # starting point
+        prior = 0
+
+        # water prior 
+        if x[0] < 44552887.2545331 or x[0] > 9.47899801e11:
+            prior = -np.inf
+        
+        # O prior
+        if x[1] < 0 or x[1] > 1e30:
+            prior = -np.inf
+        
+        # O2 prior
+        if x[2] < 0 or x[2] > 1e29:
+            prior = -np.inf
+
+        # O3 prior
+        if x[3] > 0.41 or x[3] < 0.003:
+            prior = -np.inf
+        
+        # H2O2 prior
+        if x[4] > 1 or x[4] < 0.003:
+            prior = -np.inf
+        
+        return prior
+        
+    # Prob function for MCMC
+    def mcmc_lnprob(self, x):
+
+        if self.mcmc_priors(x) == -np.inf:
+            return -np.inf
+
+        else:
+            return self.mcmc_lnlike(x)
 
 
     # Run MCMC to find a matching pressure 
-    def match_surf_pressure_MCMC(self, target_press=0.1):
+    def match_surf_pressure_MCMC(self):
 
         self.mcmc_pressure_only = True
+
+        # Set up output file
+        fsimoutputs = open(self.master_out+'EmceeSimulationOutputs.txt', 'w')
+        fsimoutputs.write('ID Converged Psurf H2O O O2 O3 H2O2\n')
+        fsimoutputs.close()
 
         # Set MCMC relevant parameters
         self.mcmc_ndim = 5 # H2O outgassing, O TOA loss, O2 TOA loss, H2O2 vdep, O3 vdep
         self.mcmc_nwalkers = 10
         self.mcmc_nsteps = 1000
-        #self.mcmc_burnin = 0 # Start with no burnin
+        self.mcmc_burnin = 100 # Start with no burnin
 
         # Initial guesses based off of stable parameter sweep run of pressure 0.006 bar
         h2o_outgass_initguess = 100610000000.0 # molec/cm2s
@@ -1077,6 +1148,13 @@ class Generate_Atmosphere_Parameter_Sweep:
 
             pos.append(np.array(hold))
 
+        lnProb = partial(self.mcmc_lnprob)
+        backendfile = self.sweepname+'.h5'
+        backend = emcee.backends.HDFBackend(self.master_out+backendfile)
+        backend.reset(self.mcmc_nwalkers, self.mcmc_ndim)
 
-
+        with Pool() as pool:
+            sampler = emcee.EnsembleSampler(self.mcmc_nwalkers, self.mcmc_ndim, lnProb, backend=backend, pool=pool)
+            sampler.run_mcmc(pos, self.mcmc_nsteps, progress=False)
+#        samples = sampler.get_chain(discard=self.mcmc_burnin, flat=True)
 
