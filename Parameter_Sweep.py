@@ -1,7 +1,7 @@
 # Units of fluxes are molecules / cm^2 / s
 
 import sys
-sys.path.append("/gscratch/vsm/gialluca/anaconda3/bin/python")
+sys.path.append("/gscratch/vsm/gialluca/anaconda3/lib/python3.9/site-packages")
 
 from Pipeline import *
 import numpy as np
