@@ -43,6 +43,8 @@ class Generate_Atmosphere_Parameter_Sweep:
 
         self.atmos_Dir = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/atmos/' # Path to dir containing atmos, will be copied for runs 
 
+        self.mcmc_pressure_only = False
+
         #########  Parameters to set if you want to do a grid sweep  #########
 
         self.outgass_species_gridsweep = ['H2O'] # Species to vary outgassing rates of
@@ -64,7 +66,7 @@ class Generate_Atmosphere_Parameter_Sweep:
 
         # Need to set Min / Max ranges for each molecule to vary in the form of a dictionary if using Linear or Log sampling
         self.outgass_species_MinMax_gridsweep = {}
-        self.outgass_species_MinMax_gridsweep['H2O'] = [1.00608103e+11, 2e11]#[9.96337789e+10, 1.00608103e+11]
+        self.outgass_species_MinMax_gridsweep['H2O'] = [1.00608103e+11, 111530000000.0]#[9.96337789e+10, 1.00608103e+11]
         #[1.00028455e+11, 1.00089313e+11]
         #[9.97550516e+10, 9.99980399e+10]
         #[9.96337789e+10, 1.00608103e+11]
@@ -87,7 +89,7 @@ class Generate_Atmosphere_Parameter_Sweep:
         #self.outgass_samples_gridsweep['H2O'] = [78000000000.0]
         self.escape_samples_gridsweep = {}
         self.escape_samples_gridsweep['O'] = [0, 1e27, 1e29]#[0, 1e27, 1e28, 1e29] #[1e28, 1e29, 1e30] #[0, 1e26, 1e27] #[0, 1e23, 5e23, 1e24, 5e24, 1e25, 5e25, 1e26]
-        self.escape_samples_gridsweep['O2'] = [1e26, 1e27, 1e29]
+        self.escape_samples_gridsweep['O2'] = [1e26, 5e26, 1e27]
         self.escape_samples_gridsweep['O3'] = [0.4]#[0.01, 0.02, 0.2, 0.4] 
         self.escape_samples_gridsweep['H2O2'] = [0.6]#[0.005, 0.1, 0.3, 0.6]
         
@@ -150,6 +152,7 @@ class Generate_Atmosphere_Parameter_Sweep:
         pipelineobj.adjust_atmospheric_pressure = True
         pipelineobj.suppress_IOerrors = True
         pipelineobj.run_spectra = True
+        pipelineobj.MCMC_pressure_only = self.mcmc_pressure_only
 
         # Testing if climate executable needs to be copied
         if self.supernode == True:
@@ -472,7 +475,7 @@ class Generate_Atmosphere_Parameter_Sweep:
     # For a given suite of inputs, run the photochem/climate pipeline 
     # InputFlux - list of input fluxes for both outgassing and escaping species built up in a run function 
     ##    samples for all outgassed species in their order followed by escaping species, plus a number to indicate the unique casename 
-    def run_one_model(self, InputFlux):
+    def run_one_model(self, InputFlux, verbose=True):
 
         # Model ID number for file naming will be the last value of the input string
         hold = len(InputFlux)-1
@@ -485,7 +488,7 @@ class Generate_Atmosphere_Parameter_Sweep:
         if type(self.Restart_Run) == str:
             if self.Starting_Point == 'Exact':
                 currmodel = VPLModelingPipeline('RunNumber'+str(modelID),  '/gscratch/vsm/gialluca/VPLModelingTools_Dev/'+self.Restart_Run+'/RunNumber'+str(modelID)+'/PhotochemInputs/', 
-                                                True, find_molecules_of_interest=False, hitran_year=self.hitran_year)
+                                                verbose, find_molecules_of_interest=False, hitran_year=self.hitran_year)
             else:
 
                 # Read in the csv file that compiled the rates used in the previous run
@@ -495,10 +498,10 @@ class Generate_Atmosphere_Parameter_Sweep:
                 use_starting_point = self.find_closest_prev_model(input_options, fluxes)
 
                 currmodel = VPLModelingPipeline('RunNumber'+str(modelID),  '/gscratch/vsm/gialluca/VPLModelingTools_Dev/'+self.Restart_Run+'/'+use_starting_point+'/PhotochemInputs/', 
-                                                True, find_molecules_of_interest=False, hitran_year=self.hitran_year)
+                                                verbose, find_molecules_of_interest=False, hitran_year=self.hitran_year)
 
         else:
-            currmodel = VPLModelingPipeline('RunNumber'+str(modelID), self.photochemInitial, True, find_molecules_of_interest=False, hitran_year=self.hitran_year)
+            currmodel = VPLModelingPipeline('RunNumber'+str(modelID), self.photochemInitial, verbose, find_molecules_of_interest=False, hitran_year=self.hitran_year)
 
         # Set relevant values of object 
         self.set_pipeline_vars('RunNumber'+str(modelID), currmodel)
@@ -513,7 +516,7 @@ class Generate_Atmosphere_Parameter_Sweep:
         
         # Run the Photochem-Climate-SMART pipeline
         converged = currmodel.run_automatic()
-        print(converged)
+        #print(converged)
 
         # Clean abs files out as they take up the most space
         #subprocess.run('rm -rf '+currmodel.LBLABC_AbsFilesDir+'*.abs', shell=True)
@@ -1030,20 +1033,50 @@ class Generate_Atmosphere_Parameter_Sweep:
 
     '''
 
-# Run MCMC to find a matching pressure 
-def match_surf_pressure_MCMC(self, target_press=0.1):
+    # log likelihood for mcmc run
+    def mcmc_lnlike(self, x):
+        
+        modelID = np.random.randint(1e5)
+        inputfluxes = [modelID]
+        for flx in x:
+            inputfluxes.append(x)
 
-    # Set MCMC relevant parameters
-    self.mcmc_ndim = 5 # H2O outgassing, O TOA loss, O2 TOA loss, H2O2 vdep, O3 vdep
-    self.mcmc_nwalkers = 100
-    self.mcmc_nsteps = 100
-    #self.mcmc_burnin = 0 # Start with no burnin
+        model = self.run_one_model(inputfluxes, verbose=False)
+        
 
-    h2o_outgass_initguess = 100610000000.0 # molec/cm2s
-    o_toaloss_initguess = 1e27 # 1/s
-    o2_toaloss_initguess = 1e26 # 1/s
-    h2o2_vdep_initguess = 0.3 # cm/s
-    o3_vdep_initguess = 0.4 # cm/s
+
+
+    # Run MCMC to find a matching pressure 
+    def match_surf_pressure_MCMC(self, target_press=0.1):
+
+        self.mcmc_pressure_only = True
+
+        # Set MCMC relevant parameters
+        self.mcmc_ndim = 5 # H2O outgassing, O TOA loss, O2 TOA loss, H2O2 vdep, O3 vdep
+        self.mcmc_nwalkers = 10
+        self.mcmc_nsteps = 1000
+        #self.mcmc_burnin = 0 # Start with no burnin
+
+        # Initial guesses based off of stable parameter sweep run of pressure 0.006 bar
+        h2o_outgass_initguess = 100610000000.0 # molec/cm2s
+        o_toaloss_initguess = 1e27 # 1/s
+        o2_toaloss_initguess = 1e26 # 1/s
+        o3_vdep_initguess = 0.4 # cm/s
+        h2o2_vdep_initguess = 0.3 # cm/s
+
+        # Pick initial positions for every walker minimally perturbed by 1e-4 * the mag of the initial guess
+        x0 = [h2o_outgass_initguess, o_toaloss_initguess, o2_toaloss_initguess, o3_vdep_initguess, h2o2_vdep_initguess]
+        pos = []
+        for i in range(self.mcmc_nwalkers):
+            hold = []
+            hold.append(self.fix_flux_units((x0[0]+1e7*np.random.randn())*(1 / (u.cm**2 * u.s)), 'H2O', 'outgass').value)
+            hold.append(self.fix_flux_units((x0[1]+1e23*np.random.randn())*(1 / (u.s)), 'O', 'escape', loss_type='TOA').value)
+            hold.append(self.fix_flux_units((x0[2]+1e22*np.random.randn())*(1 / (u.s)), 'O2', 'escape', loss_type='TOA').value)
+            hold.append(self.fix_flux_units((x0[3]+1e-5*np.random.randn())*(u.cm / (u.s)), 'O3', 'escape', loss_type='Vdep').value)
+            hold.append(self.fix_flux_units((x0[4]+1e-5*np.random.randn())*(u.cm / (u.s)), 'H2O2', 'escape', loss_type='Vdep').value)
+
+            pos.append(np.array(hold))
+
 
 
 

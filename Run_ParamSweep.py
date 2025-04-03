@@ -3,7 +3,7 @@ import subprocess
 
 
 #SmallerRange/RunNumber53/PhotochemInputs/', 
-test_object = Generate_Atmosphere_Parameter_Sweep('O2SensT2LossTest', 
+test_object = Generate_Atmosphere_Parameter_Sweep('O2SensT3LossTest', 
                                   '/gscratch/vsm/gialluca/VPLModelingTools_Dev/SensTestH2O/RunNumber175/PhotochemInputs/', 
                                 restart_run= True, 
                                 starting_point=None,
