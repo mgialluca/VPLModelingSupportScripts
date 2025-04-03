@@ -66,7 +66,7 @@ class Generate_Atmosphere_Parameter_Sweep:
 
         # Need to set Min / Max ranges for each molecule to vary in the form of a dictionary if using Linear or Log sampling
         self.outgass_species_MinMax_gridsweep = {}
-        self.outgass_species_MinMax_gridsweep['H2O'] = [1.00608103e+11, 111530000000.0]#[9.96337789e+10, 1.00608103e+11]
+        self.outgass_species_MinMax_gridsweep['H2O'] = [1.00608103e+11, 101130000000.0]#[9.96337789e+10, 1.00608103e+11]
         #[1.00028455e+11, 1.00089313e+11]
         #[9.97550516e+10, 9.99980399e+10]
         #[9.96337789e+10, 1.00608103e+11]
@@ -81,15 +81,15 @@ class Generate_Atmosphere_Parameter_Sweep:
         self.escape_species_MinMax_gridsweep['H2O2'] = [0,0]
 
         # Sample resolution if using Linear / Log sampling 
-        self.outgass_sample_resolution_gridsweep = [21] # number of samples for each outgassed species
+        self.outgass_sample_resolution_gridsweep = [16] # number of samples for each outgassed species
         self.escape_sample_resolution_gridsweep = [0]
 
         # Need to pass samples for user defined option
         self.outgass_samples_gridsweep = {}
         #self.outgass_samples_gridsweep['H2O'] = [78000000000.0]
         self.escape_samples_gridsweep = {}
-        self.escape_samples_gridsweep['O'] = [0, 1e27, 1e29]#[0, 1e27, 1e28, 1e29] #[1e28, 1e29, 1e30] #[0, 1e26, 1e27] #[0, 1e23, 5e23, 1e24, 5e24, 1e25, 5e25, 1e26]
-        self.escape_samples_gridsweep['O2'] = [1e26, 5e26, 1e27]
+        self.escape_samples_gridsweep['O'] = [0, 5e26, 1e27]#[0, 1e27, 1e29]#[0, 1e27, 1e28, 1e29] #[1e28, 1e29, 1e30] #[0, 1e26, 1e27] #[0, 1e23, 5e23, 1e24, 5e24, 1e25, 5e25, 1e26]
+        self.escape_samples_gridsweep['O2'] = [1e26, 2e26, 3e26, 4e26]#[1e26, 5e26, 1e27]
         self.escape_samples_gridsweep['O3'] = [0.4]#[0.01, 0.02, 0.2, 0.4] 
         self.escape_samples_gridsweep['H2O2'] = [0.6]#[0.005, 0.1, 0.3, 0.6]
         
