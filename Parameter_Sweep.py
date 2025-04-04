@@ -1,7 +1,7 @@
 # Units of fluxes are molecules / cm^2 / s
 
 import sys
-sys.path.append("/gscratch/vsm/gialluca/anaconda3/lib/python3.9/site-packages")
+#sys.path.append("/gscratch/vsm/gialluca/anaconda3/lib/python3.9/site-packages")
 
 from Pipeline import *
 import numpy as np
@@ -1152,7 +1152,6 @@ class Generate_Atmosphere_Parameter_Sweep:
 
         lnProb = partial(self.mcmc_lnprob)
         backendfile = self.sweepname+'.h5'
-        sys.path.append("/gscratch/vsm/gialluca/anaconda3/lib/python3.9/site-packages")
         backend = emcee.backends.HDFBackend(self.master_out+backendfile)
         backend.reset(self.mcmc_nwalkers, self.mcmc_ndim)
 
