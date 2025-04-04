@@ -14,6 +14,7 @@ import shutil
 import re
 import json
 import emcee
+import h5py
 from functools import partial
 
 
