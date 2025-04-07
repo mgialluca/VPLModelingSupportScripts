@@ -99,7 +99,7 @@ class Generate_Atmosphere_Parameter_Sweep:
         # Units for either Min/Max values, or the user defined samples 
         self.outgass_species_units_gridsweep = 1 / (u.cm**2 * u.s) # molecules / cm2*s (can convert from mass/time with molar mass or mol/time)
         #self.escape_species_units_gridsweep = 1 / u.s # Molecules per second
-        self.escape_species_units_gridsweep = [1/u.s, 1/u.s, u.cm / u.s, u.cm/u.s] # Molecules per second
+        self.escape_species_units_gridsweep = [u.cm/u.s, u.cm/u.s, u.cm / u.s, u.cm/u.s] # Molecules per second
 
         #######################################################################
 
