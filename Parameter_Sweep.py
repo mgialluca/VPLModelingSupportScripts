@@ -863,12 +863,16 @@ class Generate_Atmosphere_Parameter_Sweep:
                                 escape_rates[species].append(float(l.split()[14]))
                             elif esctypehold == 'Vdep' or esctypehold == 'vdep':
                                 escape_rates[species].append(float(l.split()[9]))
+                            elif esctypehold == 'Veff' or esctypehold == 'veff':
+                                escape_rates[species].append(float(l.split()[15]))
 
                             if dict_output == True:
                                 if esctypehold == 'TOA' or esctypehold == 'toa':
                                     d[model_ID_hold][gas_hold+'_EscapeRate'] = float(l.split()[14])
                                 elif esctypehold == 'Vdep' or esctypehold == 'vdep':
                                     d[model_ID_hold][gas_hold+'_EscapeRate'] = float(l.split()[9])
+                                elif esctypehold == 'Veff' or esctypehold == 'veff':
+                                    d[model_ID_hold][gas_hold+'_EscapeRate'] = float(l.split()[15])
 
                             break
 
