@@ -2,9 +2,9 @@ from Parameter_Sweep import *
 import subprocess
 
 
-#SmallerRange/RunNumber53/PhotochemInputs/', 
-test_object = Generate_Atmosphere_Parameter_Sweep('VeffTestFullRange', 
-                                  '/gscratch/vsm/gialluca/VPLModelingTools_Dev/SensTestH2O/RunNumber175/PhotochemInputs/', 
+#'/gscratch/vsm/gialluca/VPLModelingTools_Dev/SensTestH2O/RunNumber175/
+test_object = Generate_Atmosphere_Parameter_Sweep('VeffTestDepos', 
+                                  '/gscratch/vsm/gialluca/VPLModelingTools_Dev/VeffTestFullRange/RunNumber187/PhotochemInputs/', 
                                 restart_run= True, 
                                 starting_point=None,
                                 hitran_year='2020')
