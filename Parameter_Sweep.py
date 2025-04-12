@@ -1057,6 +1057,7 @@ class Generate_Atmosphere_Parameter_Sweep:
         
         # Run the pipeline to get pressure, convergence, etc
         modelID = np.random.randint(1e5)
+        print('MODEL ID: ', modelID)
         inputfluxes = []
         for flx in x:
             inputfluxes.append(flx)
