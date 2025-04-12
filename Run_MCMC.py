@@ -3,7 +3,7 @@ import subprocess
 
 
 test_object = Generate_Atmosphere_Parameter_Sweep('MCMCTest', 
-                                  '/gscratch/vsm/gialluca/VPLModelingTools_Dev/VeffTestDepos/RunNumber6/PhotochemInputs', 
+                                  '/gscratch/vsm/gialluca/VPLModelingTools_Dev/VeffTestDepos/RunNumber6/PhotochemInputs/', 
                                 restart_run= True, 
                                 starting_point=None,
                                 hitran_year='2020')
