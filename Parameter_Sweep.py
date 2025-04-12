@@ -1172,6 +1172,8 @@ class Generate_Atmosphere_Parameter_Sweep:
             hold.append(self.fix_flux_units((x0[4]+1e-5*np.random.randn())*(u.cm / (u.s)), 'H2O2', 'escape', loss_type='Vdep').value)
 
             pos.append(np.array(hold))
+        
+        print('Positions: '+str(len(pos)))
 
         lnProb = partial(self.mcmc_lnprob)
         backendfile = self.sweepname+'.h5'
