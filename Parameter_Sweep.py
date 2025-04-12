@@ -1110,11 +1110,11 @@ class Generate_Atmosphere_Parameter_Sweep:
             prior = -np.inf
         
         # O prior
-        if x[1] < 0 or x[1] > 1e30:
+        if x[1] < 0 or x[1] > 10:
             prior = -np.inf
         
         # O2 prior
-        if x[2] < 0 or x[2] > 1e29:
+        if x[2] < 0 or x[2] > 10:
             prior = -np.inf
 
         # O3 prior
@@ -1122,7 +1122,7 @@ class Generate_Atmosphere_Parameter_Sweep:
             prior = -np.inf
         
         # H2O2 prior
-        if x[4] > 1 or x[4] < 0.003:
+        if x[4] > 1 or x[4] < 0.00001:
             prior = -np.inf
         
         return prior
