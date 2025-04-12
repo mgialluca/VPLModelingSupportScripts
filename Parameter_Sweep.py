@@ -1166,8 +1166,8 @@ class Generate_Atmosphere_Parameter_Sweep:
         for i in range(self.mcmc_nwalkers):
             hold = []
             hold.append(self.fix_flux_units((x0[0]+1e7*np.random.randn())*(1 / (u.cm**2 * u.s)), 'H2O', 'outgass').value)
-            hold.append(self.fix_flux_units((x0[1]+1e23*np.random.randn())*(u.cm / (u.s)), 'O', 'escape', loss_type='Veff').value)
-            hold.append(self.fix_flux_units((x0[2]+1e22*np.random.randn())*(u.cm / (u.s)), 'O2', 'escape', loss_type='Veff').value)
+            hold.append(self.fix_flux_units((x0[1]+1e-5*np.random.randn())*(u.cm / (u.s)), 'O', 'escape', loss_type='Veff').value)
+            hold.append(self.fix_flux_units((x0[2]+1e-5*np.random.randn())*(u.cm / (u.s)), 'O2', 'escape', loss_type='Veff').value)
             hold.append(self.fix_flux_units((x0[3]+1e-5*np.random.randn())*(u.cm / (u.s)), 'O3', 'escape', loss_type='Vdep').value)
             hold.append(self.fix_flux_units((x0[4]+1e-5*np.random.randn())*(u.cm / (u.s)), 'H2O2', 'escape', loss_type='Vdep').value)
 
