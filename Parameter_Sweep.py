@@ -1056,8 +1056,12 @@ class Generate_Atmosphere_Parameter_Sweep:
     def mcmc_lnlike(self, x):
         
         # Run the pipeline to get pressure, convergence, etc
-        modelID = np.random.randint(1e5)
-        print('MODEL ID: ', modelID)
+        rng = np.random.default_rng()  # Automatically uses entropy from OS
+        modelID = rng.integers(1e5)
+        while os.path.exists(self.master_out+'RunNumber'+str(modelID)):
+            rng = np.random.default_rng()  # Automatically uses entropy from OS
+            modelID = rng.integers(1e5)
+
         inputfluxes = []
         for flx in x:
             inputfluxes.append(flx)
