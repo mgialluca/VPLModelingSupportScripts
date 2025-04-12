@@ -1154,11 +1154,11 @@ class Generate_Atmosphere_Parameter_Sweep:
         self.mcmc_burnin = 100 # Start with no burnin
 
         # Initial guesses based off of stable parameter sweep run of pressure 0.006 bar
-        h2o_outgass_initguess = 100610000000.0 # molec/cm2s
-        o_toaloss_initguess = 1e27 # 1/s
-        o2_toaloss_initguess = 1e26 # 1/s
-        o3_vdep_initguess = 0.4 # cm/s
-        h2o2_vdep_initguess = 0.3 # cm/s
+        h2o_outgass_initguess = 228290000000.0 # molec/cm2s
+        o_toaloss_initguess = 0.01 # cm/s
+        o2_toaloss_initguess = 0.01 # cm/s
+        o3_vdep_initguess = 0.01 # cm/s
+        h2o2_vdep_initguess = 0.005 # cm/s
 
         # Pick initial positions for every walker minimally perturbed by 1e-4 * the mag of the initial guess
         x0 = [h2o_outgass_initguess, o_toaloss_initguess, o2_toaloss_initguess, o3_vdep_initguess, h2o2_vdep_initguess]
@@ -1166,8 +1166,8 @@ class Generate_Atmosphere_Parameter_Sweep:
         for i in range(self.mcmc_nwalkers):
             hold = []
             hold.append(self.fix_flux_units((x0[0]+1e7*np.random.randn())*(1 / (u.cm**2 * u.s)), 'H2O', 'outgass').value)
-            hold.append(self.fix_flux_units((x0[1]+1e23*np.random.randn())*(1 / (u.s)), 'O', 'escape', loss_type='TOA').value)
-            hold.append(self.fix_flux_units((x0[2]+1e22*np.random.randn())*(1 / (u.s)), 'O2', 'escape', loss_type='TOA').value)
+            hold.append(self.fix_flux_units((x0[1]+1e23*np.random.randn())*(u.cm / (u.s)), 'O', 'escape', loss_type='Veff').value)
+            hold.append(self.fix_flux_units((x0[2]+1e22*np.random.randn())*(u.cm / (u.s)), 'O2', 'escape', loss_type='Veff').value)
             hold.append(self.fix_flux_units((x0[3]+1e-5*np.random.randn())*(u.cm / (u.s)), 'O3', 'escape', loss_type='Vdep').value)
             hold.append(self.fix_flux_units((x0[4]+1e-5*np.random.randn())*(u.cm / (u.s)), 'H2O2', 'escape', loss_type='Vdep').value)
 
