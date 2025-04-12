@@ -2178,6 +2178,7 @@ class VPLModelingPipeline:
 
             ### Create SMART runscript ------------------------------
 
+            self.set_climate_settings()
             self.set_smart_settings()
             self.make_smart_runscript()
 
