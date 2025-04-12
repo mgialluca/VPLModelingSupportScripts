@@ -1118,6 +1118,7 @@ class VPLModelingPipeline:
     def make_smart_runscript(self):
 
         # Load default climate settings
+        self.set_climate_settings()
         self.set_smart_settings()
 
         # Start a new runscript to create
