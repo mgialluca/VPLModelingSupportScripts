@@ -38,6 +38,9 @@ class VPLModelingPipeline:
         self.SMART_RunScriptDir = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/SMART/'+casename+'/' # path to put SMART runscripts in
         self.photochemInitialInput = photochemInitial
 
+        # For T1-c 
+        self.planetary_mass = 1.308*u.Mearth.to(u.kg)
+
         # The climate executable:
         self.vplclimate_executable = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/ClimateModel/vpl_climate/vpl_climate' # The VPL Climate executable you want to use WITH FULL PATH
 
@@ -62,6 +65,7 @@ class VPLModelingPipeline:
         self.num_photochem_runs = 0
         self.num_climate_runs = 0
         self.num_lblabc_runs = 0
+        self.num_2col_climate_runs = 0
 
         # Initialize convergence logic gates
         self.photochem_global_converge = False
@@ -73,6 +77,8 @@ class VPLModelingPipeline:
         self.run_spectra = True # If true, finished a converged run with smart 
         self.fixsgbsl = False # If true, try to fix sgbsl error
         self.MCMC_pressure_only = False # If true, remove everything after photochem for an MCMC pressure fitting walker
+
+        self.include_2column_climate = True
 
         # User defined inputs
         self.casename = casename # Case name youre running, user defined
@@ -249,11 +255,19 @@ class VPLModelingPipeline:
     # exec - the VPL Climate executable to use WITH PATH
     # trynum - the iteration number youre on for the specific case
     ##
-    def run_climate_1instance(self, runscript, exec, trynum=1):
-        if trynum == 1:
-            subprocess.run(exec+' < '+runscript+' > '+self.OutPath+'vpl_climate_output_'+self.casename+'.run', shell=True)
-        else:
-            subprocess.run(exec+' < '+runscript+' > '+self.OutPath+'vpl_climate_output_'+self.casename+'_Try'+str(trynum)+'.run', shell=True)
+    def run_climate_1instance(self, runscript, exec, trynum=1, twocol=False):
+        if twocol == False:
+            if trynum == 1:
+                subprocess.run(exec+' < '+runscript+' > '+self.OutPath+'vpl_climate_output_'+self.casename+'.run', shell=True)
+            else:
+                subprocess.run(exec+' < '+runscript+' > '+self.OutPath+'vpl_climate_output_'+self.casename+'_Try'+str(trynum)+'.run', shell=True)
+        elif twocol == True:
+            if trynum == 1:
+                subprocess.run(exec+' < '+runscript+' > '+self.OutPath+'vpl_2col_climate_output_'+self.casename+'.run', shell=True)
+            else:
+                subprocess.run(exec+' < '+runscript+' > '+self.OutPath+'vpl_2col_climate_output_'+self.casename+'_Try'+str(trynum)+'.run', shell=True)
+
+
 
     ### Run LBLABC for a given runscript (just useful to get the output w/e)
     ##
@@ -1096,6 +1110,237 @@ class VPLModelingPipeline:
             f.write(self.DataOutPath+'vpl_climate_'+self.casename+'\n')
         else:
             f.write(self.DataOutPath+'vpl_climate_'+self.casename+'_tryNum'+str(trynum)+'\n')
+        f.write('2			Overwrite existing files\n')
+
+        f.close()
+
+    
+    ### Purpose: Make the vpl climate run file for 2 column mode based on the climate settings
+    #
+    ## Attribute Dependencies:
+    # molecule_dict - All the molecules of interest
+    # casename - for naming convention
+    # MMW - the atmospheric MMW found by photochem
+    # vplclimate_RunScriptDir - the output location of climate runscripts
+    # AtmProfPath - Path to the PT and Mixing ratio profiles
+    # planetary_gravity - gravity [in m/s]
+    # planetary_radius - planet radius [in km]
+    # surface_temp - Surface temperature [K] gets set when calling degrade_PT()
+    #
+    ## Fxn-specific Inputs:
+    # trynum - the iteration number youre on for the specific case, defined by self.num_climate_runs
+    ##
+    def make_2column_climate_runscript(self, trynum=1):
+
+        # Load default climate settings
+        self.set_climate_settings()
+
+        # Start a new runscript to create
+        f = open(self.vplclimate_RunScriptDir+'RunVPLClimate_2column_'+self.casename+'.script', 'w')
+
+        f.write(str(self.c_NumberTimesteps)+'			Number of timesteps\n')
+        f.write(str(self.c_TimestepLength)+'			Timestep length [s]\n')
+        f.write(str(self.c_SubstepIntervals)+'			Substep intervals\n')
+        f.write(str(self.c_TimestepOutputIntervals)+'			Timestep output intervals\n')
+        f.write(str(self.c_TimeStepMethodIndex)+'			Index of time-stepping method\n')
+        f.write(str(self.c_TempChangeTolerance)+'			Temperature change tolerance\n')
+        f.write(str(self.c_DoubledRadiationGrid)+'			Doubled radiation grid\n')
+        f.write('4			HRT calc type index [two-column day-night]\n') # Andrew runs as latitude, then 4 separate versions (at each zenith angle)
+        f.write(str(self.c_NumberSolarZeniths)+'			No. SZAs [solar zenith angles] used in avg\n') # maybe just start with 1 when doing sweeps (just the 60 deg)
+        f.write(str(self.c_IncludeRadiativeHrt)+'			Include radiative hrt\n')
+        f.write(str(self.c_IncludeConvectiveHrt)+'			Include convective hrt\n')
+        f.write(str(self.c_IncludeConductiveHrt)+'			Include conductive heating rates\n')
+        f.write(str(self.planetary_mass)+'			Mass of planet [kg]\n')
+        f.write(str(self.c_DayLength)+'			Length of day [s]\n')
+        f.write(str(self.c_YearLength)+'			Length of year [days]\n')
+        f.write(str(self.c_OrbitalCalcType)+'			Orbital calc type [fixed orbital distance]\n')
+        f.write(str(self.c_SemiMajorAxis)+'			Distance from Star [AU]\n')
+        f.write(str(self.planetary_gravity)+'			Surface gravity [m/s^2]\n')
+        f.write(str(self.planetary_radius)+'			Planet radius [km]\n')
+        ### Dayside:
+        f.write(str(self.MMW)+'			atm mean mol wgt [g/mol]\n')
+        f.write(str(self.c_NumberMajorGases)+'			No. major atm gases\n')
+        f.write(str(self.c_MajorAbsorbingGas)+'			***GAS ABSORBER INDEX*** [o2]\n')
+        f.write('1.0			Mixing ratio\n') ### This is currently hard coded
+        f.write(str(self.c_PressureJacobians)+'			Pressure jacobians? [0 = None; 1 = Radiance; 2 = Flux]\n')
+        f.write(str(self.c_TempJacobians)+'			Temperature jacobians? [0 = None; 1 = Radiance; 2 = Flux]\n')
+        f.write(str(self.c_Fractional_dtemp)+'			Fractional dtemp\n')
+        f.write(str(self.c_SolarTolerance)+'			Solar tolerance [0-1]\n')
+        f.write(str(self.c_ThermalTolerance)+'			Thermal tolerance [0-1]\n')
+        f.write('3			List directed input\n')
+        f.write(self.AtmProfPath+'PT_profile_dayside_'+self.casename+'.pt\n')
+        f.write('1			Lines to skip\n')
+        f.write('1,2			columns of P,T\n')
+        f.write('100000.			Scale to Pa\n')
+        f.write(str(self.surface_temp_dayside)+'			Surface temperature [K]\n') 
+        ###
+        ### Nightside:
+        f.write(str(self.MMW)+'			atm mean mol wgt [g/mol]\n')
+        f.write(str(self.c_NumberMajorGases)+'			No. major atm gases\n')
+        f.write(str(self.c_MajorAbsorbingGas)+'			***GAS ABSORBER INDEX*** [o2]\n')
+        f.write('1.0			Mixing ratio\n') ### This is currently hard coded
+        f.write(str(self.c_PressureJacobians)+'			Pressure jacobians? [0 = None; 1 = Radiance; 2 = Flux]\n')
+        f.write(str(self.c_TempJacobians)+'			Temperature jacobians? [0 = None; 1 = Radiance; 2 = Flux]\n')
+        f.write(str(self.c_Fractional_dtemp)+'			Fractional dtemp\n')
+        f.write(str(self.c_SolarTolerance)+'			Solar tolerance [0-1]\n')
+        f.write(str(self.c_ThermalTolerance)+'			Thermal tolerance [0-1]\n')
+        f.write('3			List directed input\n')
+        f.write(self.AtmProfPath+'PT_profile_dayside_'+self.casename+'.pt\n')
+        f.write('1			Lines to skip\n')
+        f.write('1,2			columns of P,T\n')
+        f.write('100000.			Scale to Pa\n')
+        f.write(str(self.surface_temp_dayside)+'			Surface temperature [K]\n') 
+        ###
+        f.write(str(self.c_InternalSurfaceFlux)+'			Internal surface flux [W/m2]\n')
+        f.write(str(self.c_ConvectiveType)+'			Convective type [1 = adjustment; 2 = Mixing length scheme; 3 = turbulent; 4 = moist mixing]\n')
+        f.write(str(self.c_MixingLengthType)+'			Mixing length type [1 = fixed; 2 = prop to scale height; 3 = Blackadar aymptotic ML]\n')
+        f.write(str(self.c_MixingLengthProportionality)+'			Mixing length proportionality\n')
+        f.write(str(self.c_MinEddyDiffusivity)+'			Minimum eddy diffusivity [m2/s]\n')
+        f.write(str(self.c_SurfaceWindSpeed)+'			Surface Wind Speed [m/s]\n')
+        f.write(str(self.c_SurfRoughnessHeight)+'			Surface roughness height [m]\n')
+        f.write(str(self.c_NumberCondensibles)+'			No. condensibles\n')
+        ### advection schtuff
+        f.write('5			Advection type [1 = const diffusion]\n')
+        f.write('1.0			Advection constant / diffusion parameter\n')
+        ###
+        f.write('1			Generate fluxes using SMART\n')
+
+        #### Dayside Gases here
+
+        f.write(str(len(self.molecule_dict['Gas_names']))+'			******NO. ABSORBING GASES******\n')
+        
+        # Gases Get written here --------------------
+
+        for m in self.molecule_dict['Gas_names']:
+            f.write(str(self.molecule_dict[m])+'			************HITRAN GAS CODE ['+m+']*************\n')
+            f.write('0			Mixing ratio jacobians [0 = None; 1 = Radiance; 2 = Flux]\n')
+
+            no_abs_coef = 1
+            use_xsec = False
+            if m in ['O2', 'H2']: # Then CIA is also available
+                no_abs_coef += 1
+            if os.path.exists(self.xsec_Path+m.lower()+'xsec.dat'): # If an xsec file is available use that
+                use_xsec = True
+                no_abs_coef += 1
+
+            f.write(str(no_abs_coef)+'			No. of abs coeff types\n')
+            f.write('1			HITRAN Line Absorbers\n') # Always start with the line by line
+            f.write('2			Dont compute absorption coefficients\n')
+            f.write(self.LBLABC_AbsFilesDir+m+'_'+self.casename+'.abs\n')
+            if m in ['O2', 'H2']: # Add CIA
+                f.write('2			Collisionally-induced absorption [CIA] files\n')
+                f.write(self.xsec_Path+m.lower()+'-'+m.lower()+'_abs.cia\n')
+            if use_xsec == True: # Use cross sections
+                f.write('3			UV-VIS absorption cross sections\n')
+                f.write(self.xsec_Path+m.lower()+'xsec.dat\n')
+            
+            # Now pass the mixing ratios
+            f.write('3			List directed input\n')
+            f.write(self.AtmProfPath+'MixingRs_'+self.casename+'.dat\n')
+            f.write('1 			Lines to skip\n')
+            f.write('1			Use pressure coordinate\n')
+            f.write('1,'+str(self.molecule_dict[m+'_RmixCol'])+'			columns of P,rmix\n')
+            f.write('1			Mixing type [1 = volume; 2 = mass]\n')
+            f.write('100000.,1.0			scale P and rmix\n')
+
+        # End Gases block -------------------------
+
+        f.write(str(self.c_NumberAerosols)+'			******NO. AEROSOLS******\n')
+        f.write(str(self.c_SurfaceType)+'			Lambertian surface\n')
+        f.write(str(self.c_AlbedoJacobians)+'			No albedo jacobians\n')
+        f.write('3			List directed input\n')
+        f.write(self.c_SurfaceProfile+'\n')
+        f.write(str(self.c_SurfProfile_SkipLines)+'			Lines to skip\n')
+        f.write(str(self.c_SurfProfile_wlalbedo_cols)+'			columns of wl, albedo\n')
+        f.write(str(self.c_SurfProfile_wlType)+'			Wavelength\n')
+        f.write(str(self.c_Convert_SurfProfilewl_microns)+'			Convert to microns\n')
+        f.write(str(self.c_ScaleAlbedo)+'			Scale albedo\n')
+
+        ######
+
+        ###### Nightside Gases here:
+        
+        f.write(str(len(self.molecule_dict['Gas_names']))+'			******NO. ABSORBING GASES******\n')
+        
+        # Gases Get written here --------------------
+
+        for m in self.molecule_dict['Gas_names']:
+            f.write(str(self.molecule_dict[m])+'			************HITRAN GAS CODE ['+m+']*************\n')
+            f.write('0			Mixing ratio jacobians [0 = None; 1 = Radiance; 2 = Flux]\n')
+
+            no_abs_coef = 1
+            use_xsec = False
+            if m in ['O2', 'H2']: # Then CIA is also available
+                no_abs_coef += 1
+            if os.path.exists(self.xsec_Path+m.lower()+'xsec.dat'): # If an xsec file is available use that
+                use_xsec = True
+                no_abs_coef += 1
+
+            f.write(str(no_abs_coef)+'			No. of abs coeff types\n')
+            f.write('1			HITRAN Line Absorbers\n') # Always start with the line by line
+            f.write('2			Dont compute absorption coefficients\n')
+            f.write(self.LBLABC_AbsFilesDir+m+'_'+self.casename+'.abs\n')
+            if m in ['O2', 'H2']: # Add CIA
+                f.write('2			Collisionally-induced absorption [CIA] files\n')
+                f.write(self.xsec_Path+m.lower()+'-'+m.lower()+'_abs.cia\n')
+            if use_xsec == True: # Use cross sections
+                f.write('3			UV-VIS absorption cross sections\n')
+                f.write(self.xsec_Path+m.lower()+'xsec.dat\n')
+            
+            # Now pass the mixing ratios
+            f.write('3			List directed input\n')
+            f.write(self.AtmProfPath+'MixingRs_'+self.casename+'.dat\n')
+            f.write('1 			Lines to skip\n')
+            f.write('1			Use pressure coordinate\n')
+            f.write('1,'+str(self.molecule_dict[m+'_RmixCol'])+'			columns of P,rmix\n')
+            f.write('1			Mixing type [1 = volume; 2 = mass]\n')
+            f.write('100000.,1.0			scale P and rmix\n')
+
+        # End Gases block -------------------------
+
+        f.write(str(self.c_NumberAerosols)+'			******NO. AEROSOLS******\n')
+        f.write(str(self.c_SurfaceType)+'			Lambertian surface\n')
+        f.write(str(self.c_AlbedoJacobians)+'			No albedo jacobians\n')
+        f.write('3			List directed input\n')
+        f.write(self.c_SurfaceProfile+'\n')
+        f.write(str(self.c_SurfProfile_SkipLines)+'			Lines to skip\n')
+        f.write(str(self.c_SurfProfile_wlalbedo_cols)+'			columns of wl, albedo\n')
+        f.write(str(self.c_SurfProfile_wlType)+'			Wavelength\n')
+        f.write(str(self.c_Convert_SurfProfilewl_microns)+'			Convert to microns\n')
+        f.write(str(self.c_ScaleAlbedo)+'			Scale albedo\n')
+
+        ############
+
+        f.write(str(self.c_NumberStreams)+'			No. of Streams\n')
+        f.write(str(self.c_HRTSources)+'			Sources: 1) Solar, 2) thermal, 3) both\n')
+        f.write('3			List directed input\n')
+        f.write(self.c_StellarSpectrum+'\n')
+        f.write(str(self.c_StellarSpect_SkipLines)+'			Lines to skip\n')
+        f.write(str(self.c_SolarFluxUnits)+'			Solar flux units\n')
+        f.write(str(self.c_SolarSpectralUnits)+'			Solar spectral units\n')
+        f.write(str(self.c_Convert_Stellar_microns)+'			Conversion factor to microns\n')
+        f.write(str(self.c_StellarSpect_wnflux_col)+'			Cols of wn and flux\n')
+        f.write(str(self.c_OutputsType)+'			Outputs [fluxes]\n')
+        f.write(str(self.c_NumberOutputAzimuths)+'			No. of output azimuth angles\n')
+        f.write(str(self.c_Azimuth)+'			Azimuth\n')
+        f.write(str(self.c_OutputsLevel)+'			Outputs [TOA]\n')
+        f.write(str(self.c_OutputsUnits)+'			Output units [radiance]\n')
+        f.write(str(self.c_ThermalMinMaxWn)+'			Thermal min, max wn [cm^-1]\n')
+        f.write(str(self.c_SolarMinMaxWn)+'			Solar min, max wn [cm^-1]\n')
+        f.write(str(self.c_SlitFunction)+'			Triangular slit function\n')
+        f.write(str(self.c_SolarHWHM)+'			Solar HWHM\n')
+        f.write(str(self.c_SolarRes)+'			Solar resolution\n')
+        f.write(str(self.c_ThermalHWHM)+'			Thermal HWHM\n')
+        f.write(str(self.c_ThermalRes)+'			Thermal resolution\n')
+        f.write(str(self.c_TauError)+'			Tau error\n')
+        f.write(str(self.c_SingleScatterError)+'			Single scattering error\n')
+        f.write(str(self.c_AsymmetryParamError)+'			Asymmetry parameter error\n')
+        f.write(str(self.c_AlbedoError)+'			Albedo error\n')
+        f.write(str(self.c_OutputFileType)+'			1)ASCII 3) binary no header output\n')
+        if trynum == 1:
+            f.write(self.DataOutPath+'vpl_2column_climate_'+self.casename+'\n')
+        else:
+            f.write(self.DataOutPath+'vpl_2column_climate_'+self.casename+'_tryNum'+str(trynum)+'\n')
         f.write('2			Overwrite existing files\n')
 
         f.close()
@@ -2136,7 +2381,7 @@ class VPLModelingPipeline:
             ftestingoutput.close()
 
 
-        if self.global_convergence == True and self.run_spectra == True: 
+        if self.global_convergence == True and (self.run_spectra == True or self.include_2column_climate == True): 
 
             if self.verbose == True:
                 ftestingoutput = open(self.OutPath+self.casename+'_SavingInfoOut.txt', 'a')
@@ -2176,18 +2421,49 @@ class VPLModelingPipeline:
             
             ### Rerun the LBLABC Section Finish ------------------------------
 
+            ### Setup and Run 2 column climate to convergence ------------------------------
+            if self.include_2column_climate == True:
+
+                # create two pt profiles
+                shutil.copyfile(self.AtmProfPath+'PT_profile_'+self.casename+'.pt', self.AtmProfPath+'PT_profile_dayside_'+self.casename+'.pt')
+                shutil.copyfile(self.AtmProfPath+'PT_profile_'+self.casename+'.pt', self.AtmProfPath+'PT_profile_nightside_'+self.casename+'.pt')
+
+                # create two surface temps
+                self.surface_temp_dayside = self.surface_temp
+                self.surface_temp_nightside = self.surface_temp
+
+                # Add 1 to the climate run counter
+                self.num_2col_climate_runs += 1
+
+                # First Generate the climate runscript
+                # Things, e.g., MMW need to be updated, so just do this every time
+                self.make_2column_climate_runscript(trynum=self.num_2col_climate_runs)
+
+                if self.verbose == True:
+                    print('Climate 2 column Runscript created, beginning first 2 column climate run')
+                    ftestingoutput.write('Climate 2 column Runscript created, beginning first 2 column climate run\n')
+
+                # Now run climate 
+                ftestingoutput.write('The runscript: '+self.vplclimate_RunScriptDir+'RunVPLClimate_2column_'+self.casename+'.script\n')
+                ftestingoutput.write('The executable: '+self.vplclimate_executable+'\n')
+                self.run_climate_1instance(self.vplclimate_RunScriptDir+'RunVPLClimate_2column_'+self.casename+'.script', self.vplclimate_executable, trynum=self.num_2col_climate_runs, twocol=True)
+
+                if self.verbose == True:
+                    print('First 2 column Climate run completed')
+                    ftestingoutput.write('First 2 column Climate run completed\n')
+
             ### Create SMART runscript ------------------------------
 
-            self.set_climate_settings()
-            self.set_smart_settings()
-            self.make_smart_runscript()
+            if self.run_spectra == True:
 
-            self.run_smart_1instance(self.SMART_RunScriptDir+'RunSMART_'+self.casename+'.run')
+                self.make_smart_runscript()
 
-            if self.verbose == True:
-                print('SMART run completed')
-                ftestingoutput.write('SMART run completed\n')
-                ftestingoutput.close()
+                self.run_smart_1instance(self.SMART_RunScriptDir+'RunSMART_'+self.casename+'.run')
+
+                if self.verbose == True:
+                    print('SMART run completed')
+                    ftestingoutput.write('SMART run completed\n')
+                    ftestingoutput.close()
 
 
         return self.global_convergence
