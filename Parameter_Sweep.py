@@ -1075,7 +1075,6 @@ class Generate_Atmosphere_Parameter_Sweep:
         outstr = str(modelID)
         outstr = outstr+' '+str(model.global_convergence)
         outstr = outstr+' '+str(model.updated_atm_pressure)
-        outstr = outstr+' '+str(x[0])
         outstr = outstr+' '+"{:.4E}".format(x[0])
         outstr = outstr+' '+"{:.4E}".format(x[1])
         outstr = outstr+' '+"{:.4E}".format(x[2])
