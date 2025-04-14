@@ -42,7 +42,7 @@ def run_one_sim(casename):
 
 simlist = pd.read_csv('./EmceeSimulationOutputs.txt', delimiter=' ')
 simnumbers = list(simlist.index)
-simstorun = np.random.choice(simlist, 190, replace=False)
+simstorun = np.random.choice(simnumbers, 190, replace=False)
 
 cases = ['RunNumber'+str(s) for s in simstorun]
 
