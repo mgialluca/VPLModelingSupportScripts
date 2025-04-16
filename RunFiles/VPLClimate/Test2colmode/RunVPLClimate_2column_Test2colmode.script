@@ -70,7 +70,7 @@ False			Include conductive heating rates
 3			UV-VIS absorption cross sections
 /gscratch/vsm/gialluca/VPLModelingTools_Dev/xsec/o2xsec.dat
 3			List directed input
-/gscratch/vsm/gialluca/VPLModelingTools_Dev/AtmProfiles/MixingRs_Test2colmode.dat
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/AtmProfiles/MixingRs_dayside_Test2colmode.dat
 1 			Lines to skip
 1			Use pressure coordinate
 1,2			columns of P,rmix
@@ -85,7 +85,7 @@ False			Include conductive heating rates
 3			UV-VIS absorption cross sections
 /gscratch/vsm/gialluca/VPLModelingTools_Dev/xsec/h2oxsec.dat
 3			List directed input
-/gscratch/vsm/gialluca/VPLModelingTools_Dev/AtmProfiles/MixingRs_Test2colmode.dat
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/AtmProfiles/MixingRs_dayside_Test2colmode.dat
 1 			Lines to skip
 1			Use pressure coordinate
 1,3			columns of P,rmix
@@ -100,7 +100,7 @@ False			Include conductive heating rates
 3			UV-VIS absorption cross sections
 /gscratch/vsm/gialluca/VPLModelingTools_Dev/xsec/o3xsec.dat
 3			List directed input
-/gscratch/vsm/gialluca/VPLModelingTools_Dev/AtmProfiles/MixingRs_Test2colmode.dat
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/AtmProfiles/MixingRs_dayside_Test2colmode.dat
 1 			Lines to skip
 1			Use pressure coordinate
 1,4			columns of P,rmix
@@ -128,7 +128,7 @@ False			Include conductive heating rates
 3			UV-VIS absorption cross sections
 /gscratch/vsm/gialluca/VPLModelingTools_Dev/xsec/o2xsec.dat
 3			List directed input
-/gscratch/vsm/gialluca/VPLModelingTools_Dev/AtmProfiles/MixingRs_Test2colmode.dat
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/AtmProfiles/MixingRs_nightside_Test2colmode.dat
 1 			Lines to skip
 1			Use pressure coordinate
 1,2			columns of P,rmix
@@ -143,7 +143,7 @@ False			Include conductive heating rates
 3			UV-VIS absorption cross sections
 /gscratch/vsm/gialluca/VPLModelingTools_Dev/xsec/h2oxsec.dat
 3			List directed input
-/gscratch/vsm/gialluca/VPLModelingTools_Dev/AtmProfiles/MixingRs_Test2colmode.dat
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/AtmProfiles/MixingRs_nightside_Test2colmode.dat
 1 			Lines to skip
 1			Use pressure coordinate
 1,3			columns of P,rmix
@@ -158,7 +158,7 @@ False			Include conductive heating rates
 3			UV-VIS absorption cross sections
 /gscratch/vsm/gialluca/VPLModelingTools_Dev/xsec/o3xsec.dat
 3			List directed input
-/gscratch/vsm/gialluca/VPLModelingTools_Dev/AtmProfiles/MixingRs_Test2colmode.dat
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/AtmProfiles/MixingRs_nightside_Test2colmode.dat
 1 			Lines to skip
 1			Use pressure coordinate
 1,4			columns of P,rmix
