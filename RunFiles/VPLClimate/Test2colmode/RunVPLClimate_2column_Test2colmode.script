@@ -48,6 +48,7 @@ False			Include conductive heating rates
 100000.			Scale to Pa
 362.14			Surface temperature [K]
 0.0			Internal surface flux [W/m2]
+0.0         Day-night surface transport heat flux [W/m2]
 2			Convective type [1 = adjustment; 2 = Mixing length scheme; 3 = turbulent; 4 = moist mixing]
 3			Mixing length type [1 = fixed; 2 = prop to scale height; 3 = Blackadar aymptotic ML]
 0.01			Mixing length proportionality
