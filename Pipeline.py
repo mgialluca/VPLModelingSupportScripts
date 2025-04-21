@@ -1185,7 +1185,7 @@ class VPLModelingPipeline:
         f.write(str(self.c_SolarTolerance)+'			Solar tolerance [0-1]\n')
         f.write(str(self.c_ThermalTolerance)+'			Thermal tolerance [0-1]\n')
         f.write('3			List directed input\n')
-        f.write(self.AtmProfPath+'PT_profile_dayside_'+self.casename+'.pt\n')
+        f.write(self.AtmProfPath+'PT_profile_nightside_'+self.casename+'.pt\n')
         f.write('1			Lines to skip\n')
         f.write('1,2			columns of P,T\n')
         f.write('100000.			Scale to Pa\n')
