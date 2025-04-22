@@ -15,7 +15,7 @@ dat = pipelineobj.get_final_climate_output_temp_profile(trynum=trn)
 pipelineobj.update_indist_T_EDD(oldptz, dat)
 '''
 
-pipelineobj = VPLModelingPipeline('Test2colmode_wSMART', 
+pipelineobj = VPLModelingPipeline('col2Test2', 
                                   '/gscratch/vsm/gialluca/VPLModelingTools_Dev/VeffTestDepos/RunNumber6/PhotochemInputs/', 
                                   True, find_molecules_of_interest=False, hitran_year='2020')
 
