@@ -42,7 +42,7 @@ class VPLModelingPipeline:
         self.planetary_mass = 1.308*u.Mearth.to(u.kg)
 
         # The climate executable:
-        self.vplclimate_executable = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/ClimateModel/vpl_climate/vpl_climate' # The VPL Climate executable you want to use WITH FULL PATH
+        self.vplclimate_executable = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/ClimateModel/vpl_climate_exec' # The VPL Climate executable you want to use WITH FULL PATH
 
         self.HITRAN_year = hitran_year
         # Set the appropriate HITRAN variables
@@ -589,7 +589,7 @@ class VPLModelingPipeline:
                             Fnet[lvl] = curr_step['fs_net[W/m/m]'][lvl] - curr_step['ft_net[W/m/m]'][lvl] - curr_step['fc[W/m/m]'][lvl]
                         dat['Nightside']['f_net[W/m/m]'] = Fnet
 
-                        nightside_done == True
+                        nightside_done = True
                     
                     else:
                         # Add that profile to the dictionary
