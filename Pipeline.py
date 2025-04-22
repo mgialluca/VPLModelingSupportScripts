@@ -75,6 +75,7 @@ class VPLModelingPipeline:
         self.max_iterations_climate = 20 # Never run climate more than 15x
         self.suppress_IOerrors = False # if convergence fails, raise IO errors if False, or just break running function if True
         self.run_spectra = True # If true, finished a converged run with smart 
+        self.rerun_smart_for_2col = True # If true, rerun smart for day and night side after climate 2 column mode
         self.fixsgbsl = False # If true, try to fix sgbsl error
         self.MCMC_pressure_only = False # If true, remove everything after photochem for an MCMC pressure fitting walker
 
@@ -293,10 +294,15 @@ class VPLModelingPipeline:
     # casename - name of case you're running (to name output file)
     # outpath - path to put run output in
     ##
-    def run_smart_1instance(self, runscript):
+    def run_smart_1instance(self, runscript, whichcol=None):
         workdir = os.getcwd()
         os.chdir(self.SMARTDir)
-        subprocess.run(self.SMARTDir+'smart_spectra < '+runscript+' > '+self.OutPath+'smart_run_output_'+self.casename+'.run', shell=True)
+        if whichcol == None:
+            subprocess.run(self.SMARTDir+'smart_spectra < '+runscript+' > '+self.OutPath+'smart_run_output_'+self.casename+'.run', shell=True)
+        elif whichcol == 'dayside':
+            subprocess.run(self.SMARTDir+'smart_spectra < '+runscript+' > '+self.OutPath+'smart_run_output_dayside_'+self.casename+'.run', shell=True)
+        elif whichcol == 'nightside':
+            subprocess.run(self.SMARTDir+'smart_spectra < '+runscript+' > '+self.OutPath+'smart_run_output_nightside_'+self.casename+'.run', shell=True)
         os.chdir(workdir)
 
     ### Take the PT profile output from photochem and degrade it to a specified number of layers ...
@@ -344,10 +350,17 @@ class VPLModelingPipeline:
     ## Fxn-specific Inputs:
     # new_temp - the new temperature column to put in the PT file, usually found with get_final_climate_output_temp_profile()
     ##
-    def replace_PT_tempcol(self, new_temp):
+    def replace_PT_tempcol(self, new_temp, whichcolumn=None):
 
         # Read in the old PT profile
-        oldpt = ascii.read(self.AtmProfPath+'PT_profile_'+self.casename+'.pt')
+        if whichcolumn == None:
+            oldpt = ascii.read(self.AtmProfPath+'PT_profile_'+self.casename+'.pt')
+
+        elif whichcolumn == 'dayside' or whichcolumn == 'Dayside':
+            oldpt = ascii.read(self.AtmProfPath+'PT_profile_dayside_'+self.casename+'.pt')
+
+        elif whichcolumn == 'nightside' or whichcolumn == 'Nightside':
+            oldpt = ascii.read(self.AtmProfPath+'PT_profile_nightside_'+self.casename+'.pt')
 
         # replace the temp
         oldpt['Temp'] = new_temp
@@ -356,7 +369,14 @@ class VPLModelingPipeline:
         #self.surface_temp = new_temp[len(new_temp)-1]
 
         # Overwrite the PT profile
-        ascii.write(oldpt, self.AtmProfPath+'PT_profile_'+self.casename+'.pt', overwrite=True)
+        if whichcolumn == None:
+            ascii.write(oldpt, self.AtmProfPath+'PT_profile_'+self.casename+'.pt', overwrite=True)
+        
+        elif whichcolumn == 'dayside' or whichcolumn == 'Dayside':
+            ascii.write(oldpt, self.AtmProfPath+'PT_profile_dayside_'+self.casename+'.pt', overwrite=True)
+        
+        elif whichcolumn == 'nightside' or whichcolumn == 'Nightside':
+            ascii.write(oldpt, self.AtmProfPath+'PT_profile_nightside_'+self.casename+'.pt', overwrite=True)
 
     ### Purpose: Create the mixing ratio file with gases of interest to lblabc/climate/smart
     #
@@ -512,6 +532,78 @@ class VPLModelingPipeline:
                     break
 
         return dat
+    
+    ### Purpose: Get only the last DAYSIDE and NIGHTSIDE profile output from a TWO COLUMN climate run
+    ## 
+    ## Attribute Dependencies:
+    # casename - name of case to find output file naming scheme
+    # nlevel_coarse - number of atmospheric layers (use nlevel_coarse)
+    # OutPath - path where output climate file is
+    # DataOutPath - path to write a dictionary data file to, maybe same as OutPath?
+    # 
+    ## Fxn-specific Inputs:
+    # trynum - the iteration number youre on for the specific case, defined by self.num_climate_runs
+    ##
+    def get_final_2column_climate_output_temp_profile(self, trynum=1):
+        # Define python dictionary to compile data in
+        dat = {}
+        dat['Atm_Levels'] = self.nlevel_coarse
+
+        # Column names used in VPL Climate output run
+        colnames = ['P[Pa]', 'Alt[km]', 'T[K]', 'Q_s[K/day]', 'Q_t[K/day]', 'Q_c[K/day]', 
+                    'Q_ad[K/day]', 'Q_net[K/day]', 'fs_net[W/m/m]', 'ft_net[W/m/m]', 'fc[W/m/m]', 
+                    'f_ad[W/m/m]', 'pc[Pas]', 'Altc[km]', 'Tc[K]', 'dt[s]', 'lr[K/km]', 
+                    'aid_lr[K/km]', 'Km[m2/s]', 'rmix[kg/kg]']
+
+        # Open a simple text instance of the Climate output to use for parsing
+        if trynum == 1:
+            dat['FileName'] = self.OutPath+'vpl_2col_climate_output_'+self.casename+'.run'
+            fop = open(self.OutPath+'vpl_2col_climate_output_'+self.casename+'.run', 'r')
+        else:
+            dat['FileName'] = self.OutPath+'vpl_2col_climate_output_'+self.casename+'_Try'+str(trynum)+'.run'
+            fop = open(self.OutPath+'vpl_2col_climate_output_'+self.casename+'_Try'+str(trynum)+'.run', 'r')
+        flines = fop.readlines()
+        fop.close()
+
+        # Loop through text instance of output file to retrieve atmospheric profiles
+        # Start at bottom of file to extract only the last profile
+        nightside_done = False
+        dat['Nightside'] = {}
+        dat['Dayside'] = {}
+        for i in reversed(range(len(flines))):
+            curr_line = flines[i].split()
+            if len(curr_line) > 0:
+                if curr_line[0] == '(Pas)': # This checks if you're at a profile
+                    # This reads in that profile beautifully as pandas data frame
+                    curr_step = pd.read_csv(dat['FileName'], delimiter=' ', skipinitialspace=True, header=0, 
+                                            names=colnames, skiprows=i, nrows=self.nlevel_coarse)
+                    
+                    if nightside_done == False:
+                        # Add that profile to the dictionary
+                        for k in colnames:
+                            dat['Nightside'][k] = np.array(curr_step[k])
+
+                        # Find net flux at each level
+                        Fnet = np.zeros(len(curr_step['fs_net[W/m/m]']))
+                        for lvl in range(len(Fnet)):
+                            Fnet[lvl] = curr_step['fs_net[W/m/m]'][lvl] - curr_step['ft_net[W/m/m]'][lvl] - curr_step['fc[W/m/m]'][lvl]
+                        dat['Nightside']['f_net[W/m/m]'] = Fnet
+
+                        nightside_done == True
+                    
+                    else:
+                        # Add that profile to the dictionary
+                        for k in colnames:
+                            dat['Dayside'][k] = np.array(curr_step[k])
+
+                        # Find net flux at each level
+                        Fnet = np.zeros(len(curr_step['fs_net[W/m/m]']))
+                        for lvl in range(len(Fnet)):
+                            Fnet[lvl] = curr_step['fs_net[W/m/m]'][lvl] - curr_step['ft_net[W/m/m]'][lvl] - curr_step['fc[W/m/m]'][lvl]
+                        dat['Dayside']['f_net[W/m/m]'] = Fnet
+                        break
+
+        return dat
 
     ### Check the photochem output for convergence, might need to be played with
     ##
@@ -653,6 +745,7 @@ class VPLModelingPipeline:
         if TropHeatingConverged == True and AvgFluxConverged == True:
             HasItConverged = True
 
+        '''
         # Print messages:
         if self.verbose == True:
             if HasItConverged:
@@ -661,9 +754,96 @@ class VPLModelingPipeline:
                 print('VPL Climate run '+self.casename+' Try '+str(trynum)+' has NOT converged.')
             print('Avg Tropospheric Heating Rate Magnitude: '+str(TropHeating)+' K/day')
             print('Avg Flux: '+str(AvgFlux)+' W/m**2\n')
+        '''
 
         return HasItConverged, TropHeating, AvgFlux
     # usage should be 'convergence, tropheating, avgflux = check_vplclimate_conv()
+
+    ### Check the vpl TWO COLUMN climate output for convergence, might need more work currently pretty unconstrained
+    ##
+    ## Attribute Dependencies:
+    # casename - name of case you're running (to find output file of climate)
+    # OutPath - the path where model run outputs have been written
+    #
+    ## Fxn-specific Inputs:
+    # trynum - the iteration number youre on for the specific case, defined by self.num_climate_runs
+    # TropHeatingTolerance - Convergence check, last output value of avg trop heatin rate magnitude must be
+    #          <= this tolerance [K/day] to be converged -> could maybe loosen this ()
+    # AvgFluxTolerance - Convergence check, last output value of avg flux must be <= this tolerance
+    #          [W/m^2] to be converged
+    ##
+    def check_2column_vplclimate_conv(self, trynum=1, TropHeatingTolerance=9e-2, AvgFluxTolerance=1):
+        # Set the output flag of converged or not (boolean)
+        # Guilty until proven innocent
+        HasItConverged = False
+
+        # Flags for each tolerance check
+        TropHeatingConverged = False
+        AvgFluxConverged = False
+
+        # Read in the output from the climate run, try number defines naming scheme for automatic pipeline
+        if trynum == 1:
+            fi = open(self.OutPath+'vpl_2col_climate_output_'+self.casename+'.run', 'r')
+        else:
+            fi = open(self.OutPath+'vpl_2col_climate_output_'+self.casename+'_Try'+str(trynum)+'.run', 'r')
+        
+        lines = fi.readlines()
+        fi.close()
+
+        # Want to get the last output trop heating rate and avg flux, should be last two lines
+        # so loop in reversed order, break loop after to conserve efficiency
+
+        nightside_found = False
+        for i in reversed(range(len(lines))):
+            hold = lines[i].split()
+            if len(hold) > 2:
+                if hold[0] == 'avg' and hold[1] == 'flux:':
+                    if nightside_found == False:
+                        AvgFlux_nightside = float(hold[2])
+                    else:
+                        AvgFlux_dayside = float(hold[2])
+
+                elif hold[0] == 'avg' and hold[1] == 'trop':
+                    if nightside_found == False:
+                        TropHeating_nightside = float(hold[5])
+                    else:
+                        TropHeating_dayside = float(hold[5])
+
+                elif hold[0] == 'surface:':
+                    if nightside_found == False:
+                        self.surface_temp_nightside = float(hold[8])
+                        nightside_found = True
+                    else:
+                        self.surface_temp_dayside = float(hold[8])
+                        # After retrieving surface temp for nightside, will have all values, break
+                        break
+
+        # Do Convergence checking
+        if np.abs(TropHeating_nightside) <= TropHeatingTolerance and np.abs(TropHeating_dayside) <= TropHeatingTolerance:
+            TropHeatingConverged = True
+
+        AvgFlux = AvgFlux_dayside + AvgFlux_nightside
+        if np.abs(AvgFlux) <= AvgFluxTolerance:
+            AvgFluxConverged = True
+
+        # Overall convergence check:
+        if TropHeatingConverged == True and AvgFluxConverged == True:
+            HasItConverged = True
+
+        '''
+        # Print messages:
+        if self.verbose == True:
+            if HasItConverged:
+                print('VPL Climate run '+self.casename+' Try '+str(trynum)+' has converged!')
+            else:
+                print('VPL Climate run '+self.casename+' Try '+str(trynum)+' has NOT converged.')
+            print('Avg Dayside Tropospheric Heating Rate Magnitude: '+str(TropHeating_dayside)+' K/day')
+            print('Avg Nightside Tropospheric Heating Rate Magnitude: '+str(TropHeating_nightside)+' K/day')
+            print('Avg Flux: '+str(AvgFlux)+' W/m**2\n')
+        '''
+
+        return HasItConverged, TropHeating_dayside, TropHeating_nightside, AvgFlux
+    # usage should be 'convergence, tropheating_dayside, tropheating_nightside, avgflux = check_vplclimate_conv()
 
     ### Save the photochem run outputs to the backup directory
     ##
@@ -1189,9 +1369,10 @@ class VPLModelingPipeline:
         f.write('1			Lines to skip\n')
         f.write('1,2			columns of P,T\n')
         f.write('100000.			Scale to Pa\n')
-        f.write(str(self.surface_temp_dayside)+'			Surface temperature [K]\n') 
+        f.write(str(self.surface_temp_nightside)+'			Surface temperature [K]\n') 
         ###
         f.write(str(self.c_InternalSurfaceFlux)+'			Internal surface flux [W/m2]\n')
+        f.write('0.0         Day-night surface transport heat flux [W/m2]\n')
         f.write(str(self.c_ConvectiveType)+'			Convective type [1 = adjustment; 2 = Mixing length scheme; 3 = turbulent; 4 = moist mixing]\n')
         f.write(str(self.c_MixingLengthType)+'			Mixing length type [1 = fixed; 2 = prop to scale height; 3 = Blackadar aymptotic ML]\n')
         f.write(str(self.c_MixingLengthProportionality)+'			Mixing length proportionality\n')
@@ -1360,25 +1541,40 @@ class VPLModelingPipeline:
     ## Fxn-specific Inputs:
     # None
     ##
-    def make_smart_runscript(self):
+    def make_smart_runscript(self, whichcol=None):
 
         # Load default climate settings
         self.set_climate_settings()
         self.set_smart_settings()
 
         # Start a new runscript to create
-        f = open(self.SMART_RunScriptDir+'RunSMART_'+self.casename+'.run', 'w')
+        if whichcol == None:
+            f = open(self.SMART_RunScriptDir+'RunSMART_'+self.casename+'.run', 'w')
+        elif whichcol == 'dayside':
+            f = open(self.SMART_RunScriptDir+'RunSMART_dayside_'+self.casename+'.run', 'w')
+        elif whichcol == 'nightside':
+            f = open(self.SMART_RunScriptDir+'RunSMART_nightside_'+self.casename+'.run', 'w')
 
         f.write(str(self.s_PressJacobians)+'			Pressure Jacobians (0-None)\n')
         f.write(str(self.s_TempJacobians)+'			Temperature Jacobians (0-None)\n')
         
         # PT profile should remain the same
         f.write('3			Formatted Atmospheric Structure File\n')
-        f.write(self.AtmProfPath+'PT_profile_'+self.casename+'.pt\n')
+        if whichcol == None:
+            f.write(self.AtmProfPath+'PT_profile_'+self.casename+'.pt\n')
+        elif whichcol == 'dayside':
+            f.write(self.AtmProfPath+'PT_profile_dayside_'+self.casename+'.pt\n')
+        elif whichcol == 'nightside':
+            f.write(self.AtmProfPath+'PT_profile_nightside_'+self.casename+'.pt\n')
         f.write('1			Lines to skip\n')
         f.write('1,2			columns of P,T\n')
         f.write('100000.			Scale to Pa\n')
-        f.write(str(self.surface_temp)+'			Surface temperature [K]\n')
+        if whichcol == None:
+            f.write(str(self.surface_temp)+'			Surface temperature [K]\n')
+        elif whichcol == 'dayside':
+            f.write(str(self.surface_temp_dayside)+'			Surface temperature [K]\n')
+        elif whichcol == 'nightside':
+            f.write(str(self.surface_temp_nightside)+'			Surface temperature [K]\n')
 
         # Gases Get written here --------------------
 
@@ -1473,7 +1669,12 @@ class VPLModelingPipeline:
         f.write(str(self.s_gError)+'		g Error\n')
         f.write(str(self.s_AlbedoError)+'		Albedo Error\n')
         f.write(str(self.s_OutputFileFormat)+'			Output Format (ascii)\n')
-        f.write(self.OutPath+self.casename+'_SMART\n')
+        if whichcol == None:
+            f.write(self.OutPath+self.casename+'_SMART\n')
+        elif whichcol == 'dayside':
+            f.write(self.OutPath+self.casename+'_dayside_SMART\n')
+        elif whichcol == 'nightside':
+            f.write(self.OutPath+self.casename+'_nightside_SMART\n')
         f.write('2			Overwrite\n')
 
         f.close()
@@ -2452,18 +2653,110 @@ class VPLModelingPipeline:
                     print('First 2 column Climate run completed')
                     ftestingoutput.write('First 2 column Climate run completed\n')
 
+                    # Check for local convergence of climate, similar to process followed for a given try on photochem            
+                local_climate_convergence, tropheating_dayside, tropheating_nightside, avgflux = self.check_2column_vplclimate_conv(trynum=self.num_2col_climate_runs)
+
+                if self.verbose == True:
+                    if local_climate_convergence == True:
+                        print('2 column Climate convergence found on first try for run number '+str(self.num_2col_climate_runs))
+                        ftestingoutput.write('2 column Climate convergence found on first try for run number '+str(self.num_2col_climate_runs)+'\n')
+                    else:
+                        print('2 column Climate convergence NOT found on first try for run number '+str(self.num_2col_climate_runs)+', beginning rerun sequence')
+                        ftestingoutput.write('2 column Climate convergence NOT found on first try for run number '+str(self.num_2col_climate_runs)+', beginning rerun sequence\n')
+
+                climate_subtries = 1
+                # Until climate converges, loop through taking new temp profile
+                while local_climate_convergence == False:
+
+                    if climate_subtries == self.max_iterations_climate:
+                        break
+
+                    climate_subtries += 1
+
+                    # First, get the final profile from the last climate run to use in the restart
+                    climate_profile = self.get_final_2column_climate_output_temp_profile(trynum=self.num_2col_climate_runs)
+
+                    # Update temperature in the PT profile and update the surface temperature
+                    self.replace_PT_tempcol(climate_profile['Dayside']['T[K]'], whichcolumn='dayside')
+                    self.replace_PT_tempcol(climate_profile['Nightside']['T[K]'], whichcolumn='nightside')
+
+                    # Recreate the runscript to update the surface temp
+                    self.make_2column_climate_runscript(trynum=self.num_2col_climate_runs)
+
+                    if self.num_2col_climate_runs == 1:
+                        subprocess.run('mv '+self.OutPath+'vpl_2col_climate_output_'+self.casename+'.run '+self.OutPath+'vpl_2col_climate_output_'+self.casename+'_Subtry'+str(climate_subtries)+'.run', shell=True)
+                    else:
+                        subprocess.run('mv '+self.OutPath+'vpl_2col_climate_output_'+self.casename+'_Try'+str(self.num_2col_climate_runs)+'.run '+self.OutPath+'vpl_2col_climate_output_'+self.casename+'_Try'+str(self.num_2col_climate_runs)+'_Subtry'+str(climate_subtries)+'.run', shell=True)
+
+                    # Re run Climate 
+                    if self.verbose == True:
+                        print('Beginning 2 column Climate rerun')
+                        ftestingoutput.write('Beginning 2 column Climate rerun\n')
+                    self.run_climate_1instance(self.vplclimate_RunScriptDir+'RunVPLClimate_2column_'+self.casename+'.script', self.vplclimate_executable, trynum=self.num_2col_climate_runs, twocol=True)
+                    if self.verbose == True:
+                        print('2 column Climate subtry number '+str(climate_subtries)+' completed')
+                        ftestingoutput.write('2 column Climate subtry number '+str(climate_subtries)+' completed\n')
+
+                    # Check convergence
+                    local_climate_convergence, tropheating_dayside, tropheating_nightside, avgflux = self.check_2column_vplclimate_conv(trynum=self.num_2col_climate_runs)
+
+                    if self.verbose == True:
+                        if local_climate_convergence == True:
+                            print('2 column Climate convergence found on subtry number '+str(climate_subtries)+' for run number '+str(self.num_2col_climate_runs))
+                            ftestingoutput.write('2 column Climate convergence found on subtry number '+str(climate_subtries)+' for run number '+str(self.num_2col_climate_runs)+'\n')
+                        else:
+                            print('2 column Climate convergence NOT found on subtry number '+str(climate_subtries)+' for run number '+str(self.num_2col_climate_runs)+', continuing rerun sequence')
+                            ftestingoutput.write('2 column Climate convergence NOT found on subtry number '+str(climate_subtries)+' for run number '+str(self.num_2col_climate_runs)+', continuing rerun sequence\n')
+
+                if local_climate_convergence == False and self.suppress_IOerrors == False:
+                    raise IOError('2 column Climate could not converge in >'+str(self.max_iterations_master)+' tries. For climate run number '+str(self.num_2col_climate_runs))
+                elif local_climate_convergence == False and self.suppress_IOerrors == True:
+                    self.global_convergence = False
+
+                if self.verbose == True:
+                    ftestingoutput.close()
+                
+
             ### Create SMART runscript ------------------------------
 
-            if self.run_spectra == True:
+            if self.run_spectra == True and self.global_convergence == True:
+
+                if self.verbose == True:
+                    ftestingoutput = open(self.OutPath+self.casename+'_SavingInfoOut.txt', 'a')
 
                 self.make_smart_runscript()
 
                 self.run_smart_1instance(self.SMART_RunScriptDir+'RunSMART_'+self.casename+'.run')
 
                 if self.verbose == True:
-                    print('SMART run completed')
-                    ftestingoutput.write('SMART run completed\n')
+                    print('Terminator SMART run completed')
+                    ftestingoutput.write('Terminator SMART run completed\n')
+                    #ftestingoutput.close()
+
+                if self.rerun_smart_for_2col == True:
+
+                    self.make_smart_runscript(whichcol='dayside')
+
+                    self.run_smart_1instance(self.SMART_RunScriptDir+'RunSMART_dayside_'+self.casename+'.run', whichcol='dayside')
+
+                    if self.verbose == True:
+                        print('Dayside SMART run completed')
+                        ftestingoutput.write('Dayside SMART run completed\n')
+                        #ftestingoutput.close()
+
+                    self.make_smart_runscript(whichcol='nightside')
+
+                    self.run_smart_1instance(self.SMART_RunScriptDir+'RunSMART_nightside_'+self.casename+'.run', whichcol='nightside')
+
+                    if self.verbose == True:
+                        print('Nightside SMART run completed')
+                        ftestingoutput.write('Nightside SMART run completed\n')
+                        #ftestingoutput.close()
+                
+                if self.verbose == True:
                     ftestingoutput.close()
+                    
+
 
 
         return self.global_convergence
