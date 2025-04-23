@@ -15,11 +15,16 @@ dat = pipelineobj.get_final_climate_output_temp_profile(trynum=trn)
 pipelineobj.update_indist_T_EDD(oldptz, dat)
 '''
 
-pipelineobj = VPLModelingPipeline('col2Test2', 
-                                  '/gscratch/vsm/gialluca/VPLModelingTools_Dev/VeffTestDepos/RunNumber6/PhotochemInputs/', 
+#/gscratch/vsm/gialluca/VPLModelingTools_Dev/VeffTestDepos/RunNumber6/PhotochemInputs
+
+pipelineobj = VPLModelingPipeline('Template100mbar', 
+                                  '/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/InputDir_100mbar/', 
                                   True, find_molecules_of_interest=False, hitran_year='2020')
 
 pipelineobj.run_spectra = True
+pipelineobj.adjust_atmospheric_pressure = False
+
+pipelineobj.run_automatic()
 
 
 ### JUST RUN SMART SPECTRA:

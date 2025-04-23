@@ -18,7 +18,7 @@
 *
 *   LONG-LIVED O H C S N CL LBOUND  VDEP0   FIXEDMR SGFLUX    DISTH MBOUND SMFLUX  VEFF0  
 O          LL  1 0 0 0 0 0    0     0.      0.      0.        0.      0      0.      0. 
-O2         LL  2 0 0 0 0 0    1     0.      0.98      0.        0.      0      0.      0. 
+O2         LL  2 0 0 0 0 0    1     0.      0.98    0.        0.      0      0.      0. 
 H2O        LL  1 2 0 0 0 0    1     0.      2.0E-2  0.        0.      0      0.      0.      
 H          LL  0 1 0 0 0 0    0     0.0E+00 0.      0.        0.      0      0.      0.        
 OH         LL  1 1 0 0 0 0    0     0.0E+00 0.      0.        0.      0      0.      0.        

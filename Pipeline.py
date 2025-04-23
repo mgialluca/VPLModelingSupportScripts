@@ -27,7 +27,7 @@ class VPLModelingPipeline:
         self.OutPath = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/ModelRunOutputs/'+casename+'/' # path for the raw model run outputs (NOT for created data products like dictionaries)
         self.DataOutPath = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/ModelRunOutputs/'+casename+'/' # path for created data products like dictionaries
         self.AtmProfPath = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/AtmProfiles/' # path to put atmospheric profile files (.pt files really)
-        self.BackupPhotochemRuns = True # Make backups of individual photochem runs
+        self.BackupPhotochemRuns = False # Make backups of individual photochem runs
         self.photochemBackupDir = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/Save_Photochem_Output/'+casename+'/' # path to save output from each photochem run
         self.LBLABC_AbsFilesDir = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/LinebyLine_absFiles/'+casename+'/' # path to put the created lbl .abs files in 
         self.lblabc_RunScriptDir = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/LBLABC/'+casename+'/' # path to put lbl runscripts in
@@ -42,7 +42,7 @@ class VPLModelingPipeline:
         self.planetary_mass = 1.308*u.Mearth.to(u.kg)
 
         # The climate executable:
-        self.vplclimate_executable = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/ClimateModel/vpl_climate_supernode' # The VPL Climate executable you want to use WITH FULL PATH
+        self.vplclimate_executable = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/ClimateModel/vpl_climate_exec' # The VPL Climate executable you want to use WITH FULL PATH
 
         self.HITRAN_year = hitran_year
         # Set the appropriate HITRAN variables
@@ -72,7 +72,7 @@ class VPLModelingPipeline:
         self.climate_global_converge = False
         self.global_convergence = False
         self.max_iterations_master = 100 # Never do anything more than 100x
-        self.max_iterations_climate = 20 # Never run climate more than 15x
+        self.max_iterations_climate = 100 # Never run climate more than 15x
         self.suppress_IOerrors = False # if convergence fails, raise IO errors if False, or just break running function if True
         self.run_spectra = True # If true, finished a converged run with smart 
         self.rerun_smart_for_2col = True # If true, rerun smart for day and night side after climate 2 column mode
@@ -100,7 +100,7 @@ class VPLModelingPipeline:
 
         if find_molecules_of_interest == False:
             self.molecule_dict = {} # key-value pairs of molecules of interest (keys, str) and their hitran codes (value, int)
-            gas_names = ['O2', 'H2O', 'O3']#, 'CO', 'CO2', 'HNO3', 'N2O', 'NO2', 'SO2']
+            gas_names = ['O2', 'H2O', 'O3', 'CO2', 'CO']#, 'CO', 'CO2', 'HNO3', 'N2O', 'NO2', 'SO2']
             self.molecule_dict['Gas_names'] = gas_names
             for m in range(len(gas_names)):
                 self.molecule_dict[gas_names[m]] = self.hitran_lookup.loc[gas_names[m]]['HitranNumber']
