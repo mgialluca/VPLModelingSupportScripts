@@ -871,11 +871,16 @@ class VPLModelingPipeline:
     #
     ## Fxn-specific Inputs: NONE
     ##
-    def make_lblabc_runscripts(self):
+    def make_lblabc_runscripts(self, whichcol=None):
         for i in self.molecule_dict['Gas_names']:
             f = open(self.lblabc_RunScriptDir+'RunLBLABC_'+i+'_'+self.casename+'.script', 'w')
             f.write('3                                       format list directed\n')
-            f.write(self.AtmProfPath+'PT_profile_'+self.casename+'.pt\n')
+            if whichcol == None:
+                f.write(self.AtmProfPath+'PT_profile_'+self.casename+'.pt\n')
+            elif whichcol == 'dayside':
+                f.write(self.AtmProfPath+'PT_profile_dayside_'+self.casename+'.pt\n')
+            elif whichcol == 'nightside':
+                f.write(self.AtmProfPath+'PT_profile_nightside_'+self.casename+'.pt\n')
             f.write('1                                       # records to skip at TOF\n')
             f.write('1,2                                     columns of p and t\n')
             f.write('100000                                  pressure scaling factor\n')
@@ -898,7 +903,12 @@ class VPLModelingPipeline:
             f.write('200.                                    maximum line width\n')
             f.write('1.e-5                                   minimum column optical depth\n')
             f.write(self.HITRAN_FundamentalFile+'\n')
+            #if whichcol == None:
             f.write(self.LBLABC_AbsFilesDir+i+'_'+self.casename+'.abs\n')
+            #elif whichcol == 'dayside':
+            #    f.write(self.LBLABC_AbsFilesDir+i+'_dayside_'+self.casename+'.abs\n')
+            #elif whichcol == 'nightside':
+            #    f.write(self.LBLABC_AbsFilesDir+i+'_nightside_'+self.casename+'.abs\n')
             f.write('2                                       overwrite existing files\n')
             f.close()
 
@@ -2709,7 +2719,7 @@ class VPLModelingPipeline:
                             ftestingoutput.write('2 column Climate convergence NOT found on subtry number '+str(climate_subtries)+' for run number '+str(self.num_2col_climate_runs)+', continuing rerun sequence\n')
 
                 if local_climate_convergence == False and self.suppress_IOerrors == False:
-                    raise IOError('2 column Climate could not converge in >'+str(self.max_iterations_master)+' tries. For climate run number '+str(self.num_2col_climate_runs))
+                    raise IOError('2 column Climate could not converge in >'+str(self.max_iterations_climate)+' tries. For climate run number '+str(self.num_2col_climate_runs))
                 elif local_climate_convergence == False and self.suppress_IOerrors == True:
                     self.global_convergence = False
 

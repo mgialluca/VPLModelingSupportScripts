@@ -22,4 +22,58 @@ pipelineobj = VPLModelingPipeline('col2Test2',
 #pipelineobj.run_spectra = True
 
 
-pipelineobj.run_automatic()
+#pipelineobj.run_automatic()
+
+pipelineobj.surface_temp = 3.6214E+02
+pipelineobj.surface_temp_dayside = 4.1843E+02
+pipelineobj.surface_temp_nightside = 2.5046E+02
+
+# First, get the final profile from the last climate run to use in the restart
+climate_profile = pipelineobj.get_final_2column_climate_output_temp_profile(trynum=1)
+
+# Update temperature in the PT profile and update the surface temperature
+pipelineobj.replace_PT_tempcol(climate_profile['Dayside']['T[K]'], whichcolumn='dayside')
+pipelineobj.replace_PT_tempcol(climate_profile['Nightside']['T[K]'], whichcolumn='nightside')
+
+pipelineobj.make_lblabc_runscripts()
+
+# Now Run LBLABC for all the gases of interest
+for gas in pipelineobj.molecule_dict['Gas_names']:
+    pipelineobj.run_lblabc_1instance(pipelineobj.lblabc_RunScriptDir+'RunLBLABC_'+gas+'_'+pipelineobj.casename+'.script', gas)
+    if pipelineobj.verbose == True:
+        print('LBLABC run for '+gas+' complete, LBLABC iteration '+str(pipelineobj.num_lblabc_runs+1))
+        #ftestingoutput.write('LBLABC run for '+gas+' complete, LBLABC iteration '+str(self.num_lblabc_runs+1)+'\n')
+pipelineobj.num_lblabc_runs += 1
+
+pipelineobj.make_smart_runscript()
+
+pipelineobj.run_smart_1instance(pipelineobj.SMART_RunScriptDir+'RunSMART_'+pipelineobj.casename+'.run')
+
+pipelineobj.make_lblabc_runscripts(whichcol='dayside')
+
+# Now Run LBLABC for all the gases of interest
+for gas in pipelineobj.molecule_dict['Gas_names']:
+    pipelineobj.run_lblabc_1instance(pipelineobj.lblabc_RunScriptDir+'RunLBLABC_'+gas+'_'+pipelineobj.casename+'.script', gas)
+    if pipelineobj.verbose == True:
+        print('LBLABC run for '+gas+' complete, LBLABC iteration '+str(pipelineobj.num_lblabc_runs+1))
+        #ftestingoutput.write('LBLABC run for '+gas+' complete, LBLABC iteration '+str(self.num_lblabc_runs+1)+'\n')
+pipelineobj.num_lblabc_runs += 1
+
+pipelineobj.make_smart_runscript(whichcol='dayside')
+
+pipelineobj.run_smart_1instance(pipelineobj.SMART_RunScriptDir+'RunSMART_dayside_'+pipelineobj.casename+'.run', whichcol='dayside')
+
+pipelineobj.make_lblabc_runscripts(whichcol='nightside')
+
+# Now Run LBLABC for all the gases of interest
+for gas in pipelineobj.molecule_dict['Gas_names']:
+    pipelineobj.run_lblabc_1instance(pipelineobj.lblabc_RunScriptDir+'RunLBLABC_'+gas+'_'+pipelineobj.casename+'.script', gas)
+    if pipelineobj.verbose == True:
+        print('LBLABC run for '+gas+' complete, LBLABC iteration '+str(pipelineobj.num_lblabc_runs+1))
+        #ftestingoutput.write('LBLABC run for '+gas+' complete, LBLABC iteration '+str(self.num_lblabc_runs+1)+'\n')
+pipelineobj.num_lblabc_runs += 1
+
+pipelineobj.make_smart_runscript(whichcol='nightside')
+
+pipelineobj.run_smart_1instance(pipelineobj.SMART_RunScriptDir+'RunSMART_nightside_'+pipelineobj.casename+'.run', whichcol='nightside')
+
