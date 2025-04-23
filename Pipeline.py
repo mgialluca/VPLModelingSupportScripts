@@ -42,7 +42,7 @@ class VPLModelingPipeline:
         self.planetary_mass = 1.308*u.Mearth.to(u.kg)
 
         # The climate executable:
-        self.vplclimate_executable = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/ClimateModel/vpl_climate_exec' # The VPL Climate executable you want to use WITH FULL PATH
+        self.vplclimate_executable = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/ClimateModel/vpl_climate_supernode' # The VPL Climate executable you want to use WITH FULL PATH
 
         self.HITRAN_year = hitran_year
         # Set the appropriate HITRAN variables
@@ -772,7 +772,7 @@ class VPLModelingPipeline:
     # AvgFluxTolerance - Convergence check, last output value of avg flux must be <= this tolerance
     #          [W/m^2] to be converged
     ##
-    def check_2column_vplclimate_conv(self, trynum=1, TropHeatingTolerance=9e-2, AvgFluxTolerance=1):
+    def check_2column_vplclimate_conv(self, trynum=1, TropHeatingTolerance=1e-3, AvgFluxTolerance=10):
         # Set the output flag of converged or not (boolean)
         # Guilty until proven innocent
         HasItConverged = False

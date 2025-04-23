@@ -19,7 +19,11 @@ pipelineobj = VPLModelingPipeline('col2Test2',
                                   '/gscratch/vsm/gialluca/VPLModelingTools_Dev/VeffTestDepos/RunNumber6/PhotochemInputs/', 
                                   True, find_molecules_of_interest=False, hitran_year='2020')
 
-#pipelineobj.run_spectra = True
+pipelineobj.run_spectra = True
+
+
+### JUST RUN SMART SPECTRA:
+'''
 
 planet = open(pipelineobj.photochemDir+'INPUTFILES/PLANET.dat', 'r')
 planet_lines = planet.readlines()
@@ -98,3 +102,4 @@ pipelineobj.make_smart_runscript(whichcol='nightside')
 
 pipelineobj.run_smart_1instance(pipelineobj.SMART_RunScriptDir+'RunSMART_nightside_'+pipelineobj.casename+'.run', whichcol='nightside')
 
+'''
