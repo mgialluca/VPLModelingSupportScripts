@@ -21,6 +21,23 @@ pipelineobj = VPLModelingPipeline('col2Test2',
 
 #pipelineobj.run_spectra = True
 
+planet = open(pipelineobj.photochemDir+'INPUTFILES/PLANET.dat', 'r')
+planet_lines = planet.readlines()
+planet.close()
+grav = None
+rad = None
+for i in planet_lines:
+    if len(i.split('= G')) > 1:
+        grav = float(i.split()[0])*(u.cm*u.s**-2).to(u.m*u.s**-2) #*1e-2 # Get the gravity from the first line of PLANET.dat and convert to m/s**2 (should be originally cm/s**2)
+    elif len(i.split('= R0')) > 1:
+        rad = float(i.split()[0])*u.cm.to(u.km) #*1e-5 # Get radius from PLANET.dat and convert from cm to km
+    elif grav != None and rad != None:
+        break
+    
+# Set object values
+pipelineobj.planetary_gravity = grav
+pipelineobj.planetary_radius = rad
+
 
 #pipelineobj.run_automatic()
 
