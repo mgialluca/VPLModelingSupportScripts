@@ -37,6 +37,10 @@ for i in planet_lines:
 # Set object values
 pipelineobj.planetary_gravity = grav
 pipelineobj.planetary_radius = rad
+pipelineobj.MMW = 31.63843524999342
+
+pipelineobj.set_climate_settings()
+pipelineobj.set_smart_settings()
 
 
 #pipelineobj.run_automatic()
