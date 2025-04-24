@@ -17,8 +17,8 @@ pipelineobj.update_indist_T_EDD(oldptz, dat)
 
 #/gscratch/vsm/gialluca/VPLModelingTools_Dev/VeffTestDepos/RunNumber6/PhotochemInputs
 
-pipelineobj = VPLModelingPipeline('Template100mbar', 
-                                  '/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/InputDir_100mbar/', 
+pipelineobj = VPLModelingPipeline('T100mbar', 
+                                  '/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/Template100mbar/', 
                                   True, find_molecules_of_interest=False, hitran_year='2020')
 
 pipelineobj.run_spectra = True
