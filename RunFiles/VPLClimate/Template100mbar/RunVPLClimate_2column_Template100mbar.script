@@ -261,5 +261,5 @@ False			Include conductive heating rates
 0.35			Asymmetry parameter error
 0.25			Albedo error
 3			1)ASCII 3) binary no header output
-/gscratch/vsm/gialluca/VPLModelingTools_Dev/ModelRunOutputs/Template100mbar/vpl_2column_climate_Template100mbar
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/ModelRunOutputs/Template100mbar/vpl_2column_climate_T100mbar
 2			Overwrite existing files
