@@ -18,11 +18,13 @@ pipelineobj.update_indist_T_EDD(oldptz, dat)
 #/gscratch/vsm/gialluca/VPLModelingTools_Dev/VeffTestDepos/RunNumber6/PhotochemInputs
 
 pipelineobj = VPLModelingPipeline('T100mbar', 
-                                  '/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/Template100mbar/', 
+                                  '/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/T100mbar/', 
                                   True, find_molecules_of_interest=False, hitran_year='2020')
 
 pipelineobj.run_spectra = True
 pipelineobj.adjust_atmospheric_pressure = False
+pipelineobj.dayside_starting_PT = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/AtmProfiles/PT_profile_day_100mbar.pt'
+pipelineobj.nightside_starting_PT = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/AtmProfiles/PT_profile_night_100mbar.pt'
 
 pipelineobj.run_automatic()
 

@@ -81,6 +81,10 @@ class VPLModelingPipeline:
 
         self.include_2column_climate = True
 
+        # Option to start with a different 2 column dayside/nightside PT than what is found through 1D 
+        self.dayside_starting_PT = None
+        self.nightside_starting_PT = None
+
         # User defined inputs
         self.casename = casename # Case name youre running, user defined
         #self.vplclimateInitial = vplclimateInitial # path to vpl climate template file
@@ -772,7 +776,7 @@ class VPLModelingPipeline:
     # AvgFluxTolerance - Convergence check, last output value of avg flux must be <= this tolerance
     #          [W/m^2] to be converged
     ##
-    def check_2column_vplclimate_conv(self, trynum=1, TropHeatingTolerance=1e-3, AvgFluxTolerance=10):
+    def check_2column_vplclimate_conv(self, trynum=1, TropHeatingTolerance=9e-2, AvgFluxTolerance=10):
         # Set the output flag of converged or not (boolean)
         # Guilty until proven innocent
         HasItConverged = False
@@ -2636,8 +2640,15 @@ class VPLModelingPipeline:
             if self.include_2column_climate == True:
 
                 # create two pt profiles
-                shutil.copyfile(self.AtmProfPath+'PT_profile_'+self.casename+'.pt', self.AtmProfPath+'PT_profile_dayside_'+self.casename+'.pt')
-                shutil.copyfile(self.AtmProfPath+'PT_profile_'+self.casename+'.pt', self.AtmProfPath+'PT_profile_nightside_'+self.casename+'.pt')
+                if self.dayside_starting_PT == None:
+                    shutil.copyfile(self.AtmProfPath+'PT_profile_'+self.casename+'.pt', self.AtmProfPath+'PT_profile_dayside_'+self.casename+'.pt')
+                else:
+                    shutil.copyfile(self.dayside_starting_PT, self.AtmProfPath+'PT_profile_dayside_'+self.casename+'.pt')
+
+                if self.nightside_starting_PT == None:
+                    shutil.copyfile(self.AtmProfPath+'PT_profile_'+self.casename+'.pt', self.AtmProfPath+'PT_profile_nightside_'+self.casename+'.pt')
+                else:
+                    shutil.copyfile(self.nightside_starting_PT, self.AtmProfPath+'PT_profile_nightside_'+self.casename+'.pt')
 
                 # create two surface temps
                 self.surface_temp_dayside = self.surface_temp
@@ -2734,6 +2745,16 @@ class VPLModelingPipeline:
                 if self.verbose == True:
                     ftestingoutput = open(self.OutPath+self.casename+'_SavingInfoOut.txt', 'a')
 
+                self.make_lblabc_runscripts()
+
+                # Now Run LBLABC for all the gases of interest
+                for gas in self.molecule_dict['Gas_names']:
+                    self.run_lblabc_1instance(self.lblabc_RunScriptDir+'RunLBLABC_'+gas+'_'+self.casename+'.script', gas)
+                    if self.verbose == True:
+                        print('LBLABC run for '+gas+' complete, LBLABC iteration '+str(self.num_lblabc_runs+1))
+                        #ftestingoutput.write('LBLABC run for '+gas+' complete, LBLABC iteration '+str(self.num_lblabc_runs+1)+'\n')
+                self.num_lblabc_runs += 1
+
                 self.make_smart_runscript()
 
                 self.run_smart_1instance(self.SMART_RunScriptDir+'RunSMART_'+self.casename+'.run')
@@ -2743,7 +2764,18 @@ class VPLModelingPipeline:
                     ftestingoutput.write('Terminator SMART run completed\n')
                     #ftestingoutput.close()
 
+
                 if self.rerun_smart_for_2col == True:
+
+                    self.make_lblabc_runscripts(whichcol='dayside')
+
+                    # Now Run LBLABC for all the gases of interest
+                    for gas in self.molecule_dict['Gas_names']:
+                        self.run_lblabc_1instance(self.lblabc_RunScriptDir+'RunLBLABC_'+gas+'_'+self.casename+'.script', gas)
+                        if self.verbose == True:
+                            print('LBLABC run for '+gas+' complete, LBLABC iteration '+str(self.num_lblabc_runs+1))
+                            #ftestingoutput.write('LBLABC run for '+gas+' complete, LBLABC iteration '+str(self.num_lblabc_runs+1)+'\n')
+                    self.num_lblabc_runs += 1
 
                     self.make_smart_runscript(whichcol='dayside')
 
@@ -2753,6 +2785,16 @@ class VPLModelingPipeline:
                         print('Dayside SMART run completed')
                         ftestingoutput.write('Dayside SMART run completed\n')
                         #ftestingoutput.close()
+
+                    self.make_lblabc_runscripts(whichcol='nightside')
+
+                    # Now Run LBLABC for all the gases of interest
+                    for gas in self.molecule_dict['Gas_names']:
+                        self.run_lblabc_1instance(self.lblabc_RunScriptDir+'RunLBLABC_'+gas+'_'+self.casename+'.script', gas)
+                        if self.verbose == True:
+                            print('LBLABC run for '+gas+' complete, LBLABC iteration '+str(self.num_lblabc_runs+1))
+                            #ftestingoutput.write('LBLABC run for '+gas+' complete, LBLABC iteration '+str(self.num_lblabc_runs+1)+'\n')
+                    self.num_lblabc_runs += 1
 
                     self.make_smart_runscript(whichcol='nightside')
 
