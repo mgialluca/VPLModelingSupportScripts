@@ -27,7 +27,7 @@ False			Include conductive heating rates
 1.0			Solar tolerance [0-1]
 0.03			Thermal tolerance [0-1]
 3			List directed input
-/gscratch/vsm/gialluca/VPLModelingTools_Dev/AtmProfiles/PT_profile_dayside_Template100mbar.pt
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/AtmProfiles/PT_profile_dayside_T100mbar.pt
 1			Lines to skip
 1,2			columns of P,T
 100000.			Scale to Pa
@@ -42,7 +42,7 @@ False			Include conductive heating rates
 1.0			Solar tolerance [0-1]
 0.03			Thermal tolerance [0-1]
 3			List directed input
-/gscratch/vsm/gialluca/VPLModelingTools_Dev/AtmProfiles/PT_profile_nightside_Template100mbar.pt
+/gscratch/vsm/gialluca/VPLModelingTools_Dev/AtmProfiles/PT_profile_nightside_T100mbar.pt
 1			Lines to skip
 1,2			columns of P,T
 100000.			Scale to Pa
