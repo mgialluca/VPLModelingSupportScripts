@@ -2745,16 +2745,6 @@ class VPLModelingPipeline:
                 if self.verbose == True:
                     ftestingoutput = open(self.OutPath+self.casename+'_SavingInfoOut.txt', 'a')
 
-                self.make_lblabc_runscripts()
-
-                # Now Run LBLABC for all the gases of interest
-                for gas in self.molecule_dict['Gas_names']:
-                    self.run_lblabc_1instance(self.lblabc_RunScriptDir+'RunLBLABC_'+gas+'_'+self.casename+'.script', gas)
-                    if self.verbose == True:
-                        print('LBLABC run for '+gas+' complete, LBLABC iteration '+str(self.num_lblabc_runs+1))
-                        #ftestingoutput.write('LBLABC run for '+gas+' complete, LBLABC iteration '+str(self.num_lblabc_runs+1)+'\n')
-                self.num_lblabc_runs += 1
-
                 self.make_smart_runscript()
 
                 self.run_smart_1instance(self.SMART_RunScriptDir+'RunSMART_'+self.casename+'.run')
