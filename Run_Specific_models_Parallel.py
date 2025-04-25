@@ -37,7 +37,7 @@ def set_pipeline_vars(casename, pipelineobj, master_out=master):
     pipelineobj.dayside_starting_PT = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/AtmProfiles/PT_profile_dayside_T100mbar.pt'
     pipelineobj.nightside_starting_PT = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/AtmProfiles/PT_profile_nightside_T100mbar.pt'
 
-    pipelineobj.vplclimate_executable = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/ClimateModel/vpl_climate/vpl_climate_supernode'
+    pipelineobj.vplclimate_executable = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/ClimateModel/vpl_climate_supernode'
 
     # Molecules for the type of atmosphere we're interested in 
 
