@@ -81,7 +81,7 @@ def edit_speciesdat(pipelineobj, co2in, h2oin):
 
 def run_one_model(inputstring):
 
-    modelid, co2input, h2oinput = inputstring
+    co2input, h2oinput, modelid = inputstring
 
     '''
     co2_label = str(int(np.ceil(co2input*1e6)))+'ppm'
