@@ -55,7 +55,8 @@ def set_pipeline_vars(casename, pipelineobj, master_out=master):
 
 def rerun_with_so2(runname):
 
-    os.mkdir(master+runname)
+    if not os.path.exists(master+runname+'/'):
+        os.mkdir(master+runname)
 
     copyfrom = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/T1cComparison/'
 
