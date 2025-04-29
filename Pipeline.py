@@ -2603,6 +2603,7 @@ class VPLModelingPipeline:
 
             ##### Generate SMART spectra of the final converged atmosphere ------------------------------
 
+            '''
             ### Create degraded atmospheric profile to prepare for LBLABC and Climate -------------
             if self.adjust_atmospheric_pressure == True:
                 if self.updated_atm_pressure < 1e-2:
@@ -2617,11 +2618,13 @@ class VPLModelingPipeline:
                 print('Degraded PT profile created from photochem run '+str(self.num_photochem_runs))
                 ftestingoutput.write('Degraded PT profile created from photochem run '+str(self.num_photochem_runs)+'\n')
             ### Degraded PT Profile finished ------------
-
+            
+            
             ### Create new mixing ratios profile file --------------------------
             self.prep_rmix_file(self.photochemDir+'OUTPUT/PTZ_mixingratios_out.dist')
             ### Mixing ratios profile created --------------------------
-
+            '''
+            
             ### Rerun the LBLABC files for the most recent atmosphere ------------------------------
             
             self.make_lblabc_runscripts()
@@ -2651,8 +2654,14 @@ class VPLModelingPipeline:
                     shutil.copyfile(self.nightside_starting_PT, self.AtmProfPath+'PT_profile_nightside_'+self.casename+'.pt')
 
                 # create two surface temps
-                self.surface_temp_dayside = self.surface_temp
-                self.surface_temp_nightside = self.surface_temp
+                if self.dayside_starting_PT == None and self.nightside_starting_PT == None:
+                    self.surface_temp_dayside = self.surface_temp
+                    self.surface_temp_nightside = self.surface_temp
+                else:
+                    openhold = ascii.read(self.dayside_starting_PT)
+                    self.surface_temp_dayside = openhold['Temp'][len(openhold['Temp'])-1]
+                    openhold = ascii.read(self.nightside_starting_PT)
+                    self.surface_temp_nightside = openhold['Temp'][len(openhold['Temp'])-1]
 
                 # Add 1 to the climate run counter
                 self.num_2col_climate_runs += 1
