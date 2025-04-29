@@ -60,7 +60,7 @@ def rerun_with_so2(runname):
     copyfrom = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/T1cComparison/'
 
     # Copy files over needed for LBLABC and SMART run
-    fis_to_copy = ['PT_profile_'+runname+'.pt' 'MixingRs_'+runname+'.dat']
+    fis_to_copy = ['PT_profile_'+runname+'.pt', 'MixingRs_'+runname+'.dat']
     
     for fi in fis_to_copy:
         shutil.copyfile(copyfrom+runname+'/'+fi, master+runname+'/'+fi)
