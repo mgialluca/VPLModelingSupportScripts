@@ -65,8 +65,6 @@ def rerun_with_so2(runname):
     for fi in fis_to_copy:
         shutil.copyfile(copyfrom+runname+'/'+fi, master+runname+'/'+fi)
 
-    shutil(copyfrom+runname+'/RunLBLABC_CO2_'+runname+'.script', master+runname+'/RunLBLABC_SO2_'+runname+'.script')
-
     pipelineobj = VPLModelingPipeline(runname, 
                                   '/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/T100mbar/', 
                                   True, find_molecules_of_interest=False, hitran_year='2020')
