@@ -44,6 +44,17 @@ def set_pipeline_vars(casename, pipelineobj, master_out=master):
 
     pipelineobj.vplclimate_executable = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/ClimateModel/vpl_climate_supernode'
 
+    pipelineobj.planetary_gravity = 10.65
+    pipelineobj.planetary_radius = 6990.0
+
+    fi = open('/gscratch/vsm/gialluca/VPLModelingTools_Dev/T1cComparison/'+casename+'/photochem_run_output_'+casename+'_Try2.run', 'r')
+    lines = fi.readlines()
+    fi.close()
+    for i in lines:
+        if len(i.split('Molecular weight of atmosphere')) > 1:
+            pipelineobj.MMW = float(i.split()[len(i.split())-1])
+            break
+
     # Molecules for the type of atmosphere we're interested in 
 
     pipelineobj.molecule_dict = {} # key-value pairs of molecules of interest (keys, str) and their hitran codes (value, int)
