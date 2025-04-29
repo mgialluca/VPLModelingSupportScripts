@@ -2624,6 +2624,7 @@ class VPLModelingPipeline:
             self.prep_rmix_file(self.photochemDir+'OUTPUT/PTZ_mixingratios_out.dist')
             ### Mixing ratios profile created --------------------------
             
+            '''
             
             ### Rerun the LBLABC files for the most recent atmosphere ------------------------------
             
@@ -2639,7 +2640,6 @@ class VPLModelingPipeline:
             
             ### Rerun the LBLABC Section Finish ------------------------------
 
-            '''
 
             ### Setup and Run 2 column climate to convergence ------------------------------
             if self.include_2column_climate == True:
