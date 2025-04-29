@@ -7,7 +7,7 @@ import os
 from multiprocessing import Pool
 
 
-master = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/T1cComparison/SO2-H2OT1c/'
+master = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/SO2-H2OT1c/'
 
 def set_pipeline_vars(casename, pipelineobj, master_out=master):
 
