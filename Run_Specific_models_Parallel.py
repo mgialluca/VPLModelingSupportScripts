@@ -135,7 +135,7 @@ for i in range(len(all_samps)):
     inputs = newset
 
 
-H2O_mixing = [0.01, 0.05, 0.1]
+H2O_mixing = [0.001, 0.01]
 ppms = np.linspace(110, 500, 40)
 CO2_ppm = [p*1e-6 for p in ppms]
 all_samps = [CO2_ppm, H2O_mixing]
