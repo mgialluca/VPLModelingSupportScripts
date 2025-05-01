@@ -7,7 +7,7 @@ import os
 from multiprocessing import Pool
 
 
-master = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/SO2-H2OT1c/'
+master = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/SO2-H2O-CO2T1c/'
 
 def set_pipeline_vars(casename, pipelineobj, master_out=master):
 
@@ -58,11 +58,12 @@ def set_pipeline_vars(casename, pipelineobj, master_out=master):
     # Molecules for the type of atmosphere we're interested in 
 
     pipelineobj.molecule_dict = {} # key-value pairs of molecules of interest (keys, str) and their hitran codes (value, int)
-    gas_names = ['O2', 'H2O', 'O3', 'SO2']# 'CO2', 'CO']
+    gas_names = ['O2', 'H2O', 'O3', 'CO2', 'CO', 'SO2']
     pipelineobj.molecule_dict['Gas_names'] = gas_names
     for m in range(len(gas_names)):
         pipelineobj.molecule_dict[gas_names[m]] = pipelineobj.hitran_lookup.loc[gas_names[m]]['HitranNumber']
         pipelineobj.molecule_dict[gas_names[m]+'_RmixCol'] = m+2
+    pipelineobj.molecule_dict['SO2_RmixCol'] = pipelineobj.molecule_dict['CO2_RmixCol']
 
 def rerun_with_so2(runname):
 
@@ -72,10 +73,10 @@ def rerun_with_so2(runname):
     copyfrom = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/T1cComparison/'
 
     # Copy files over needed for LBLABC and SMART run
-    #fis_to_copy = ['PT_profile_'+runname+'.pt', 'MixingRs_'+runname+'.dat']
+    fis_to_copy = ['PT_profile_'+runname+'.pt', 'MixingRs_'+runname+'.dat']
     
-    #for fi in fis_to_copy:
-    #    shutil.copyfile(copyfrom+runname+'/'+fi, master+runname+'/'+fi)
+    for fi in fis_to_copy:
+        shutil.copyfile(copyfrom+runname+'/'+fi, master+runname+'/'+fi)
 
     pipelineobj = VPLModelingPipeline(runname, 
                                   '/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/T100mbar/', 

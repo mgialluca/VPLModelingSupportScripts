@@ -2644,7 +2644,7 @@ class VPLModelingPipeline:
             ### Setup and Run 2 column climate to convergence ------------------------------
             if self.include_2column_climate == True:
 
-                '''
+                
                 # create two pt profiles
                 if self.dayside_starting_PT == None:
                     shutil.copyfile(self.AtmProfPath+'PT_profile_'+self.casename+'.pt', self.AtmProfPath+'PT_profile_dayside_'+self.casename+'.pt')
@@ -2656,7 +2656,7 @@ class VPLModelingPipeline:
                 else:
                     shutil.copyfile(self.nightside_starting_PT, self.AtmProfPath+'PT_profile_nightside_'+self.casename+'.pt')
 
-                '''
+                
                 # create two surface temps
                 if self.dayside_starting_PT == None and self.nightside_starting_PT == None:
                     self.surface_temp_dayside = self.surface_temp
