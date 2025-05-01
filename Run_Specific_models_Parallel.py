@@ -3,7 +3,7 @@ import copy
 import subprocess
 from multiprocessing import Pool
 
-master = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/T1cComparison/'
+master = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/T1cHighCO2/'
 
 def set_pipeline_vars(casename, pipelineobj, master_out=master):
 
@@ -95,7 +95,7 @@ def run_one_model(inputstring):
     case = 'Run'+str(modelid)
 
     pipelineobj = VPLModelingPipeline(case, 
-                                  '/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/T100mbar/', 
+                                  '/gscratch/vsm/gialluca/VPLModelingTools_Dev/T1cComparison/Run79/PhotochemInputs/', 
                                   True, find_molecules_of_interest=False, hitran_year='2020')
     
     set_pipeline_vars(case, pipelineobj)
@@ -117,9 +117,11 @@ def run_one_model(inputstring):
     return pipelineobj
     
 
-H2O_mixing = [0.001, 0.01, 0.05, 0.1]
-ppms = np.linspace(5, 100, 20)
-CO2_ppm = [p*1e-6 for p in ppms]
+#H2O_mixing = [0.001, 0.01, 0.05, 0.1]
+H2O_mixing = [0.12, 0.15, 0.17, 0.2, 0.3]
+#ppms = np.linspace(5, 100, 20)
+#CO2_ppm = [p*1e-6 for p in ppms]
+CO2_ppm = [100e-6]
 all_samps = [CO2_ppm, H2O_mixing]
 inputs = [[]]
 for i in range(len(all_samps)):
@@ -132,12 +134,34 @@ for i in range(len(all_samps)):
             ns_ind += 1
     inputs = newset
 
-for i in range(len(inputs)):
-    inputs[i].append(i)
 
+H2O_mixing = [0.01, 0.05, 0.1]
+ppms = np.linspace(110, 500, 40)
+CO2_ppm = [p*1e-6 for p in ppms]
+all_samps = [CO2_ppm, H2O_mixing]
+inputs2= [[]]
+for i in range(len(all_samps)):
+    newset = []
+    ns_ind = 0
+    for j in all_samps[i]:
+        for f in range(len(inputs2)):
+            newset.append(copy.deepcopy(inputs2[f]))
+            newset[ns_ind].append(j)
+            ns_ind += 1
+    inputs2 = newset
+
+modelinputs = []
+for i in range(len(inputs)):
+    modelinputs.append(inputs[i])
+
+for i in range(len(inputs2)):
+    modelinputs.append(inputs2[i])
+
+for i in range(len(modelinputs)):
+    modelinputs[i].append(i)
 
 with Pool() as p:
-    models = p.map(run_one_model, inputs)
+    models = p.map(run_one_model, modelinputs)
 
 convergence = [m.global_convergence for m in models]
 run_names = [m.casename for m in models]
