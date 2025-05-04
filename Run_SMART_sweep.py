@@ -47,7 +47,7 @@ def set_pipeline_vars(casename, pipelineobj, master_out=master):
     pipelineobj.planetary_gravity = 10.65
     pipelineobj.planetary_radius = 6990.0
 
-    fi = open('/gscratch/vsm/gialluca/VPLModelingTools_Dev/T1cComparison/'+casename+'/photochem_run_output_'+casename+'_Try2.run', 'r')
+    fi = open('/gscratch/vsm/gialluca/VPLModelingTools_Dev/T1cHighCO2/'+casename+'/photochem_run_output_'+casename+'_Try2.run', 'r')
     lines = fi.readlines()
     fi.close()
     for i in lines:
