@@ -2603,7 +2603,7 @@ class VPLModelingPipeline:
 
             ##### Generate SMART spectra of the final converged atmosphere ------------------------------
 
-            #'''
+            '''
             ### Create degraded atmospheric profile to prepare for LBLABC and Climate -------------
             if self.adjust_atmospheric_pressure == True:
                 if self.updated_atm_pressure < 1e-2:
@@ -2624,7 +2624,7 @@ class VPLModelingPipeline:
             self.prep_rmix_file(self.photochemDir+'OUTPUT/PTZ_mixingratios_out.dist')
             ### Mixing ratios profile created --------------------------
             
-            #'''
+            '''
             
             ### Rerun the LBLABC files for the most recent atmosphere ------------------------------
             

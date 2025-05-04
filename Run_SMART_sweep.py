@@ -7,7 +7,7 @@ import os
 from multiprocessing import Pool
 
 
-master = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/SO2-H2O-CO2T1c/'
+master = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/HighCO2SO2/'
 
 def set_pipeline_vars(casename, pipelineobj, master_out=master):
 
@@ -39,8 +39,8 @@ def set_pipeline_vars(casename, pipelineobj, master_out=master):
     pipelineobj.global_convergence = True # BYPASS PHOTOCHEM
     pipelineobj.suppress_IOerrors = True
     pipelineobj.run_spectra = False
-    pipelineobj.dayside_starting_PT = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/SO2-H2OT1c/'+casename+'/PT_profile_dayside_'+casename+'.pt'
-    pipelineobj.nightside_starting_PT = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/SO2-H2OT1c/'+casename+'/PT_profile_nightside_'+casename+'.pt'
+    pipelineobj.dayside_starting_PT = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/T1cHighCO2/'+casename+'/PT_profile_dayside_'+casename+'.pt'
+    pipelineobj.nightside_starting_PT = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/T1cHighCO2c/'+casename+'/PT_profile_nightside_'+casename+'.pt'
 
     pipelineobj.vplclimate_executable = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/ClimateModel/vpl_climate_supernode'
 
@@ -70,7 +70,7 @@ def rerun_with_so2(runname):
     if not os.path.exists(master+runname+'/'):
         os.mkdir(master+runname)
 
-    copyfrom = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/T1cComparison/'
+    copyfrom = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/T1cHighCO2/'
 
     # Copy files over needed for LBLABC and SMART run
     fis_to_copy = ['PT_profile_'+runname+'.pt', 'MixingRs_'+runname+'.dat']
@@ -98,7 +98,8 @@ def rerun_with_so2(runname):
     pipelineobj.run_smart_1instance(pipelineobj.SMART_RunScriptDir+'RunSMART_dayside_'+pipelineobj.casename+'.run', whichcol='dayside')
 
 
-names = ['Run'+str(i) for i in range(80)]
+names = ['Run'+str(i) for i in range(5,85)]
 
 with Pool() as p:
     models = p.map(rerun_with_so2, names)
+
