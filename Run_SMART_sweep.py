@@ -40,7 +40,7 @@ def set_pipeline_vars(casename, pipelineobj, master_out=master):
     pipelineobj.suppress_IOerrors = True
     pipelineobj.run_spectra = False
     pipelineobj.dayside_starting_PT = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/T1cHighCO2/'+casename+'/PT_profile_dayside_'+casename+'.pt'
-    pipelineobj.nightside_starting_PT = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/T1cHighCO2c/'+casename+'/PT_profile_nightside_'+casename+'.pt'
+    pipelineobj.nightside_starting_PT = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/T1cHighCO2/'+casename+'/PT_profile_nightside_'+casename+'.pt'
 
     pipelineobj.vplclimate_executable = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/ClimateModel/vpl_climate_supernode'
 
