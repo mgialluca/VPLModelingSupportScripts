@@ -16,6 +16,10 @@ import json
 import emcee
 import h5py
 from functools import partial
+from numpy import log, exp, pi
+import scipy.stats, scipy
+import sys
+import pymultinest
 
 
 # Need to figure out how parameter sweeps are running:
@@ -55,12 +59,12 @@ class Generate_Atmosphere_Parameter_Sweep:
         self.escape_species_losstype = ['Veff', 'Veff', 'Vdep', 'Vdep'] # Vdep (depositional velocity at surface) or TOA (flux at top of atmosphere)
         self.escape_species_molarmass = {}
         self.escape_species_molarmass['O'] = [15.999]*(u.g/u.mol) 
-        self.escape_species_molarmass['O'] = [31.998]*(u.g/u.mol) 
+        self.escape_species_molarmass['O2'] = [31.998]*(u.g/u.mol) 
         self.escape_species_molarmass['O3'] = [47.997]*(u.g/u.mol) 
         self.escape_species_molarmass['H2O2'] = [34.014]*(u.g/u.mol) 
 
         self.outgass_sample_type_gridsweep = ['Log'] # How to sample outgassed molecules: 'Linear', 'Log', or 'UserDef' 
-        self.escape_sample_type_gridsweep = ['UserDef', 'UserDef', 'UserDef', 'UserDef']
+        self.escape_sample_type_gridsweep = ['Linear', 'Linear', 'Linear', 'UserDef'] #['UserDef', 'UserDef', 'UserDef', 'UserDef']
         # Linear - sample every flux on a linear grid (np.linspace) with some defined resolution
         # Log - sample every flux on a log grid (np.logspace) with some defined resolution
         # UserDef - User defined arrays of samples for every flux to vary 
@@ -76,23 +80,24 @@ class Generate_Atmosphere_Parameter_Sweep:
         #[90000000000.0, 100000000000.0] #[1.65329797e8, 3.00359578e12] # min, max
 
         self.escape_species_MinMax_gridsweep = {}
-        self.escape_species_MinMax_gridsweep['O'] = [0,0]
-        self.escape_species_MinMax_gridsweep['O2'] = [0,0]
-        self.escape_species_MinMax_gridsweep['O3'] = [0,0]
-        self.escape_species_MinMax_gridsweep['H2O2'] = [0,0]
+        self.escape_species_MinMax_gridsweep['O'] = [0,10]
+        self.escape_species_MinMax_gridsweep['O2'] = [0,10]
+        self.escape_species_MinMax_gridsweep['O3'] = [0,0.5]
+        self.escape_species_MinMax_gridsweep['H2O2'] = [0,1]
 
         # Sample resolution if using Linear / Log sampling 
-        self.outgass_sample_resolution_gridsweep = [8] # number of samples for each outgassed species
-        self.escape_sample_resolution_gridsweep = [0]
+        self.outgass_sample_resolution_gridsweep = [7] # number of samples for each outgassed species
+        self.escape_sample_resolution_gridsweep = [3,3,3,0]
 
         # Need to pass samples for user defined option
         self.outgass_samples_gridsweep = {}
         #self.outgass_samples_gridsweep['H2O'] = [78000000000.0]
+
         self.escape_samples_gridsweep = {}
-        self.escape_samples_gridsweep['O'] = [0.01, 0.1]#[0, 1e27, 1e29]#[0, 1e27, 1e28, 1e29] #[1e28, 1e29, 1e30] #[0, 1e26, 1e27] #[0, 1e23, 5e23, 1e24, 5e24, 1e25, 5e25, 1e26]
-        self.escape_samples_gridsweep['O2'] = [0.01, 0.1]#[1e26, 5e26, 1e27]
-        self.escape_samples_gridsweep['O3'] = [0.01, 0.2, 0.4] 
-        self.escape_samples_gridsweep['H2O2'] = [0.005, 0.6]
+        #self.escape_samples_gridsweep['O'] = [0.01, 0.1]#[0, 1e27, 1e29]#[0, 1e27, 1e28, 1e29] #[1e28, 1e29, 1e30] #[0, 1e26, 1e27] #[0, 1e23, 5e23, 1e24, 5e24, 1e25, 5e25, 1e26]
+        #self.escape_samples_gridsweep['O2'] = [0.01, 0.1]#[1e26, 5e26, 1e27]
+        #self.escape_samples_gridsweep['O3'] = [0.01, 0.2, 0.4] 
+        self.escape_samples_gridsweep['H2O2'] = [0.02]
         
 
 
@@ -154,6 +159,7 @@ class Generate_Atmosphere_Parameter_Sweep:
         pipelineobj.suppress_IOerrors = True
         pipelineobj.run_spectra = True
         pipelineobj.MCMC_pressure_only = self.mcmc_pressure_only
+        pipelineobj.include_2column_climate = True
 
         # Testing if climate executable needs to be copied
         if self.supernode == True:
@@ -1183,4 +1189,34 @@ class Generate_Atmosphere_Parameter_Sweep:
             sampler = emcee.EnsembleSampler(self.mcmc_nwalkers, self.mcmc_ndim, lnProb, backend=backend, pool=pool)
             sampler.run_mcmc(pos, self.mcmc_nsteps, progress=False)
 #        samples = sampler.get_chain(discard=self.mcmc_burnin, flat=True)
+
+
+    # Priors to use for PyMultiNest
+    def multinest_prior(self,cube):
+
+        # H2O outgassing rate prior
+        wat_lowlim = 44552887.2545331
+        wat_hilim = 9.47899801e11
+        cube[0] = (cube[0]*(wat_hilim - wat_lowlim)) + wat_lowlim
+
+        # O effusion velocity prior
+        cube[1] = cube[1]*10
+        
+        # O2 effusion velocity prior
+        cube[2] = cube[2]*10
+
+        # O3 deposition velocity prior
+        cube[3] = cube[3]*0.5
+
+        # H2O2 deposition velocty prior
+        #cube[4] = cube[4] # Go from 0 to 1 
+
+        # Could add CO2 here?
+
+        return cube
+    
+    # log likelihood for PyMultiNest
+    #def multinest_loglike(self, cube, ndim, nparams):
+
+
 
