@@ -19,6 +19,13 @@ from functools import partial
 from numpy import log, exp, pi
 import scipy.stats, scipy
 import sys
+
+# To use pymultinest:
+# - Load the intel module
+# - export the python path back to anaconda
+# - Load the ompi module
+# - Add the multinest path to LD_LIBRARY_PATH
+
 #import pymultinest
 
 
@@ -163,7 +170,7 @@ class Generate_Atmosphere_Parameter_Sweep:
 
         # Testing if climate executable needs to be copied
         if self.supernode == True:
-            pipelineobj.vplclimate_executable = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/ClimateModel/vpl_climate/vpl_climate_supernode'
+            pipelineobj.vplclimate_executable = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/ClimateModel/vpl_climate_supernode'
 
         # Molecules for the type of atmosphere we're interested in 
 
