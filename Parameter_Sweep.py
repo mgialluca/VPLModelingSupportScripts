@@ -19,7 +19,7 @@ from functools import partial
 from numpy import log, exp, pi
 import scipy.stats, scipy
 import sys
-import pymultinest
+#import pymultinest
 
 
 # Need to figure out how parameter sweeps are running:
