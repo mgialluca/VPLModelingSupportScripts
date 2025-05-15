@@ -681,6 +681,7 @@ class VPLModelingPipeline:
         if NormGrossConverged == True and TimeConverged == True: # and L2Converged == True:
             HasItConverged = True
 
+        '''
         # Print messages:
         if self.verbose == True:
             if HasItConverged:
@@ -690,6 +691,7 @@ class VPLModelingPipeline:
             print('Normalized Gross error: '+str(NormGrosserr))
             print('L2 Error: '+str(L2err))
             print('Time of final timestep: '+str(FinalTime))
+        '''
 
         return HasItConverged, NormGrosserr, L2err, FinalTime, Nstep_photochemrun, sgbslerror
     # usage should be 'convergence, grosserr, l2err, finaltime, nstepsphoto, sgbslerror = check_photochem_conv()
@@ -861,8 +863,8 @@ class VPLModelingPipeline:
         os.mkdir(self.photochemBackupDir+'RunNumber'+str(trynum)+'/')
         subprocess.run('cp '+self.photochemDir+'PTZ_mixingratios_in.dist '+self.photochemBackupDir+'RunNumber'+str(trynum)+'/', shell=True)
         subprocess.run('cp '+self.photochemDir+'OUTPUT/* '+self.photochemBackupDir+'RunNumber'+str(trynum)+'/', shell=True)
-        if self.verbose == True:
-            print('Photochem Run Number '+str(trynum)+' Output Backup Created')
+        #if self.verbose == True:
+        #    print('Photochem Run Number '+str(trynum)+' Output Backup Created')
 
     ### Create the lblabc runscripts, this creates them from scratch, but this function could easily be re-written to use a
     ### ... template, as long as it writes an lbl file to the self.LBLABC_AbsFilesDir
@@ -2116,7 +2118,7 @@ class VPLModelingPipeline:
 
             self.num_photochem_runs += 1
             if self.verbose == True:
-                print('----> Beginning photochem run Try number '+str(self.num_photochem_runs))
+                #print('----> Beginning photochem run Try number '+str(self.num_photochem_runs))
                 ftestingoutput.write('----> Beginning photochem run Try number '+str(self.num_photochem_runs)+'\n')
             self.run_photochem_1instance(CleanMake=True, InputCopy=self.photochem_InputsDir, trynum=self.num_photochem_runs)
             
@@ -2145,7 +2147,7 @@ class VPLModelingPipeline:
 
             if sgbslerror == True and local_photochem_conv == False:
                 if self.verbose == True:
-                    print('SGBSL Error occured in photochem run')
+                    #print('SGBSL Error occured in photochem run')
                     ftestingoutput.write('\n SGBSL Error occured in photochem run\n')
                 
                 if self.fixsgbsl == True:
@@ -2166,8 +2168,8 @@ class VPLModelingPipeline:
 
                         pressure_converged, maxchange, holdnewsurfp = self.change_atmospheric_pressure(after_sgbsl_err=True)
                         if self.verbose == True:
-                            print('Attempting to adjust pressure to fix SGBSL error')
-                            print('New Pressure would be: '+str(holdnewsurfp)+' bars, using pressure of: '+str(self.updated_atm_pressure)+' bars')
+                            #print('Attempting to adjust pressure to fix SGBSL error')
+                            #print('New Pressure would be: '+str(holdnewsurfp)+' bars, using pressure of: '+str(self.updated_atm_pressure)+' bars')
                             ftestingoutput.write('Attempting to adjust pressure to fix SGBSL error\n')
                             ftestingoutput.write('New Pressure would be: '+str(holdnewsurfp)+' bars, using pressure of: '+str(self.updated_atm_pressure)+' bars\n\n')
 
@@ -2225,8 +2227,8 @@ class VPLModelingPipeline:
                             break
                     pressure_converged, maxchange, holdnewsurfp = self.change_atmospheric_pressure(after_sgbsl_err=True)
                     if self.verbose == True:
-                        print('Attempting to adjust pressure to fix SGBSL error')
-                        print('New Pressure: '+str(holdnewsurfp)+' bars, using pressure of: '+str(self.updated_atm_pressure)+' bars')
+                        #print('Attempting to adjust pressure to fix SGBSL error')
+                        #print('New Pressure: '+str(holdnewsurfp)+' bars, using pressure of: '+str(self.updated_atm_pressure)+' bars')
                         ftestingoutput.write('Attempting to adjust pressure to fix SGBSL error\n')
                         ftestingoutput.write('New Pressure would be: '+str(holdnewsurfp)+' bars, using pressure of: '+str(self.updated_atm_pressure)+' bars\n\n')
 
@@ -2248,11 +2250,11 @@ class VPLModelingPipeline:
                 subprocess.run('cp '+self.photochemDir+'OUTPUT/PTZ_mixingratios_out.dist '+self.DataOutPath+'FINAL_PTZ_mixingratios_out_FAILED.dist', shell=True)
                 if self.verbose == True:
                     ftestingoutput.write('Max Iterations reached ('+str(self.max_iterations_master)+'), couldnt find new pressure, ending run\n')
-                    print('Max Iterations reached ('+str(self.max_iterations_master)+'), couldnt find new pressure, ending run')
+                    #print('Max Iterations reached ('+str(self.max_iterations_master)+'), couldnt find new pressure, ending run')
                 break
 
             if self.verbose == True:
-                print('Photochem local convergence found with '+str(photochem_subtries)+' subtries')
+                #print('Photochem local convergence found with '+str(photochem_subtries)+' subtries')
                 ftestingoutput.write('Photochem local convergence found with '+str(photochem_subtries)+' subtries\n')
 
             # Retrieve atmosphere MMW for use moving forward:
@@ -2273,16 +2275,16 @@ class VPLModelingPipeline:
                 pressure_converged, maxchange, holdnewsurfp = self.change_atmospheric_pressure()
 
                 if self.verbose == True:
-                    print('New Pressure found: '+"{:.4e}".format(holdnewsurfp)+' bars')
+                    #print('New Pressure found: '+"{:.4e}".format(holdnewsurfp)+' bars')
                     ftestingoutput.write('New Pressure found: '+"{:.4e}".format(holdnewsurfp)+' bars\n')
                     if pressure_converged == True:
-                        print('Pressure converged, no need to rerun photochem')
+                        #print('Pressure converged, no need to rerun photochem')
                         ftestingoutput.write('Pressure converged, no need to rerun photochem\n')
                 
                 if pressure_converged == False:
 
                     if self.verbose == True:
-                        print('Pressure NOT converged, rerunning photochem using '+str(self.updated_atm_pressure)+' bars')
+                        #print('Pressure NOT converged, rerunning photochem using '+str(self.updated_atm_pressure)+' bars')
                         ftestingoutput.write('Pressure NOT converged, rerunning photochem using '+str(self.updated_atm_pressure)+' bars \n\n')
 
                     while pressure_converged == False:
@@ -2300,7 +2302,7 @@ class VPLModelingPipeline:
                         # If SGBSL Error occured, just set local conv to True so it skips the next bit and tries to find a different pressure 
                         if sgbslerror == True:
                             if self.verbose == True:
-                                print('SGBSL Error Occured, retrying for pressure')
+                                #print('SGBSL Error Occured, retrying for pressure')
                                 ftestingoutput.write('SGBSL Error Occured, retrying for pressure\n')
                             if self.fixsgbsl == True:
                                 local_photochem_conv = True
@@ -2373,7 +2375,7 @@ class VPLModelingPipeline:
                             ftestingoutput.write('Time of final timestep: '+str(finaltime)+'\n')
                             ftestingoutput.write('Max change of a number density layer: '+str(maxchange)+'\n')
                             ftestingoutput.write('New Pressure: '+str(holdnewsurfp)+', using '+str(self.updated_atm_pressure)+' Bars \n')
-                            print('Surf Pressure Subtry '+str(photochem_newPsurf_subtries)+' NOT converged')
+                            #print('Surf Pressure Subtry '+str(photochem_newPsurf_subtries)+' NOT converged')
                             ftestingoutput.write('Surf Pressure Subtry '+str(photochem_newPsurf_subtries)+' NOT converged\n\n')
 
                     if photochem_newPsurf_inner_subtries > self.max_iterations_master and self.suppress_IOerrors == False:
@@ -2386,7 +2388,7 @@ class VPLModelingPipeline:
                         subprocess.run('cp '+self.photochemDir+'OUTPUT/out.out '+self.DataOutPath+'FINAL_out_FAILED.out', shell=True)
                         subprocess.run('cp '+self.photochemDir+'OUTPUT/PTZ_mixingratios_out.dist '+self.DataOutPath+'FINAL_PTZ_mixingratios_out_FAILED.dist', shell=True)
                         if self.verbose == True:
-                            print('Max iterations reached ('+str(self.max_iterations_master)+'), using new pressure without finding inner convergence, ending run')
+                            #print('Max iterations reached ('+str(self.max_iterations_master)+'), using new pressure without finding inner convergence, ending run')
                             ftestingoutput.write('Max iterations reached ('+str(self.max_iterations_master)+'), using new pressure without finding inner convergence, ending run\n')
                         break
 
@@ -2400,12 +2402,12 @@ class VPLModelingPipeline:
                         subprocess.run('cp '+self.photochemDir+'OUTPUT/out.out '+self.DataOutPath+'FINAL_out_FAILED.out', shell=True)
                         subprocess.run('cp '+self.photochemDir+'OUTPUT/PTZ_mixingratios_out.dist '+self.DataOutPath+'FINAL_PTZ_mixingratios_out_FAILED.dist', shell=True)
                         if self.verbose == True:
-                            print('Max iterations reached ('+str(self.max_iterations_master)+'), couldnt find new pressure, ending run')
+                            #print('Max iterations reached ('+str(self.max_iterations_master)+'), couldnt find new pressure, ending run')
                             ftestingoutput.write('Max iterations reached ('+str(self.max_iterations_master)+'), couldnt find new pressure, ending run\n')
                         break
 
                     if self.verbose == True:
-                        print('Pressure converged after '+str(photochem_newPsurf_subtries)+' iterations, with '+str(photochem_newPsurf_inner_subtries)+' number of photochem reruns at this pressure')
+                        #print('Pressure converged after '+str(photochem_newPsurf_subtries)+' iterations, with '+str(photochem_newPsurf_inner_subtries)+' number of photochem reruns at this pressure')
                         ftestingoutput.write('Pressure converged after '+str(photochem_newPsurf_subtries)+' iterations, with '+str(photochem_newPsurf_inner_subtries)+' number of photochem reruns at this pressure\n')
                         ftestingoutput.write('Converged pressure: '+str(self.updated_atm_pressure)+' bars\n')
 
@@ -2422,7 +2424,7 @@ class VPLModelingPipeline:
                 #if nsteps_photo < 1000:
                 self.global_convergence = True
                 if self.verbose == True:
-                    print('Global Convergence achieved')
+                    #print('Global Convergence achieved')
                     ftestingoutput.write('Global Convergence achieved')
                 subprocess.run('cp '+self.photochemDir+'OUTPUT/out.dist '+self.DataOutPath+'FINAL_out.dist', shell=True)
                 subprocess.run('cp '+self.photochemDir+'OUTPUT/out.out '+self.DataOutPath+'FINAL_out.out', shell=True)
@@ -2456,13 +2458,13 @@ class VPLModelingPipeline:
                     self.degrade_PT(grid_spacing='log')
                     if self.verbose == True:
                         ftestingoutput.write('Log Spacing Used\n')
-                        print('log spacing used')
+                        #print('log spacing used')
                 else:
                     self.degrade_PT()
             else:
                 self.degrade_PT()
             if self.verbose == True:
-                print('Degraded PT profile created from photochem run '+str(self.num_photochem_runs))
+                #print('Degraded PT profile created from photochem run '+str(self.num_photochem_runs))
                 ftestingoutput.write('Degraded PT profile created from photochem run '+str(self.num_photochem_runs)+'\n')
             ### Degraded PT Profile finished ------------
 
@@ -2482,7 +2484,7 @@ class VPLModelingPipeline:
             for gas in self.molecule_dict['Gas_names']:
                 self.run_lblabc_1instance(self.lblabc_RunScriptDir+'RunLBLABC_'+gas+'_'+self.casename+'.script', gas)
                 if self.verbose == True:
-                    print('LBLABC run for '+gas+' complete, LBLABC iteration '+str(self.num_lblabc_runs+1))
+                    #print('LBLABC run for '+gas+' complete, LBLABC iteration '+str(self.num_lblabc_runs+1))
                     ftestingoutput.write('LBLABC run for '+gas+' complete, LBLABC iteration '+str(self.num_lblabc_runs+1)+'\n')
             self.num_lblabc_runs += 1
 
@@ -2498,7 +2500,7 @@ class VPLModelingPipeline:
             self.make_climate_runscript(trynum=self.num_climate_runs)
 
             if self.verbose == True:
-                print('Climate Runscript created, beginning first climate run')
+                #print('Climate Runscript created, beginning first climate run')
                 ftestingoutput.write('Climate Runscript created, beginning first climate run\n')
 
             # Now run climate 
@@ -2507,7 +2509,7 @@ class VPLModelingPipeline:
             self.run_climate_1instance(self.vplclimate_RunScriptDir+'RunVPLClimate_'+self.casename+'.script', self.vplclimate_executable, trynum=self.num_climate_runs)
 
             if self.verbose == True:
-                print('First Climate run completed')
+                #print('First Climate run completed')
                 ftestingoutput.write('First Climate run completed\n')
 
             # Check for local convergence of climate, similar to process followed for a given try on photochem            
@@ -2515,10 +2517,10 @@ class VPLModelingPipeline:
 
             if self.verbose == True:
                 if local_climate_convergence == True:
-                    print('Climate convergence found on first try for run number '+str(self.num_climate_runs))
+                    #print('Climate convergence found on first try for run number '+str(self.num_climate_runs))
                     ftestingoutput.write('Climate convergence found on first try for run number '+str(self.num_climate_runs)+'\n')
                 else:
-                    print('Climate convergence NOT found on first try for run number '+str(self.num_climate_runs)+', beginning rerun sequence')
+                    #print('Climate convergence NOT found on first try for run number '+str(self.num_climate_runs)+', beginning rerun sequence')
                     ftestingoutput.write('Climate convergence NOT found on first try for run number '+str(self.num_climate_runs)+', beginning rerun sequence\n')
 
             climate_subtries = 1
@@ -2546,11 +2548,11 @@ class VPLModelingPipeline:
 
                 # Re run Climate 
                 if self.verbose == True:
-                    print('Beginning Climate rerun')
+                    #print('Beginning Climate rerun')
                     ftestingoutput.write('Beginning Climate rerun\n')
                 self.run_climate_1instance(self.vplclimate_RunScriptDir+'RunVPLClimate_'+self.casename+'.script', self.vplclimate_executable, trynum=self.num_climate_runs)
                 if self.verbose == True:
-                    print('Climate subtry number '+str(climate_subtries)+' completed')
+                    #print('Climate subtry number '+str(climate_subtries)+' completed')
                     ftestingoutput.write('Climate subtry number '+str(climate_subtries)+' completed\n')
 
                 # Check convergence
@@ -2558,10 +2560,10 @@ class VPLModelingPipeline:
 
                 if self.verbose == True:
                     if local_climate_convergence == True:
-                        print('Climate convergence found on subtry number '+str(climate_subtries)+' for run number '+str(self.num_climate_runs))
+                        #print('Climate convergence found on subtry number '+str(climate_subtries)+' for run number '+str(self.num_climate_runs))
                         ftestingoutput.write('Climate convergence found on subtry number '+str(climate_subtries)+' for run number '+str(self.num_climate_runs)+'\n')
                     else:
-                        print('Climate convergence NOT found on subtry number '+str(climate_subtries)+' for run number '+str(self.num_climate_runs)+', continuing rerun sequence')
+                        #print('Climate convergence NOT found on subtry number '+str(climate_subtries)+' for run number '+str(self.num_climate_runs)+', continuing rerun sequence')
                         ftestingoutput.write('Climate convergence NOT found on subtry number '+str(climate_subtries)+' for run number '+str(self.num_climate_runs)+', continuing rerun sequence\n')
 
             if local_climate_convergence == False and self.suppress_IOerrors == False:
@@ -2609,13 +2611,13 @@ class VPLModelingPipeline:
                 if self.updated_atm_pressure < 1e-2:
                     self.degrade_PT(grid_spacing='log')
                     if self.verbose == True:
-                        print('log spacing used')
+                        ftestingoutput.write('log spacing used\n')
                 else:
                     self.degrade_PT()
             else:
                 self.degrade_PT()
             if self.verbose == True:
-                print('Degraded PT profile created from photochem run '+str(self.num_photochem_runs))
+                #print('Degraded PT profile created from photochem run '+str(self.num_photochem_runs))
                 ftestingoutput.write('Degraded PT profile created from photochem run '+str(self.num_photochem_runs)+'\n')
             ### Degraded PT Profile finished ------------
             
@@ -2633,8 +2635,8 @@ class VPLModelingPipeline:
             # Now Run LBLABC for all the gases of interest
             for gas in self.molecule_dict['Gas_names']:
                 self.run_lblabc_1instance(self.lblabc_RunScriptDir+'RunLBLABC_'+gas+'_'+self.casename+'.script', gas)
-                if self.verbose == True:
-                    print('LBLABC run for '+gas+' complete, LBLABC iteration '+str(self.num_lblabc_runs+1))
+                #if self.verbose == True:
+                    #print('LBLABC run for '+gas+' complete, LBLABC iteration '+str(self.num_lblabc_runs+1))
                     #ftestingoutput.write('LBLABC run for '+gas+' complete, LBLABC iteration '+str(self.num_lblabc_runs+1)+'\n')
             self.num_lblabc_runs += 1
             
@@ -2675,7 +2677,7 @@ class VPLModelingPipeline:
                 self.make_2column_climate_runscript(trynum=self.num_2col_climate_runs)
 
                 if self.verbose == True:
-                    print('Climate 2 column Runscript created, beginning first 2 column climate run')
+                    #print('Climate 2 column Runscript created, beginning first 2 column climate run')
                     ftestingoutput.write('Climate 2 column Runscript created, beginning first 2 column climate run\n')
 
                 # Now run climate 
@@ -2684,7 +2686,7 @@ class VPLModelingPipeline:
                 self.run_climate_1instance(self.vplclimate_RunScriptDir+'RunVPLClimate_2column_'+self.casename+'.script', self.vplclimate_executable, trynum=self.num_2col_climate_runs, twocol=True)
 
                 if self.verbose == True:
-                    print('First 2 column Climate run completed')
+                    #print('First 2 column Climate run completed')
                     ftestingoutput.write('First 2 column Climate run completed\n')
 
                     # Check for local convergence of climate, similar to process followed for a given try on photochem            
@@ -2692,10 +2694,10 @@ class VPLModelingPipeline:
 
                 if self.verbose == True:
                     if local_climate_convergence == True:
-                        print('2 column Climate convergence found on first try for run number '+str(self.num_2col_climate_runs))
+                        #print('2 column Climate convergence found on first try for run number '+str(self.num_2col_climate_runs))
                         ftestingoutput.write('2 column Climate convergence found on first try for run number '+str(self.num_2col_climate_runs)+'\n')
                     else:
-                        print('2 column Climate convergence NOT found on first try for run number '+str(self.num_2col_climate_runs)+', beginning rerun sequence')
+                        #print('2 column Climate convergence NOT found on first try for run number '+str(self.num_2col_climate_runs)+', beginning rerun sequence')
                         ftestingoutput.write('2 column Climate convergence NOT found on first try for run number '+str(self.num_2col_climate_runs)+', beginning rerun sequence\n')
 
                 climate_subtries = 1
@@ -2724,11 +2726,11 @@ class VPLModelingPipeline:
 
                     # Re run Climate 
                     if self.verbose == True:
-                        print('Beginning 2 column Climate rerun')
+                        #print('Beginning 2 column Climate rerun')
                         ftestingoutput.write('Beginning 2 column Climate rerun\n')
                     self.run_climate_1instance(self.vplclimate_RunScriptDir+'RunVPLClimate_2column_'+self.casename+'.script', self.vplclimate_executable, trynum=self.num_2col_climate_runs, twocol=True)
                     if self.verbose == True:
-                        print('2 column Climate subtry number '+str(climate_subtries)+' completed')
+                        #print('2 column Climate subtry number '+str(climate_subtries)+' completed')
                         ftestingoutput.write('2 column Climate subtry number '+str(climate_subtries)+' completed\n')
 
                     # Check convergence
@@ -2736,10 +2738,10 @@ class VPLModelingPipeline:
 
                     if self.verbose == True:
                         if local_climate_convergence == True:
-                            print('2 column Climate convergence found on subtry number '+str(climate_subtries)+' for run number '+str(self.num_2col_climate_runs))
+                            #print('2 column Climate convergence found on subtry number '+str(climate_subtries)+' for run number '+str(self.num_2col_climate_runs))
                             ftestingoutput.write('2 column Climate convergence found on subtry number '+str(climate_subtries)+' for run number '+str(self.num_2col_climate_runs)+'\n')
                         else:
-                            print('2 column Climate convergence NOT found on subtry number '+str(climate_subtries)+' for run number '+str(self.num_2col_climate_runs)+', continuing rerun sequence')
+                            #print('2 column Climate convergence NOT found on subtry number '+str(climate_subtries)+' for run number '+str(self.num_2col_climate_runs)+', continuing rerun sequence')
                             ftestingoutput.write('2 column Climate convergence NOT found on subtry number '+str(climate_subtries)+' for run number '+str(self.num_2col_climate_runs)+', continuing rerun sequence\n')
 
                 if local_climate_convergence == False and self.suppress_IOerrors == False:
@@ -2763,7 +2765,7 @@ class VPLModelingPipeline:
                 self.run_smart_1instance(self.SMART_RunScriptDir+'RunSMART_'+self.casename+'.run')
 
                 if self.verbose == True:
-                    print('Terminator SMART run completed')
+                    #print('Terminator SMART run completed')
                     ftestingoutput.write('Terminator SMART run completed\n')
                     #ftestingoutput.close()
 
@@ -2775,8 +2777,8 @@ class VPLModelingPipeline:
                     # Now Run LBLABC for all the gases of interest
                     for gas in self.molecule_dict['Gas_names']:
                         self.run_lblabc_1instance(self.lblabc_RunScriptDir+'RunLBLABC_'+gas+'_'+self.casename+'.script', gas)
-                        if self.verbose == True:
-                            print('LBLABC run for '+gas+' complete, LBLABC iteration '+str(self.num_lblabc_runs+1))
+                        #if self.verbose == True:
+                            #print('LBLABC run for '+gas+' complete, LBLABC iteration '+str(self.num_lblabc_runs+1))
                             #ftestingoutput.write('LBLABC run for '+gas+' complete, LBLABC iteration '+str(self.num_lblabc_runs+1)+'\n')
                     self.num_lblabc_runs += 1
 
@@ -2785,7 +2787,7 @@ class VPLModelingPipeline:
                     self.run_smart_1instance(self.SMART_RunScriptDir+'RunSMART_dayside_'+self.casename+'.run', whichcol='dayside')
 
                     if self.verbose == True:
-                        print('Dayside SMART run completed')
+                        #print('Dayside SMART run completed')
                         ftestingoutput.write('Dayside SMART run completed\n')
                         #ftestingoutput.close()
 
@@ -2794,8 +2796,8 @@ class VPLModelingPipeline:
                     # Now Run LBLABC for all the gases of interest
                     for gas in self.molecule_dict['Gas_names']:
                         self.run_lblabc_1instance(self.lblabc_RunScriptDir+'RunLBLABC_'+gas+'_'+self.casename+'.script', gas)
-                        if self.verbose == True:
-                            print('LBLABC run for '+gas+' complete, LBLABC iteration '+str(self.num_lblabc_runs+1))
+                        #if self.verbose == True:
+                            #print('LBLABC run for '+gas+' complete, LBLABC iteration '+str(self.num_lblabc_runs+1))
                             #ftestingoutput.write('LBLABC run for '+gas+' complete, LBLABC iteration '+str(self.num_lblabc_runs+1)+'\n')
                     self.num_lblabc_runs += 1
 
@@ -2804,7 +2806,7 @@ class VPLModelingPipeline:
                     self.run_smart_1instance(self.SMART_RunScriptDir+'RunSMART_nightside_'+self.casename+'.run', whichcol='nightside')
 
                     if self.verbose == True:
-                        print('Nightside SMART run completed')
+                        #print('Nightside SMART run completed')
                         ftestingoutput.write('Nightside SMART run completed\n')
                         #ftestingoutput.close()
                 
