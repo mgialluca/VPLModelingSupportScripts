@@ -28,6 +28,7 @@ import sys
 
 import pymultinest
 import mpi4py
+from mpi4py import MPI
 
 
 # Need to figure out how parameter sweeps are running:
@@ -1315,9 +1316,11 @@ class Generate_Atmosphere_Parameter_Sweep:
         self.mcmc_pressure_only = True
 
         # Set up output file
-        fsimoutputs = open(self.master_out+'EmceeSimulationOutputs.txt', 'w')
-        fsimoutputs.write('ID Converged Psurf H2O O O2 O3 H2O2\n')
-        fsimoutputs.close()
+        self.rank = MPI.COMM_WORLD.Get_rank()
+        if self.rank == 0:
+            fsimoutputs = open(self.master_out+'EmceeSimulationOutputs.txt', 'w')
+            fsimoutputs.write('ID Converged Psurf H2O O O2 O3 H2O2\n')
+            fsimoutputs.close()
 
         # Need to take the closest matching climate and 2 col climate profiles
         self.Starting_Point = 'Euclidean'
