@@ -1258,7 +1258,7 @@ class Generate_Atmosphere_Parameter_Sweep:
         return cube
     
     # log likelihood for PyMultiNest
-    def multinest_loglike(self, cube, ndim, nparams, lnew):
+    def multinest_loglike(self, cube, ndim, nparams):
 
         # Run the pipeline to get pressure, convergence, etc
         rng = np.random.default_rng()  # Automatically uses entropy from OS
@@ -1330,8 +1330,10 @@ class Generate_Atmosphere_Parameter_Sweep:
         parameters = ['H2OFlx', 'OVeff', 'O2Veff', 'O3Vdep', 'H2O2Vdep']
         nparams = len(parameters)
 
-        lnlike = partial(self.multinest_loglike)
-        prior = partial(self.multinest_prior)
+        #lnlike = partial(self.multinest_loglike)
+        lnlike = lambda cube, ndim, nparams: self.multinest_loglike(cube, ndim, nparams)
+        #prior = partial(self.multinest_prior)
+        prior = lambda cube, ndim, nparams: self.multinest_prior(cube, ndim, nparams)
 
         pymultinest.run(lnlike, prior, nparams, outputfiles_basename='chain/Test_Run_Multinest_', resume=False, verbose=True, evidence_tolerance=1)
 
