@@ -998,31 +998,38 @@ class Generate_Atmosphere_Parameter_Sweep:
 
             # Get the model ID ('RunNumber#')
             model_ID_hold = 'RunNumber'+str(i)
-            model_ID.append(self.sweepname+'/'+model_ID_hold)
             path_hold = self.master_out+model_ID_hold+'/'
 
-            # Now retrieve the outgassing and escape rates
-            f = open(path_hold+'PhotochemInputs/species.dat', 'r')
-            lines = f.readlines()
-            f.close()
+            # Check for convergence
+            for dirs, subdirs, fis in os.walk(path_hold):
+                break
 
-            for species in range(len(self.outgass_species_gridsweep)):
-                gas_hold = self.outgass_species_gridsweep[species]
-                for l in lines:
-                    if l.split()[0][0] != '*':
-                        if l.split()[0] == gas_hold:
-                            outgass_rates[species].append(float(l.split()[11]))
+            if 'FINAL_out.dist' in fis:
 
-                            break
+                model_ID.append(self.sweepname+'/'+model_ID_hold)
 
-            for species in range(len(self.escape_species_gridsweep)):
-                gas_hold = self.escape_species_gridsweep[species]
-                for l in lines:
-                    if l.split()[0][0] != '*':
-                        if l.split()[0] == gas_hold:
-                            escape_rates[species].append(float(l.split()[14]))
+                # Now retrieve the outgassing and escape rates
+                f = open(path_hold+'PhotochemInputs/species.dat', 'r')
+                lines = f.readlines()
+                f.close()
 
-                            break
+                for species in range(len(self.outgass_species_gridsweep)):
+                    gas_hold = self.outgass_species_gridsweep[species]
+                    for l in lines:
+                        if l.split()[0][0] != '*':
+                            if l.split()[0] == gas_hold:
+                                outgass_rates[species].append(float(l.split()[11]))
+
+                                break
+
+                for species in range(len(self.escape_species_gridsweep)):
+                    gas_hold = self.escape_species_gridsweep[species]
+                    for l in lines:
+                        if l.split()[0][0] != '*':
+                            if l.split()[0] == gas_hold:
+                                escape_rates[species].append(float(l.split()[14]))
+
+                                break
 
         # Compile the information
         dat = [model_ID]
