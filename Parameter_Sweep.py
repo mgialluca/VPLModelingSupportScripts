@@ -127,7 +127,7 @@ class Generate_Atmosphere_Parameter_Sweep:
 
         # UNCOMMENT BEFORE RUNNING:
         if not os.path.exists(self.master_out):
-            os.makedirs(self.master_out, exist_okay=True)
+            os.makedirs(self.master_out, exist_ok=True)
         elif self.Restart_Run == True:
             subprocess.run('rm -rf '+self.master_out+'/*', shell=True)
 
