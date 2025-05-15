@@ -27,6 +27,7 @@ import sys
 # - Add the multinest path to LD_LIBRARY_PATH
 
 import pymultinest
+import mpi4py
 
 
 # Need to figure out how parameter sweeps are running:
@@ -1327,7 +1328,7 @@ class Generate_Atmosphere_Parameter_Sweep:
         lnlike = partial(self.multinest_loglike)
         prior = partial(self.multinest_prior)
 
-        pymultinest.run(lnlike, prior, nparams, outputfiles_basename='Test_Run_Multinest_', resume=True, verbose=True, evidence_tolerance=1)
+        pymultinest.run(lnlike, prior, nparams, outputfiles_basename='chain/Test_Run_Multinest_', resume=False, verbose=True, evidence_tolerance=1)
 
 
 
