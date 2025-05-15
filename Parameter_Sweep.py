@@ -1024,10 +1024,16 @@ class Generate_Atmosphere_Parameter_Sweep:
 
                 for species in range(len(self.escape_species_gridsweep)):
                     gas_hold = self.escape_species_gridsweep[species]
+                    esctypehold = self.escape_species_losstype[species]
                     for l in lines:
                         if l.split()[0][0] != '*':
                             if l.split()[0] == gas_hold:
-                                escape_rates[species].append(float(l.split()[14]))
+                                if esctypehold == 'TOA' or esctypehold == 'toa':
+                                    escape_rates[species].append(float(l.split()[14]))
+                                elif esctypehold == 'Vdep' or esctypehold == 'vdep':
+                                    escape_rates[species].append(float(l.split()[9]))
+                                elif esctypehold == 'Veff' or esctypehold == 'veff':
+                                    escape_rates[species].append(float(l.split()[15]))
 
                                 break
 
