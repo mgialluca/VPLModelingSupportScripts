@@ -127,7 +127,7 @@ class Generate_Atmosphere_Parameter_Sweep:
 
         # UNCOMMENT BEFORE RUNNING:
         if not os.path.exists(self.master_out):
-            os.mkdir(self.master_out)
+            os.makedirs(self.master_out, exist_okay=True)
         elif self.Restart_Run == True:
             subprocess.run('rm -rf '+self.master_out+'/*', shell=True)
 
@@ -1263,9 +1263,11 @@ class Generate_Atmosphere_Parameter_Sweep:
         # Run the pipeline to get pressure, convergence, etc
         rng = np.random.default_rng()  # Automatically uses entropy from OS
         modelID = rng.integers(1e5)
+        modelID = modelID+self.rank
         while os.path.exists(self.master_out+'RunNumber'+str(modelID)):
             rng = np.random.default_rng()  # Automatically uses entropy from OS
             modelID = rng.integers(1e5)
+            modelID = modelID + self.rank
 
         watflx = cube[0]
         oflx = cube[1]
