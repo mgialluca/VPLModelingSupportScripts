@@ -1232,7 +1232,7 @@ class Generate_Atmosphere_Parameter_Sweep:
 
 
     # Priors to use for PyMultiNest
-    def multinest_prior(self,cube):
+    def multinest_prior(self, cube, ndim, nparams):
 
         # H2O outgassing rate prior
         wat_lowlim = 44552887.2545331
