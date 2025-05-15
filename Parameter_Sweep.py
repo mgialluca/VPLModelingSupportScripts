@@ -26,7 +26,7 @@ import sys
 # - Load the ompi module
 # - Add the multinest path to LD_LIBRARY_PATH
 
-#import pymultinest
+import pymultinest
 
 
 # Need to figure out how parameter sweeps are running:
@@ -164,9 +164,14 @@ class Generate_Atmosphere_Parameter_Sweep:
         # Adjust the atmospheric pressure
         pipelineobj.adjust_atmospheric_pressure = True
         pipelineobj.suppress_IOerrors = True
-        pipelineobj.run_spectra = True
         pipelineobj.MCMC_pressure_only = self.mcmc_pressure_only
-        pipelineobj.include_2column_climate = True
+
+        if self.mcmc_pressure_only == True:
+            pipelineobj.include_2column_climate = False
+            pipelineobj.run_spectra = False
+        else:
+            pipelineobj.include_2column_climate = True
+            pipelineobj.run_spectra = True
 
         # Testing if climate executable needs to be copied
         if self.supernode == True:
@@ -470,7 +475,7 @@ class Generate_Atmosphere_Parameter_Sweep:
         for currgas in self.escape_species_gridsweep:
             if currgas in overlap_escape:
                 compareind = overlap_escape.index(currgas) + len(overlap_outgass)
-                compare_to_curr_run[compareind] = (newfluxes[fluxind])
+                compare_to_curr_run[compareind] = newfluxes[fluxind]
             fluxind += 1
 
         # Find closest model from previous sweep
@@ -525,7 +530,7 @@ class Generate_Atmosphere_Parameter_Sweep:
                 # Find the closest model
                 use_starting_point = self.find_closest_prev_model(input_options, fluxes)
 
-                currmodel = VPLModelingPipeline('RunNumber'+str(modelID),  '/gscratch/vsm/gialluca/VPLModelingTools_Dev/'+self.Restart_Run+'/'+use_starting_point+'/PhotochemInputs/', 
+                currmodel = VPLModelingPipeline('RunNumber'+str(modelID),  '/gscratch/vsm/gialluca/VPLModelingTools_Dev/'+use_starting_point+'/PhotochemInputs/', 
                                                 verbose, find_molecules_of_interest=False, hitran_year=self.hitran_year)
 
         else:
@@ -547,7 +552,7 @@ class Generate_Atmosphere_Parameter_Sweep:
         #print(converged)
 
         # Clean abs files out as they take up the most space
-        #subprocess.run('rm -rf '+currmodel.LBLABC_AbsFilesDir+'*.abs', shell=True)
+        subprocess.run('rm -rf '+currmodel.LBLABC_AbsFilesDir+'*.abs', shell=True)
 
         # Delete copied atmos directory
         subprocess.run('rm -rf '+currmodel.atmosDir, shell=True)
@@ -974,7 +979,7 @@ class Generate_Atmosphere_Parameter_Sweep:
     # Specifically used if you want to start a new run using the final state of a previous sweep but not the exact same sweep 
     ## Input:
     # Num_of_Models - the number of models in the master out, this just makes code easier
-    def compile_restart_input_options(self, Num_of_Models=80):
+    def compile_restart_input_options(self, Num_of_Models=80, add_to_file=False):
 
         model_ID = []
         
@@ -993,7 +998,7 @@ class Generate_Atmosphere_Parameter_Sweep:
 
             # Get the model ID ('RunNumber#')
             model_ID_hold = 'RunNumber'+str(i)
-            model_ID.append(model_ID_hold)
+            model_ID.append(self.sweepname+'/'+model_ID_hold)
             path_hold = self.master_out+model_ID_hold+'/'
 
             # Now retrieve the outgassing and escape rates
@@ -1028,8 +1033,23 @@ class Generate_Atmosphere_Parameter_Sweep:
             dat.append(col)
         for col in escape_rates:
             dat.append(col)
-        tab = Table(dat, names=col_names)
-        ascii.write(tab, self.master_out+'RatesInSweep_ForFutureInputOptions.dat', delimiter=' ')
+        #tab = Table(dat, names=col_names)
+
+        if add_to_file == False:
+            tab = Table(dat, names=col_names)
+            ascii.write(tab, self.master_out+'RatesInSweep_ForFutureInputOptions.dat', delimiter=' ')
+        
+        else:
+            prevfile = ascii.read(add_to_file, delimiter=' ')
+
+            for d in range(len(dat[0])):
+                newrow = []
+                for name in dat:
+                    newrow.append(name[d])
+                prevfile.add_row(newrow)
+            
+            ascii.write(prevfile, add_to_file, delimiter=' ', overwrite=True)
+
 
 
     '''
@@ -1223,7 +1243,79 @@ class Generate_Atmosphere_Parameter_Sweep:
         return cube
     
     # log likelihood for PyMultiNest
-    #def multinest_loglike(self, cube, ndim, nparams):
+    def multinest_loglike(self, cube, ndim, nparams):
+
+        # Run the pipeline to get pressure, convergence, etc
+        rng = np.random.default_rng()  # Automatically uses entropy from OS
+        modelID = rng.integers(1e5)
+        while os.path.exists(self.master_out+'RunNumber'+str(modelID)):
+            rng = np.random.default_rng()  # Automatically uses entropy from OS
+            modelID = rng.integers(1e5)
+
+        watflx = cube[0]
+        oflx = cube[1]
+        o2flx = cube[2]
+        o3flx = cube[3]
+        h2o2flx = cube[4]
+
+        inputfluxes = [watflx, oflx, o2flx, o3flx, h2o2flx, modelID]
+
+        # Run the model
+        model = self.run_one_model(inputfluxes, verbose=False)
+
+        # Attempt to save some info to a text file for quick assessment
+        outstr = str(modelID)
+        outstr = outstr+' '+str(model.global_convergence)
+        outstr = outstr+' '+str(model.updated_atm_pressure)
+        outstr = outstr+' '+"{:.4E}".format(watflx)
+        outstr = outstr+' '+"{:.4E}".format(oflx)
+        outstr = outstr+' '+"{:.4E}".format(o2flx)
+        outstr = outstr+' '+"{:.3E}".format(o3flx)
+        outstr = outstr+' '+"{:.3E}".format(h2o2flx)
+        outstr = outstr+'\n'
+
+        fsimoutputs = open(self.master_out+'EmceeSimulationOutputs.txt', 'a')
+        fsimoutputs.write(outstr)
+        fsimoutputs.close()
+
+        # If the model blew up, etc, this run is discarded, likelihood set to neg infinity
+        if model.global_convergence == False:
+            L = -np.inf
+        
+        else:
+            # Fit chi sq to the likelihood of 0.1 bar atmosphere +/- sigma bars
+            if model.updated_atm_pressure > 0.1:
+                sigma = 0.7 # okay up to 0.8 bar
+            else:
+                sigma = 0.06 # okay down to 0.04 bar
+            s = ((model.updated_atm_pressure-0.1)**2)/(sigma**2)
+            L = -0.5*s
+        
+        return L
+
+
+    # Run a multinest fit
+    def match_data_multinest(self):
+
+        # To skip climate and spectra
+        self.mcmc_pressure_only = True
+
+        # Set up output file
+        fsimoutputs = open(self.master_out+'EmceeSimulationOutputs.txt', 'w')
+        fsimoutputs.write('ID Converged Psurf H2O O O2 O3 H2O2\n')
+        fsimoutputs.close()
+
+        # Need to take the closest matching climate and 2 col climate profiles
+        self.Starting_Point = 'Euclidean'
+
+        parameters = ['H2OFlx', 'OVeff', 'O2Veff', 'O3Vdep', 'H2O2Vdep']
+        nparams = len(parameters)
+
+        lnlike = partial(self.multinest_loglike)
+        prior = partial(self.multinest_prior)
+
+        pymultinest.run(lnlike, prior, nparams, outputfiles_basename='Test_Run_Multinest_', resume=True, verbose=True, evidence_tolerance=1)
+
 
 
 
