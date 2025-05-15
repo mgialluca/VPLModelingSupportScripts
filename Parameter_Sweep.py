@@ -1258,7 +1258,7 @@ class Generate_Atmosphere_Parameter_Sweep:
         return cube
     
     # log likelihood for PyMultiNest
-    def multinest_loglike(self, cube, ndim, nparams, lnew):
+    def multinest_loglike(self, cube, ndim, nparams):
 
         # Run the pipeline to get pressure, convergence, etc
         rng = np.random.default_rng()  # Automatically uses entropy from OS
