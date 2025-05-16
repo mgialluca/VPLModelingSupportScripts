@@ -1278,7 +1278,7 @@ class Generate_Atmosphere_Parameter_Sweep:
         inputfluxes = [watflx, oflx, o2flx, o3flx, h2o2flx, modelID]
 
         # Run the model
-        model = self.run_one_model(inputfluxes, verbose=False)
+        model = self.run_one_model(inputfluxes, verbose=True)
 
         # Attempt to save some info to a text file for quick assessment
         outstr = str(modelID)
@@ -1325,7 +1325,7 @@ class Generate_Atmosphere_Parameter_Sweep:
             fsimoutputs.close()
 
         # Need to take the closest matching climate and 2 col climate profiles
-        self.Starting_Point = 'Euclidean'
+        #self.Starting_Point = 'Euclidean'
 
         parameters = ['H2OFlx', 'OVeff', 'O2Veff', 'O3Vdep', 'H2O2Vdep']
         nparams = len(parameters)
@@ -1335,7 +1335,7 @@ class Generate_Atmosphere_Parameter_Sweep:
         #prior = partial(self.multinest_prior)
         prior = lambda cube, ndim, nparams: self.multinest_prior(cube, ndim, nparams)
 
-        pymultinest.run(lnlike, prior, nparams, outputfiles_basename='chain/Test_Run_Multinest_', resume=False, verbose=True, evidence_tolerance=1)
+        pymultinest.run(lnlike, prior, nparams, outputfiles_basename='chain/Test_Run_Multinest_', resume=False, verbose=True, evidence_tolerance=1, n_live_points=800)
 
 
 
