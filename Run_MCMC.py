@@ -2,7 +2,7 @@ from Parameter_Sweep import *
 import subprocess
 
 
-test_object = Generate_Atmosphere_Parameter_Sweep('MultiNTest', 
+test_object = Generate_Atmosphere_Parameter_Sweep('RestrOMultiN', 
                                   '/gscratch/vsm/gialluca/VPLModelingTools_Dev/VeffTestDepos/RunNumber166/PhotochemInputs/', 
                                 restart_run= False, 
                                 starting_point=None,

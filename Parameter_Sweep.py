@@ -1242,10 +1242,10 @@ class Generate_Atmosphere_Parameter_Sweep:
         cube[0] = (cube[0]*(wat_hilim - wat_lowlim)) + wat_lowlim
 
         # O effusion velocity prior
-        cube[1] = cube[1]*10
+        #cube[1] = cube[1]*1
         
         # O2 effusion velocity prior
-        cube[2] = cube[2]*10
+        #cube[2] = cube[2]*1
 
         # O3 deposition velocity prior
         cube[3] = cube[3]*0.5
@@ -1335,7 +1335,7 @@ class Generate_Atmosphere_Parameter_Sweep:
         #prior = partial(self.multinest_prior)
         prior = lambda cube, ndim, nparams: self.multinest_prior(cube, ndim, nparams)
 
-        pymultinest.run(lnlike, prior, nparams, outputfiles_basename='chain/Test_Run_Multinest_', resume=False, verbose=True, evidence_tolerance=1, n_live_points=800)
+        pymultinest.run(lnlike, prior, nparams, outputfiles_basename='chain/RestrictOEsc_', resume=False, verbose=True, evidence_tolerance=1, n_live_points=800)
 
 
 
