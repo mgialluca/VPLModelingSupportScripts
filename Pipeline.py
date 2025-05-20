@@ -2447,6 +2447,9 @@ class VPLModelingPipeline:
             # If MCMC is only looking for a pressure convergence (for computational efficiency), just find convergence here
             if self.MCMC_pressure_only == True:
                 if sgbslerror == False:
+                    subprocess.run('cp '+self.photochemDir+'OUTPUT/out.dist '+self.DataOutPath+'FINAL_out.dist', shell=True)
+                    subprocess.run('cp '+self.photochemDir+'OUTPUT/out.out '+self.DataOutPath+'FINAL_out.out', shell=True)
+                    subprocess.run('cp '+self.photochemDir+'OUTPUT/PTZ_mixingratios_out.dist '+self.DataOutPath+'FINAL_PTZ_mixingratios_out.dist', shell=True)
                     self.global_convergence = True
                 break
 
