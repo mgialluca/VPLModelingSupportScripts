@@ -3,7 +3,7 @@ import copy
 import subprocess
 from multiprocessing import Pool
 
-master = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/T1cHighCO2/'
+master = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/ClimTestMulti/'
 
 def set_pipeline_vars(casename, pipelineobj, master_out=master):
 
@@ -31,24 +31,25 @@ def set_pipeline_vars(casename, pipelineobj, master_out=master):
     pipelineobj.SMART_RunScriptDir = master_out+casename+'/'
 
     # Adjust the atmospheric pressure
-    pipelineobj.adjust_atmospheric_pressure = False
+    pipelineobj.adjust_atmospheric_pressure = True
+    pipelineobj.include_2column_climate = True
     pipelineobj.suppress_IOerrors = True
-    pipelineobj.run_spectra = True
-    pipelineobj.dayside_starting_PT = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/AtmProfiles/PT_profile_dayside_T100mbar.pt'
-    pipelineobj.nightside_starting_PT = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/AtmProfiles/PT_profile_nightside_T100mbar.pt'
+    pipelineobj.run_spectra = False
+    pipelineobj.dayside_starting_PT = None
+    pipelineobj.nightside_starting_PT = None
 
     pipelineobj.vplclimate_executable = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/ClimateModel/vpl_climate_supernode'
 
     # Molecules for the type of atmosphere we're interested in 
 
     pipelineobj.molecule_dict = {} # key-value pairs of molecules of interest (keys, str) and their hitran codes (value, int)
-    gas_names = ['O2', 'H2O', 'O3', 'CO2', 'CO']
+    gas_names = ['O2', 'H2O', 'O3']
     pipelineobj.molecule_dict['Gas_names'] = gas_names
     for m in range(len(gas_names)):
         pipelineobj.molecule_dict[gas_names[m]] = pipelineobj.hitran_lookup.loc[gas_names[m]]['HitranNumber']
         pipelineobj.molecule_dict[gas_names[m]+'_RmixCol'] = m+2
 
-def edit_speciesdat(pipelineobj, co2in, h2oin):
+def edit_speciesdat(pipelineobj, h2oin, oin, o2in, o3in, h2o2in):
 
     # First need to create the inputs directory and copy the initial master files to change
     # Pipeline already has a function that does this:
@@ -65,9 +66,15 @@ def edit_speciesdat(pipelineobj, co2in, h2oin):
         hold = l.split()
         if len(hold) > 0:
             if hold[0] == 'H2O':
-                nsp_new.write('H2O        LL  1 2 0 0 0 0    1     0.      '+str(h2oin)+'  0.        0.      0      0.      0.      \n')
-            elif hold[0] == 'CO2':
-                nsp_new.write('CO2        LL  2 0 1 0 0 0    1     0.      '+"{:.1e}".format(co2in)+' 0.        0.      0      0.      0.\n')
+                nsp_new.write('H2O        LL  1 2 0 0 0 0    2     0.      0.      '+"{:.4E}".format(h2oin)+'  0.      0      0.      0. \n')
+            elif hold[0] == 'O':
+                nsp_new.write('O          LL  1 0 0 0 0 0    0     0.      0.      0.        0.      0      0.      '+"{:.3E}".format(oin)+'\n')
+            elif hold[0] == 'O2':
+                nsp_new.write('O2         LL  2 0 0 0 0 0    0     0.      0.      0.        0.      0      0.      '+"{:.3E}".format(o2in)+'\n')
+            elif hold[0] == 'O3':
+                nsp_new.write('O3         LL  3 0 0 0 0 0    0     '+"{:.3E}".format(o3in)+'  0.      0.        0.      0      0.      0. \n')
+            elif hold[0] == 'H2O2':
+                nsp_new.write('H2O2       LL  2 2 0 0 0 0    0     '+"{:.3E}".format(h2o2in)+' 0.      0.        0.      0      0.      0. \n')
             else:
                 nsp_new.write(l)
         else:
@@ -83,7 +90,7 @@ def edit_speciesdat(pipelineobj, co2in, h2oin):
 
 def run_one_model(inputstring):
 
-    co2input, h2oinput, modelid = inputstring
+    h2oinput, oin, o2in, o3in, h2o2in, modelid = inputstring
 
     '''
     co2_label = str(int(np.ceil(co2input*1e6)))+'ppm'
@@ -95,14 +102,17 @@ def run_one_model(inputstring):
     case = 'Run'+str(modelid)
 
     pipelineobj = VPLModelingPipeline(case, 
-                                  '/gscratch/vsm/gialluca/VPLModelingTools_Dev/T1cComparison/Run79/PhotochemInputs/', 
+                                  '/gscratch/vsm/gialluca/VPLModelingTools_Dev/VeffTestDepos/RunNumber166/PhotochemInputs/', 
                                   True, find_molecules_of_interest=False, hitran_year='2020')
     
     set_pipeline_vars(case, pipelineobj)
-    edit_speciesdat(pipelineobj, co2input, h2oinput)
+    edit_speciesdat(pipelineobj, h2oinput, oin, o2in, o3in, h2o2in)
 
-    pipelineobj.co2input = co2input
     pipelineobj.h2oinput = h2oinput
+    pipelineobj.oinput = oin
+    pipelineobj.o2input = o2in
+    pipelineobj.o3input = o3in
+    pipelineobj.h2o2input = h2o2in
 
     # Run the Photochem-Climate-SMART pipeline
     converged = pipelineobj.run_automatic()
@@ -116,7 +126,7 @@ def run_one_model(inputstring):
 
     return pipelineobj
     
-
+'''
 #H2O_mixing = [0.001, 0.01, 0.05, 0.1]
 H2O_mixing = [0.12, 0.15, 0.17, 0.2, 0.3]
 #ppms = np.linspace(5, 100, 20)
@@ -159,17 +169,38 @@ for i in range(len(inputs2)):
 
 for i in range(len(modelinputs)):
     modelinputs[i].append(i)
+'''
+
+modestorun = np.load('modes_to_try.npy')
+
+modelinputs = []
+for i in modestorun:
+    hold = []
+    hold.append(i[0])
+    hold.append(i[1])
+    hold.append(i[2])
+    hold.append(i[3])
+    hold.append(i[4])
+    modelinputs.append(hold)
+
+for i in range(len(modelinputs)):
+    modelinputs[i].append(i)
+
 
 with Pool() as p:
     models = p.map(run_one_model, modelinputs)
 
 convergence = [m.global_convergence for m in models]
 run_names = [m.casename for m in models]
-co2s = [m.co2input for m in models]
 h2os = [m.h2oinput for m in models]
+oins = [m.oinput for m in models]
+o2s = [m.o2input for m in models]
+o3s = [m.o3input for m in models]
+h2o2s = [m.h2o2input for m in models]
+psurf = [m.updated_atm_pressure for m in models]
 
-data_for_table = [run_names, convergence, co2s, h2os]
-output_col_names = ['RunName', 'Converged', 'CO2Input', 'H2OInput']
+data_for_table = [run_names, convergence, psurf, h2os, oins, o2s, o3s, h2o2s]
+output_col_names = ['RunName', 'Converged', 'Psurf', 'H2OInput', 'OInput', 'O2Input', 'O3Input', 'H2O2Input']
 
 tab = Table(data_for_table, names=output_col_names)
 
