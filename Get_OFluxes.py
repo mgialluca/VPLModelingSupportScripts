@@ -131,3 +131,5 @@ for r in runnums:
         print('\n')
     else:
         print("No matching files found.")
+        print(root_dir)
+        print('\n')
