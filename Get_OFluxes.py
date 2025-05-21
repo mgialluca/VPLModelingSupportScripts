@@ -106,16 +106,18 @@ runnums = [36895,
  44339,
  44339]
 
+
+pattern = re.compile(r'outout_Psurfsubtry(\d+)_Innertry_(\d+)\.out$')
+otherpattern = re.compile(r'outout_subtry(\d+)\.out$')
+
+# Store matches in a dict: {psurfsubtry_number: list of (innertry_number, filepath)}
+fis = []
+
 for r in runnums:
     root_dir =  '/gscratch/vsm/gialluca/VPLModelingTools_Dev/RestrOMultiN/RunNumber'+str(r)+'/' 
 
-    # Regex pattern to extract numbers
-    pattern = re.compile(r'outout_Psurfsubtry(\d+)_Innertry_(\d+)\.out$')
-    otherpattern = re.compile(r'outout_subtry(\d+)\.out$')
-
-    # Store matches in a dict: {psurfsubtry_number: list of (innertry_number, filepath)}
     psurf_map = {}
-    fis = []
+    # Regex pattern to extract number
 
     for dirpath, _, filenames in os.walk(root_dir):
         for fname in filenames:
@@ -136,9 +138,23 @@ for r in runnums:
         #print('\n')
         fis.append(max_file)
     else:
-        print("No matching files found.")
-        print(root_dir)
-        print('\n')
+        for dirpath, _, filenames in os.walk(root_dir):
+            for fname in filenames:
+                match = otherpattern.search(fname)
+                if match:
+                    psurf_num = int(match.group(1))
+                    full_path = os.path.join(dirpath, fname)
+                    psurf_map.setdefault(psurf_num, []).append((full_path))
+
+        # Now find the highest Psurfsubtry
+        if psurf_map:
+            max_psurf = max(psurf_map)
+            # Within that, find the highest Innertry
+            max_file = max(psurf_map[max_psurf], key=lambda x: x[0])
+            #print(f"Highest file: {max_file}")
+            #print(f"Psurfsubtry: {max_psurf}, Innertry: {max_inner}")
+            #print('\n')
+            fis.append(max_file)
 
 R_p = 1.097*u.Rearth
 fac = 4*np.pi*(R_p**2)
@@ -155,8 +171,16 @@ for fi in fis:
         if len(lines[l].split('FLUXES OF')) > 1:
             tab = ascii.read(fi, header_start=l-45, data_end=l+58) 
 
-    flo2 = tab['O2'][len(tab['O2'])-1]
-    flo = tab['O'][len(tab['O'])-1]
+    try:
+        flo2 = tab['O2'][len(tab['O2'])-1]
+        flo = tab['O'][len(tab['O'])-1]
+    except:
+        for l in range(len(lines)):
+            if len(lines[l].split('FLUXES OF')) > 1:
+                tab = ascii.read(fi, header_start=l-68, data_end=l+35) 
+        
+        flo2 = tab['O2'][len(tab['O2'])-1]
+        flo = tab['O'][len(tab['O'])-1]
 
     flo2 = ((flo2*(u.cm**-2 * u.s**-1))*fac).to(u.s**-1).value
     flo = ((flo*(u.cm**-2 * u.s**-1))*fac).to(u.s**-1).value
