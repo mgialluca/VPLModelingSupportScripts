@@ -190,7 +190,7 @@ for fi in fis:
 
 oflux = np.array(oflux)
 o2flux = np.array(o2flux)
-dat = np.array(oflux, o2flux)
+dat = np.array([oflux, o2flux])
 
 np.save('/gscratch/vsm/gialluca/VPLModelingTools_Dev/RestrOMultiN/OxyFluxesTOA.npy', dat)
 
