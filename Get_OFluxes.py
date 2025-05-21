@@ -161,13 +161,14 @@ for fi in fis:
     flo2 = ((flo2*(u.cm**-2 * u.s**-1))*fac).to(u.s**-1).value
     flo = ((flo*(u.cm**-2 * u.s**-1))*fac).to(u.s**-1).value
 
-    oflux.append(flo)
-    o2flux.append(flo2)
+    oflux.append(float(flo))
+    o2flux.append(float(flo2))
 
 oflux = np.array(oflux)
 o2flux = np.array(o2flux)
+dat = np.array(oflux, o2flux)
 
-np.save('/gscratch/vsm/gialluca/VPLModelingTools_Dev/RestrOMultiN/OxyFluxesTOA.npy', np.array(oflux, o2flux))
+np.save('/gscratch/vsm/gialluca/VPLModelingTools_Dev/RestrOMultiN/OxyFluxesTOA.npy', dat)
 
 
 
