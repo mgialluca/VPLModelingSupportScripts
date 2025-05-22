@@ -3,6 +3,7 @@ import copy
 import subprocess
 from multiprocessing import Pool
 
+#master = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/ParallelTest/'
 master = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/ClimTestMulti/'
 
 def set_pipeline_vars(casename, pipelineobj, master_out=master):
@@ -37,6 +38,26 @@ def set_pipeline_vars(casename, pipelineobj, master_out=master):
     pipelineobj.run_spectra = False
     pipelineobj.dayside_starting_PT = None
     pipelineobj.nightside_starting_PT = None
+    pipelineobj.NewPressure_Psurf_tolerance = 0.035
+
+    pipelineobj.adjust_atmospheric_pressure = True
+    pipelineobj.suppress_IOerrors = True
+    pipelineobj.MCMC_pressure_only = False#True
+    pipelineobj.MultiNest_DataFit = False#True # False
+    
+    if pipelineobj.MCMC_pressure_only == True:
+        pipelineobj.include_2column_climate = False
+        pipelineobj.run_spectra = False
+    else:
+        pipelineobj.include_2column_climate = True
+        pipelineobj.run_spectra = False#True
+
+    if pipelineobj.MultiNest_DataFit == True:
+        pipelineobj.multinest_climate_copycase = 'ClimTestMulti/Run99'
+        copycase = pipelineobj.multinest_climate_copycase.split('/')[1]
+        pipelineobj.dayside_starting_PT = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/'+pipelineobj.multinest_climate_copycase+'/PT_profile_dayside_'+copycase+'.pt'
+        pipelineobj.nightside_starting_PT = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/'+pipelineobj.multinest_climate_copycase+'/PT_profile_nightside_'+copycase+'.pt'
+        pipelineobj.run_spectra = True
 
     pipelineobj.vplclimate_executable = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/ClimateModel/vpl_climate_supernode'
 
@@ -90,7 +111,7 @@ def edit_speciesdat(pipelineobj, h2oin, oin, o2in, o3in, h2o2in):
 
 def run_one_model(inputstring):
 
-    h2oinput, oin, o2in, o3in, h2o2in, modelid = inputstring
+    #h2oinput, oin, o2in, o3in, h2o2in, modelid = inputstring
 
     '''
     co2_label = str(int(np.ceil(co2input*1e6)))+'ppm'
@@ -99,21 +120,24 @@ def run_one_model(inputstring):
     else:
         h2o_label = str(int(h2oinput*1e2))+'percent'
     '''
-    case = 'Run'+str(modelid)
+    #case = 'Run'+str(modelid)
+    case = inputstring+'T2'
 
     pipelineobj = VPLModelingPipeline(case, 
-                                  '/gscratch/vsm/gialluca/VPLModelingTools_Dev/VeffTestDepos/RunNumber166/PhotochemInputs/', 
+                                  '/gscratch/vsm/gialluca/VPLModelingTools_Dev/ClimTestMulti/'+inputstring+'/PhotochemInputs/', 
                                   True, find_molecules_of_interest=False, hitran_year='2020')
     
     set_pipeline_vars(case, pipelineobj)
-    edit_speciesdat(pipelineobj, h2oinput, oin, o2in, o3in, h2o2in)
+    #edit_speciesdat(pipelineobj, h2oinput, oin, o2in, o3in, h2o2in)
 
+    '''
     pipelineobj.h2oinput = h2oinput
     pipelineobj.oinput = oin
     pipelineobj.o2input = o2in
     pipelineobj.o3input = o3in
     pipelineobj.h2o2input = h2o2in
-
+    '''
+    
     # Run the Photochem-Climate-SMART pipeline
     converged = pipelineobj.run_automatic()
     #print(converged)
@@ -171,6 +195,7 @@ for i in range(len(modelinputs)):
     modelinputs[i].append(i)
 '''
 
+'''
 modestorun = np.load('modes_to_try.npy')
 
 modelinputs = []
@@ -185,11 +210,76 @@ for i in modestorun:
 
 for i in range(len(modelinputs)):
     modelinputs[i].append(i)
+'''
 
+need2conv = ['Run0',
+ 'Run47',
+ 'Run81',
+ 'Run86',
+ 'Run75',
+ 'Run84',
+ 'Run89',
+ 'Run90',
+ 'Run61',
+ 'Run63',
+ 'Run17',
+ 'Run51',
+ 'Run87',
+ 'Run50',
+ 'Run25',
+ 'Run41',
+ 'Run94',
+ 'Run18',
+ 'Run10',
+ 'Run31',
+ 'Run48',
+ 'Run21',
+ 'Run68',
+ 'Run57',
+ 'Run78',
+ 'Run56',
+ 'Run88',
+ 'Run55',
+ 'Run19',
+ 'Run93',
+ 'Run11',
+ 'Run43',
+ 'Run79',
+ 'Run24',
+ 'Run60',
+ 'Run27',
+ 'Run62',
+ 'Run97',
+ 'Run92',
+ 'Run20',
+ 'Run34',
+ 'Run49',
+ 'Run73',
+ 'Run23',
+ 'Run96',
+ 'Run67',
+ 'Run44',
+ 'Run26',
+ 'Run8',
+ 'Run9',
+ 'Run95',
+ 'Run30',
+ 'Run22',
+ 'Run52',
+ 'Run82',
+ 'Run64',
+ 'Run80',
+ 'Run77',
+ 'Run59',
+ 'Run83',
+ 'Run40',
+ 'Run91',
+ 'Run74']
 
 with Pool() as p:
-    models = p.map(run_one_model, modelinputs)
+    models = p.map(run_one_model, need2conv)
 
+'''
 convergence = [m.global_convergence for m in models]
 run_names = [m.casename for m in models]
 h2os = [m.h2oinput for m in models]
@@ -206,3 +296,6 @@ tab = Table(data_for_table, names=output_col_names)
 
 # Save output info
 ascii.write(tab, master+'ParameterSweep_RunStats.dat', delimiter=' ', format='fixed_width')
+'''
+
+#testmodel = run_one_model([3.4339E+11, 3.146E-02, 2.359E-02, 1.854E-01, 4.376E-01, 99])

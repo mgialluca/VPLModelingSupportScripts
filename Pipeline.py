@@ -7,6 +7,7 @@ import astropy.constants as const
 from astropy.table import Table
 import json
 import pandas as pd
+from multiprocessing import Pool
 from NewPressure_HelperFunctions import get_true_number_densities, sum_mixing_ratios, new_total_Ndens, new_mixing_rats, find_tot_column_mass_dens
 
 ################################
@@ -78,6 +79,7 @@ class VPLModelingPipeline:
         self.rerun_smart_for_2col = True # If true, rerun smart for day and night side after climate 2 column mode
         self.fixsgbsl = False # If true, try to fix sgbsl error
         self.MCMC_pressure_only = False # If true, remove everything after photochem for an MCMC pressure fitting walker
+        self.MultiNest_DataFit = False # If true, skip any climate runs, parallelize over smart calls and LBLABC
 
         self.include_2column_climate = True
 
@@ -291,6 +293,30 @@ class VPLModelingPipeline:
         f.close()
         os.chdir(workdir)
 
+    ### Run LBLABC for a given runscript (just useful to get the output w/e)
+    ##
+    ## Attribute Dependencies:
+    # casename - name of case you're running (to name output file)
+    # OutPath - path to put run output in
+    #
+    # Fxn-specific Inputs:
+    # runscript - name of LBLABC runscript WITH PATH
+    ##
+    def run_lblabc_1instance_Parallel(self, input):
+        runscript, molecule, col = input
+        if col == 'Avg':
+            f = open(self.OutPath+'lblabc_run_output_'+molecule+'_'+self.casename+'.run', 'w')
+        elif col == 'dayside':
+            f = open(self.OutPath+'lblabc_run_output_d_'+molecule+'_'+self.casename+'.run', 'w')
+        elif col == 'nightside':
+            f = open(self.OutPath+'lblabc_run_output_n_'+molecule+'_'+self.casename+'.run', 'w')
+        workdir = os.getcwd()
+        os.chdir(self.lblabcDir)
+        subprocess.run(self.lblabcDir+'lblabc < '+runscript, shell=True, stdout=f)
+        f.close()
+        os.chdir(workdir)
+        self.num_lblabc_runs += 1
+
     ### Run SMART for a given runscript (just useful to get the output or be fully in python w/e)
     ##
     ## Inputs:
@@ -308,6 +334,46 @@ class VPLModelingPipeline:
         elif whichcol == 'nightside':
             subprocess.run(self.SMARTDir+'smart_spectra < '+runscript+' > '+self.OutPath+'smart_run_output_nightside_'+self.casename+'.run', shell=True)
         os.chdir(workdir)
+
+
+    ### Run SMART all columns in a way that can be parallelized when using multinest
+    ##
+    ## Inputs:
+    # col - 'Avg', 'dayside', or 'nightside'
+    ##
+    def run_multinest_smart_parallel(self, col):
+
+        if col == 'Avg':
+            self.make_smart_runscript()
+
+            self.run_smart_1instance(self.SMART_RunScriptDir+'RunSMART_'+self.casename+'.run')
+
+            if self.verbose == True:
+                ftestingoutput = open(self.OutPath+self.casename+'_SavingInfoOut.txt', 'a')
+                ftestingoutput.write('Terminator SMART run completed\n')
+                ftestingoutput.close()
+            
+        elif col == 'dayside':
+
+            self.make_smart_runscript(whichcol='dayside')
+
+            self.run_smart_1instance(self.SMART_RunScriptDir+'RunSMART_dayside_'+self.casename+'.run', whichcol='dayside')
+
+            if self.verbose == True:
+                ftestingoutput = open(self.OutPath+self.casename+'_SavingInfoOut.txt', 'a')
+                ftestingoutput.write('Dayside SMART run completed\n')
+                ftestingoutput.close()
+
+        elif col == 'nightside':
+
+            self.make_smart_runscript(whichcol='nightside')
+
+            self.run_smart_1instance(self.SMART_RunScriptDir+'RunSMART_nightside_'+self.casename+'.run', whichcol='dayside')
+
+            if self.verbose == True:
+                ftestingoutput = open(self.OutPath+self.casename+'_SavingInfoOut.txt', 'a')
+                ftestingoutput.write('Nightside SMART run completed\n')
+                ftestingoutput.close()
 
     ### Take the PT profile output from photochem and degrade it to a specified number of layers ...
     ### ... to create PT profile for LBLABC and SMART
@@ -879,7 +945,12 @@ class VPLModelingPipeline:
     ##
     def make_lblabc_runscripts(self, whichcol=None):
         for i in self.molecule_dict['Gas_names']:
-            f = open(self.lblabc_RunScriptDir+'RunLBLABC_'+i+'_'+self.casename+'.script', 'w')
+            if whichcol == None:
+                f = open(self.lblabc_RunScriptDir+'RunLBLABC_'+i+'_'+self.casename+'.script', 'w')
+            elif whichcol == 'dayside':
+                f = open(self.lblabc_RunScriptDir+'RunLBLABC_d_'+i+'_'+self.casename+'.script', 'w')
+            elif whichcol == 'nightside':
+                f = open(self.lblabc_RunScriptDir+'RunLBLABC_n_'+i+'_'+self.casename+'.script', 'w')
             f.write('3                                       format list directed\n')
             if whichcol == None:
                 f.write(self.AtmProfPath+'PT_profile_'+self.casename+'.pt\n')
@@ -909,12 +980,12 @@ class VPLModelingPipeline:
             f.write('200.                                    maximum line width\n')
             f.write('1.e-5                                   minimum column optical depth\n')
             f.write(self.HITRAN_FundamentalFile+'\n')
-            #if whichcol == None:
-            f.write(self.LBLABC_AbsFilesDir+i+'_'+self.casename+'.abs\n')
-            #elif whichcol == 'dayside':
-            #    f.write(self.LBLABC_AbsFilesDir+i+'_dayside_'+self.casename+'.abs\n')
-            #elif whichcol == 'nightside':
-            #    f.write(self.LBLABC_AbsFilesDir+i+'_nightside_'+self.casename+'.abs\n')
+            if whichcol == None:
+                f.write(self.LBLABC_AbsFilesDir+i+'_'+self.casename+'.abs\n')
+            elif whichcol == 'dayside':
+                f.write(self.LBLABC_AbsFilesDir+i+'_d_'+self.casename+'.abs\n')
+            elif whichcol == 'nightside':
+                f.write(self.LBLABC_AbsFilesDir+i+'_n_'+self.casename+'.abs\n')
             f.write('2                                       overwrite existing files\n')
             f.close()
 
@@ -2635,14 +2706,25 @@ class VPLModelingPipeline:
             
             self.make_lblabc_runscripts()
 
-            # Now Run LBLABC for all the gases of interest
-            for gas in self.molecule_dict['Gas_names']:
-                self.run_lblabc_1instance(self.lblabc_RunScriptDir+'RunLBLABC_'+gas+'_'+self.casename+'.script', gas)
-                #if self.verbose == True:
-                    #print('LBLABC run for '+gas+' complete, LBLABC iteration '+str(self.num_lblabc_runs+1))
-                    #ftestingoutput.write('LBLABC run for '+gas+' complete, LBLABC iteration '+str(self.num_lblabc_runs+1)+'\n')
-            self.num_lblabc_runs += 1
+            if self.MultiNest_DataFit == True: # To run LBLABC gases in parallel
+
+                lblabc_input = []
+                for gas in self.molecule_dict['Gas_names']:
+                    lblabc_input.append([self.lblabc_RunScriptDir+'RunLBLABC_'+gas+'_'+self.casename+'.script', gas, 'Avg'])
+                
+                with Pool() as p:
+                    lblruns = p.map(self.run_lblabc_1instance_Parallel, lblabc_input)
             
+            else:
+
+                # Now Run LBLABC for all the gases of interest
+                for gas in self.molecule_dict['Gas_names']:
+                    self.run_lblabc_1instance(self.lblabc_RunScriptDir+'RunLBLABC_'+gas+'_'+self.casename+'.script', gas)
+                    #if self.verbose == True:
+                        #print('LBLABC run for '+gas+' complete, LBLABC iteration '+str(self.num_lblabc_runs+1))
+                        #ftestingoutput.write('LBLABC run for '+gas+' complete, LBLABC iteration '+str(self.num_lblabc_runs+1)+'\n')
+                self.num_lblabc_runs += 1
+                
             ### Rerun the LBLABC Section Finish ------------------------------
 
 
@@ -2747,6 +2829,12 @@ class VPLModelingPipeline:
                             #print('2 column Climate convergence NOT found on subtry number '+str(climate_subtries)+' for run number '+str(self.num_2col_climate_runs)+', continuing rerun sequence')
                             ftestingoutput.write('2 column Climate convergence NOT found on subtry number '+str(climate_subtries)+' for run number '+str(self.num_2col_climate_runs)+', continuing rerun sequence\n')
 
+                climate_profile = self.get_final_2column_climate_output_temp_profile(trynum=self.num_2col_climate_runs)
+
+                # Update temperature in the PT profile and update the surface temperature
+                self.replace_PT_tempcol(climate_profile['Dayside']['T[K]'], whichcolumn='dayside')
+                self.replace_PT_tempcol(climate_profile['Nightside']['T[K]'], whichcolumn='nightside')
+
                 if local_climate_convergence == False and self.suppress_IOerrors == False:
                     raise IOError('2 column Climate could not converge in >'+str(self.max_iterations_climate)+' tries. For climate run number '+str(self.num_2col_climate_runs))
                 elif local_climate_convergence == False and self.suppress_IOerrors == True:
@@ -2758,7 +2846,7 @@ class VPLModelingPipeline:
 
             ### Create SMART runscript ------------------------------
 
-            if self.run_spectra == True and self.global_convergence == True:
+            if self.run_spectra == True and self.global_convergence == True and self.MultiNest_DataFit == False:
 
                 if self.verbose == True:
                     ftestingoutput = open(self.OutPath+self.casename+'_SavingInfoOut.txt', 'a')
@@ -2779,7 +2867,7 @@ class VPLModelingPipeline:
 
                     # Now Run LBLABC for all the gases of interest
                     for gas in self.molecule_dict['Gas_names']:
-                        self.run_lblabc_1instance(self.lblabc_RunScriptDir+'RunLBLABC_'+gas+'_'+self.casename+'.script', gas)
+                        self.run_lblabc_1instance_Parallel([self.lblabc_RunScriptDir+'RunLBLABC_'+gas+'_'+self.casename+'.script', gas, 'dayside'])
                         #if self.verbose == True:
                             #print('LBLABC run for '+gas+' complete, LBLABC iteration '+str(self.num_lblabc_runs+1))
                             #ftestingoutput.write('LBLABC run for '+gas+' complete, LBLABC iteration '+str(self.num_lblabc_runs+1)+'\n')
@@ -2798,7 +2886,7 @@ class VPLModelingPipeline:
 
                     # Now Run LBLABC for all the gases of interest
                     for gas in self.molecule_dict['Gas_names']:
-                        self.run_lblabc_1instance(self.lblabc_RunScriptDir+'RunLBLABC_'+gas+'_'+self.casename+'.script', gas)
+                        self.run_lblabc_1instance_Parallel([self.lblabc_RunScriptDir+'RunLBLABC_'+gas+'_'+self.casename+'.script', gas, 'nightside'])
                         #if self.verbose == True:
                             #print('LBLABC run for '+gas+' complete, LBLABC iteration '+str(self.num_lblabc_runs+1))
                             #ftestingoutput.write('LBLABC run for '+gas+' complete, LBLABC iteration '+str(self.num_lblabc_runs+1)+'\n')
@@ -2816,7 +2904,25 @@ class VPLModelingPipeline:
                 if self.verbose == True:
                     ftestingoutput.close()
                     
+            elif self.run_spectra == True and self.global_convergence == True and self.MultiNest_DataFit == True:
 
+                shutil.copyfile(self.dayside_starting_PT, self.AtmProfPath+'PT_profile_dayside_'+self.casename+'.pt')
+                shutil.copyfile(self.nightside_starting_PT, self.AtmProfPath+'PT_profile_nightside_'+self.casename+'.pt')
+
+                self.make_lblabc_runscripts(whichcol='dayside')
+                self.make_lblabc_runscripts(whichcol='nightside')
+                lblabc_input = []
+                for gas in self.molecule_dict['Gas_names']:
+                    lblabc_input.append([self.lblabc_RunScriptDir+'RunLBLABC_'+gas+'_'+self.casename+'.script', gas, 'dayside'])
+                    lblabc_input.append([self.lblabc_RunScriptDir+'RunLBLABC_'+gas+'_'+self.casename+'.script', gas, 'nightside'])
+                
+                with Pool() as p:
+                    lblruns = p.map(self.run_lblabc_1instance_Parallel, lblabc_input)
+                
+                smartruninputs = ['Avg', 'dayside', 'nightside']
+
+                with Pool() as p:
+                    smartrunsparallel = p.map(self.run_multinest_smart_parallel, smartruninputs)
 
 
         return self.global_convergence

@@ -58,6 +58,8 @@ class Generate_Atmosphere_Parameter_Sweep:
         self.atmos_Dir = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/atmos/' # Path to dir containing atmos, will be copied for runs 
 
         self.mcmc_pressure_only = False
+        self.multinest_fit_data = False
+        self.multinest_climate_copycase = None # initialized here, gets set automatically 
 
         #########  Parameters to set if you want to do a grid sweep  #########
 
@@ -167,12 +169,19 @@ class Generate_Atmosphere_Parameter_Sweep:
         pipelineobj.adjust_atmospheric_pressure = True
         pipelineobj.suppress_IOerrors = True
         pipelineobj.MCMC_pressure_only = self.mcmc_pressure_only
-
+        pipelineobj.MultiNest_DataFit = self.multinest_fit_data
+        
         if self.mcmc_pressure_only == True:
             pipelineobj.include_2column_climate = False
             pipelineobj.run_spectra = False
         else:
             pipelineobj.include_2column_climate = True
+            pipelineobj.run_spectra = True
+
+        if self.multinest_fit_data == True:
+            copycase = self.multinest_climate_copycase.split('/')[1]
+            pipelineobj.dayside_starting_PT = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/'+self.multinest_climate_copycase+'/PT_profile_dayside_'+copycase+'.pt'
+            pipelineobj.nightside_starting_PT = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/'+self.multinest_climate_copycase+'/PT_profile_nightside_'+copycase+'.pt'
             pipelineobj.run_spectra = True
 
         # Testing if climate executable needs to be copied
@@ -531,6 +540,9 @@ class Generate_Atmosphere_Parameter_Sweep:
                 
                 # Find the closest model
                 use_starting_point = self.find_closest_prev_model(input_options, fluxes)
+
+                if self.multinest_fit_data == True:
+                    self.multinest_climate_copycase = use_starting_point
 
                 currmodel = VPLModelingPipeline('RunNumber'+str(modelID),  '/gscratch/vsm/gialluca/VPLModelingTools_Dev/'+use_starting_point+'/PhotochemInputs/', 
                                                 verbose, find_molecules_of_interest=False, hitran_year=self.hitran_year)
@@ -981,7 +993,8 @@ class Generate_Atmosphere_Parameter_Sweep:
     # Specifically used if you want to start a new run using the final state of a previous sweep but not the exact same sweep 
     ## Input:
     # Num_of_Models - the number of models in the master out, this just makes code easier
-    def compile_restart_input_options(self, Num_of_Models=80, add_to_file=False):
+    def compile_restart_input_options(self, Num_of_Models=80, add_to_file=False, include_2col=True):
+
 
         model_ID = []
         
@@ -999,14 +1012,25 @@ class Generate_Atmosphere_Parameter_Sweep:
         for i in range(Num_of_Models):
 
             # Get the model ID ('RunNumber#')
-            model_ID_hold = 'RunNumber'+str(i)
+            model_ID_hold = 'Run'+str(i)
             path_hold = self.master_out+model_ID_hold+'/'
 
             # Check for convergence
             for dirs, subdirs, fis in os.walk(path_hold):
                 break
 
-            if 'FINAL_out.dist' in fis:
+            conv2col = True
+            if include_2col == True:
+                conv2col = False
+                fio = open(path_hold+'/'+model_ID_hold+'_SavingInfoOut.txt', 'r')
+                lines = fio.readlines()
+                fio.close()
+                for l in reversed(lines):
+                    hold = l.split('2 column Climate convergence found')
+                    if len(hold) > 1:
+                        conv2col = True
+
+            if 'FINAL_out.dist' in fis and conv2col == True:
 
                 model_ID.append(self.sweepname+'/'+model_ID_hold)
 
