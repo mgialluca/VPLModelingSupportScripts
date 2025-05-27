@@ -3,8 +3,8 @@ import copy
 import subprocess
 from multiprocessing import Pool
 
-#master = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/ParallelTest/'
-master = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/ClimTestMulti/'
+master = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/ParallelTest/'
+#master = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/ClimTestMulti/'
 
 def set_pipeline_vars(casename, pipelineobj, master_out=master):
 
@@ -42,15 +42,15 @@ def set_pipeline_vars(casename, pipelineobj, master_out=master):
 
     pipelineobj.adjust_atmospheric_pressure = True
     pipelineobj.suppress_IOerrors = True
-    pipelineobj.MCMC_pressure_only = False#True
-    pipelineobj.MultiNest_DataFit = False#True # False
+    pipelineobj.MCMC_pressure_only = True
+    pipelineobj.MultiNest_DataFit = True # False
     
     if pipelineobj.MCMC_pressure_only == True:
         pipelineobj.include_2column_climate = False
         pipelineobj.run_spectra = False
     else:
         pipelineobj.include_2column_climate = True
-        pipelineobj.run_spectra = False#True
+        pipelineobj.run_spectra = True
 
     if pipelineobj.MultiNest_DataFit == True:
         pipelineobj.multinest_climate_copycase = 'ClimTestMulti/Run99'
@@ -121,7 +121,7 @@ def run_one_model(inputstring):
         h2o_label = str(int(h2oinput*1e2))+'percent'
     '''
     #case = 'Run'+str(modelid)
-    case = inputstring+'T2'
+    case = inputstring#+'T2'
 
     pipelineobj = VPLModelingPipeline(case, 
                                   '/gscratch/vsm/gialluca/VPLModelingTools_Dev/ClimTestMulti/'+inputstring+'/PhotochemInputs/', 
@@ -211,7 +211,7 @@ for i in modestorun:
 for i in range(len(modelinputs)):
     modelinputs[i].append(i)
 '''
-
+'''
 need2conv = ['Run0',
  'Run47',
  'Run81',
@@ -279,7 +279,6 @@ need2conv = ['Run0',
 with Pool() as p:
     models = p.map(run_one_model, need2conv)
 
-'''
 convergence = [m.global_convergence for m in models]
 run_names = [m.casename for m in models]
 h2os = [m.h2oinput for m in models]
@@ -298,4 +297,4 @@ tab = Table(data_for_table, names=output_col_names)
 ascii.write(tab, master+'ParameterSweep_RunStats.dat', delimiter=' ', format='fixed_width')
 '''
 
-#testmodel = run_one_model([3.4339E+11, 3.146E-02, 2.359E-02, 1.854E-01, 4.376E-01, 99])
+testmodel = run_one_model([3.4339E+11, 3.146E-02, 2.359E-02, 1.854E-01, 4.376E-01, 99])
