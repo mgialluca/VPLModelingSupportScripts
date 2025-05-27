@@ -1009,10 +1009,13 @@ class Generate_Atmosphere_Parameter_Sweep:
             rate_cols.append(species+'_EscapeRate')
             escape_rates.append([])
 
-        for i in range(Num_of_Models):
+        for dirs, sdirs, fs in os.walk(self.master_out):
+            break
+
+        for model_ID_hold in sdirs:
 
             # Get the model ID ('RunNumber#')
-            model_ID_hold = 'Run'+str(i)
+            #model_ID_hold = 'Run'+str(i)
             path_hold = self.master_out+model_ID_hold+'/'
 
             # Check for convergence
