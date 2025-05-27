@@ -2913,8 +2913,8 @@ class VPLModelingPipeline:
                 self.make_lblabc_runscripts(whichcol='nightside')
                 lblabc_input = []
                 for gas in self.molecule_dict['Gas_names']:
-                    lblabc_input.append([self.lblabc_RunScriptDir+'RunLBLABC_'+gas+'_'+self.casename+'.script', gas, 'dayside'])
-                    lblabc_input.append([self.lblabc_RunScriptDir+'RunLBLABC_'+gas+'_'+self.casename+'.script', gas, 'nightside'])
+                    lblabc_input.append([self.lblabc_RunScriptDir+'RunLBLABC_d_'+gas+'_'+self.casename+'.script', gas, 'dayside'])
+                    lblabc_input.append([self.lblabc_RunScriptDir+'RunLBLABC_n_'+gas+'_'+self.casename+'.script', gas, 'nightside'])
                 
                 with Pool() as p:
                     lblruns = p.map(self.run_lblabc_1instance_Parallel, lblabc_input)

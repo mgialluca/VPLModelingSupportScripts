@@ -182,6 +182,29 @@ class Generate_Atmosphere_Parameter_Sweep:
             copycase = self.multinest_climate_copycase.split('/')[1]
             pipelineobj.dayside_starting_PT = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/'+self.multinest_climate_copycase+'/PT_profile_dayside_'+copycase+'.pt'
             pipelineobj.nightside_starting_PT = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/'+self.multinest_climate_copycase+'/PT_profile_nightside_'+copycase+'.pt'
+
+            ## Set the day/night surface temps
+            climoutcopy = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/'+self.multinest_climate_copycase+'/vpl_2col_climate_output_'+copycase+'.run'
+            fi = open(climoutcopy, 'r')
+            lines = fi.readlines()
+            fi.close()
+
+            # Want to get the last output trop heating rate and avg flux, should be last two lines
+            # so loop in reversed order, break loop after to conserve efficiency
+
+            nightside_found = False
+            for i in reversed(range(len(lines))):
+                hold = lines[i].split()
+                if len(hold) > 2:
+                    if hold[0] == 'surface:':
+                        if nightside_found == False:
+                            pipelineobj.surface_temp_nightside = float(hold[8])
+                            nightside_found = True
+                        else:
+                            pipelineobj.surface_temp_dayside = float(hold[8])
+                            # After retrieving surface temp for nightside, will have all values, break
+                            break
+
             pipelineobj.run_spectra = True
 
         # Testing if climate executable needs to be copied

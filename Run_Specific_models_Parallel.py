@@ -59,6 +59,27 @@ def set_pipeline_vars(casename, pipelineobj, master_out=master):
         pipelineobj.nightside_starting_PT = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/'+pipelineobj.multinest_climate_copycase+'/PT_profile_nightside_'+copycase+'.pt'
         pipelineobj.run_spectra = True
 
+        climoutcopy = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/'+pipelineobj.multinest_climate_copycase+'/vpl_2col_climate_output_'+copycase+'.run'
+        fi = open(climoutcopy, 'r')
+        lines = fi.readlines()
+        fi.close()
+
+        # Want to get the last output trop heating rate and avg flux, should be last two lines
+        # so loop in reversed order, break loop after to conserve efficiency
+
+        nightside_found = False
+        for i in reversed(range(len(lines))):
+            hold = lines[i].split()
+            if len(hold) > 2:
+                if hold[0] == 'surface:':
+                    if nightside_found == False:
+                        pipelineobj.surface_temp_nightside = float(hold[8])
+                        nightside_found = True
+                    else:
+                        pipelineobj.surface_temp_dayside = float(hold[8])
+                        # After retrieving surface temp for nightside, will have all values, break
+                        break
+
     pipelineobj.vplclimate_executable = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/ClimateModel/vpl_climate_supernode'
 
     # Molecules for the type of atmosphere we're interested in 
