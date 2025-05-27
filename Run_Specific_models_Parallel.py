@@ -111,7 +111,7 @@ def edit_speciesdat(pipelineobj, h2oin, oin, o2in, o3in, h2o2in):
 
 def run_one_model(inputstring):
 
-    #h2oinput, oin, o2in, o3in, h2o2in, modelid = inputstring
+    h2oinput, oin, o2in, o3in, h2o2in, modelid = inputstring
 
     '''
     co2_label = str(int(np.ceil(co2input*1e6)))+'ppm'
@@ -120,11 +120,11 @@ def run_one_model(inputstring):
     else:
         h2o_label = str(int(h2oinput*1e2))+'percent'
     '''
-    #case = 'Run'+str(modelid)
-    case = inputstring#+'T2'
+    case = 'Run'+str(modelid)
+    #case = inputstring#+'T2'
 
     pipelineobj = VPLModelingPipeline(case, 
-                                  '/gscratch/vsm/gialluca/VPLModelingTools_Dev/ClimTestMulti/'+inputstring+'/PhotochemInputs/', 
+                                  '/gscratch/vsm/gialluca/VPLModelingTools_Dev/ClimTestMulti/'+case+'/PhotochemInputs/', 
                                   True, find_molecules_of_interest=False, hitran_year='2020')
     
     set_pipeline_vars(case, pipelineobj)
