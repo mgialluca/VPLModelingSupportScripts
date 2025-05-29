@@ -19,6 +19,10 @@ from functools import partial
 from numpy import log, exp, pi
 import scipy.stats, scipy
 import sys
+from spectral_utils import *
+from planck import *
+import pandas as pd
+from scipy.optimize import minimize
 
 # To use pymultinest:
 # - Load the intel module
@@ -59,7 +63,6 @@ class Generate_Atmosphere_Parameter_Sweep:
 
         self.mcmc_pressure_only = False
         self.multinest_fit_data = False
-        self.multinest_climate_copycase = None # initialized here, gets set automatically 
 
         #########  Parameters to set if you want to do a grid sweep  #########
 
@@ -179,12 +182,12 @@ class Generate_Atmosphere_Parameter_Sweep:
             pipelineobj.run_spectra = True
 
         if self.multinest_fit_data == True:
-            copycase = self.multinest_climate_copycase.split('/')[1]
-            pipelineobj.dayside_starting_PT = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/'+self.multinest_climate_copycase+'/PT_profile_dayside_'+copycase+'.pt'
-            pipelineobj.nightside_starting_PT = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/'+self.multinest_climate_copycase+'/PT_profile_nightside_'+copycase+'.pt'
+            copycase = pipelineobj.multinest_climate_copycase.split('/')[1]
+            pipelineobj.dayside_starting_PT = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/'+pipelineobj.multinest_climate_copycase+'/PT_profile_dayside_'+copycase+'.pt'
+            pipelineobj.nightside_starting_PT = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/'+pipelineobj.multinest_climate_copycase+'/PT_profile_nightside_'+copycase+'.pt'
 
             ## Set the day/night surface temps
-            climoutcopy = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/'+self.multinest_climate_copycase+'/vpl_2col_climate_output_'+copycase+'.run'
+            climoutcopy = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/'+pipelineobj.multinest_climate_copycase+'/vpl_2col_climate_output_'+copycase+'.run'
             fi = open(climoutcopy, 'r')
             lines = fi.readlines()
             fi.close()
@@ -564,11 +567,11 @@ class Generate_Atmosphere_Parameter_Sweep:
                 # Find the closest model
                 use_starting_point = self.find_closest_prev_model(input_options, fluxes)
 
-                if self.multinest_fit_data == True:
-                    self.multinest_climate_copycase = use_starting_point
-
                 currmodel = VPLModelingPipeline('RunNumber'+str(modelID),  '/gscratch/vsm/gialluca/VPLModelingTools_Dev/'+use_starting_point+'/PhotochemInputs/', 
                                                 verbose, find_molecules_of_interest=False, hitran_year=self.hitran_year)
+                
+                if self.multinest_fit_data == True:
+                    currmodel.multinest_climate_copycase = use_starting_point
 
         else:
             currmodel = VPLModelingPipeline('RunNumber'+str(modelID), self.photochemInitial, verbose, find_molecules_of_interest=False, hitran_year=self.hitran_year)
@@ -1292,10 +1295,10 @@ class Generate_Atmosphere_Parameter_Sweep:
         cube[0] = (cube[0]*(wat_hilim - wat_lowlim)) + wat_lowlim
 
         # O effusion velocity prior
-        #cube[1] = cube[1]*1
+        cube[1] = cube[1]*4
         
         # O2 effusion velocity prior
-        #cube[2] = cube[2]*1
+        cube[2] = cube[2]*0.04
 
         # O3 deposition velocity prior
         cube[3] = cube[3]*0.5
@@ -1306,6 +1309,98 @@ class Generate_Atmosphere_Parameter_Sweep:
         # Could add CO2 here?
 
         return cube
+    
+    def get_JWST_measurement(self, toaspec, bandpass=15):
+        rp = (1.096*u.Rearth)
+        rs = (0.1192*u.Rsun)
+        a = 0.0158*u.AU
+        fac = (rp/a)**2
+        fac = fac.decompose()
+
+        MIRI_filters, wl_filter, filt_names = open_MIRI_filters()
+
+        if bandpass == 15:
+            krn = np.interp(toaspec['col1'], wl_filter, MIRI_filters[:,5], right=0, left=0)
+            krn = -krn/np.trapz(krn, toaspec['col1'])
+            t1model = -np.trapz(toaspec['col3']*krn, toaspec['col1'])
+        elif bandpass == 12.8:
+            krn = np.interp(toaspec['col1'], wl_filter, MIRI_filters[:,4], right=0, left=0)
+            krn = -krn/np.trapz(krn, toaspec['col1'])
+            t1model = -np.trapz(toaspec['col3']*krn, toaspec['col1'])
+
+        #flx = (t1spect['col2']*u.mJy).to(u.W/u.m**2/u.Hz)
+        #flx = flx*(const.c/((t1spect['col1']*u.um)**2))
+        #flx = flx.to(u.W/u.m**2/u.um)
+        #flx = flx.value
+        #flx = flx*((((12.4669*u.pc)**2)/((a)**2)).decompose().value) # Rescale to distance assumed by SMART
+        #flx = np.interp(toaspec['col1'], t1spect['col1'], flx)
+
+        t115umT = 1867
+        flx = planck(t115umT, toaspec['col1']*1e-6)*np.pi/(((a/rs)**2).decompose())
+
+        t1um = -np.trapz(flx*krn, toaspec['col1'])
+        starfac = 1/(t1um/t1model)
+        #print(starfac)
+
+        hc = (const.h*const.c).to(u.J*u.um).value
+
+        if bandpass == 15:
+            krn = np.interp(toaspec['col1'][toaspec['col1'] > 1], wl_filter, MIRI_filters[:,5], right=0, left=0)
+        elif bandpass == 12.8:
+            krn = np.interp(toaspec['col1'][toaspec['col1'] > 1], wl_filter, MIRI_filters[:,4], right=0, left=0)
+        krn = -krn/np.trapz(krn, toaspec['col1'][toaspec['col1'] > 1])
+
+        planet = np.trapz(toaspec['col4'][toaspec['col1'] > 1]*hc/toaspec['col1'][toaspec['col1'] > 1]*krn, toaspec['col1'][toaspec['col1'] > 1])
+        star = np.trapz(toaspec['col3'][toaspec['col1'] > 1]*hc/toaspec['col1'][toaspec['col1'] > 1]*krn, toaspec['col1'][toaspec['col1'] > 1])
+
+        measurement = planet/star*fac*starfac*1e6
+
+        return measurement.value, starfac, fac
+    
+    def emission_likeli(self, day, night):
+
+        measd = self.get_JWST_measurement(day)[0]
+        measn = self.get_JWST_measurement(night)[0]
+
+        # Measurements Zieba et al 2023, MG #1, ED #1, TJB #3, ZH Sin
+        Fc_D = np.array([421.,392.,405.,410.,333.9])
+        Fc_D_err = np.array([[94.,63.,71.,110.,78.3],[94.,75.,71.,110.,78.8]]) 
+
+        # Night measurements # MG #1, ED #1, TJB #3, ZH Sin
+        Fc_N = np.array([62.,125.,89.,170.])
+        Fc_N_err = np.array([[43.,90.,91.,92.],[60.,90.,91.,31.]])
+
+        '''
+        if model.updated_atm_pressure > 0.1:
+            sigma = 0.7 # okay up to 0.8 bar
+        else:
+            sigma = 0.06 # okay down to 0.04 bar
+        '''
+        L = 0
+        for dm in range(len(Fc_D)):
+
+            if measd > Fc_D[dm]:
+                sigma = Fc_D_err[0][dm]
+            elif measd <= Fc_D[dm]:
+                sigma = Fc_D_err[1][dm]
+
+            li = ((measd - Fc_D[dm])**2)/(sigma**2)
+
+            L = L + li
+        
+        for nm in range(len(Fc_N)):
+
+            if measn > Fc_N[nm]:
+                sigma = Fc_N_err[0][nm]
+            elif measn <= Fc_N[nm]:
+                sigma = Fc_N_err[1][nm]
+
+            li = ((measn - Fc_N[nm])**2)/(sigma**2)
+
+            L = L + li
+
+        L = -0.5*L
+        return L, measd, measn
     
     # log likelihood for PyMultiNest
     def multinest_loglike(self, cube, ndim, nparams):
@@ -1330,21 +1425,7 @@ class Generate_Atmosphere_Parameter_Sweep:
         # Run the model
         model = self.run_one_model(inputfluxes, verbose=True)
 
-        # Attempt to save some info to a text file for quick assessment
-        outstr = str(modelID)
-        outstr = outstr+' '+str(model.global_convergence)
-        outstr = outstr+' '+str(model.updated_atm_pressure)
-        outstr = outstr+' '+"{:.4E}".format(watflx)
-        outstr = outstr+' '+"{:.4E}".format(oflx)
-        outstr = outstr+' '+"{:.4E}".format(o2flx)
-        outstr = outstr+' '+"{:.3E}".format(o3flx)
-        outstr = outstr+' '+"{:.3E}".format(h2o2flx)
-        outstr = outstr+'\n'
-
-        fsimoutputs = open(self.master_out+'EmceeSimulationOutputs.txt', 'a')
-        fsimoutputs.write(outstr)
-        fsimoutputs.close()
-
+        ''' This function will match to a specific surface pressue
         # If the model blew up, etc, this run is discarded, likelihood set to neg infinity
         if model.global_convergence == False:
             L = -np.inf
@@ -1357,7 +1438,38 @@ class Generate_Atmosphere_Parameter_Sweep:
                 sigma = 0.06 # okay down to 0.04 bar
             s = ((model.updated_atm_pressure-0.1)**2)/(sigma**2)
             L = -0.5*s
+        '''
+
+        ## This function will match to the emission (day/night) and transmission data 
+        if model.global_convergence == False:
+            L = -np.inf
         
+        else:
+            dayside_emiss = ascii.read(self.master_out+'RunNumber'+str(modelID)+'/RunNumber'+str(modelID)+'_dayside_SMART_toa.rad')
+            nightside_emiss = ascii.read(self.master_out+'RunNumber'+str(modelID)+'/RunNumber'+str(modelID)+'_nightside_SMART_toa.rad')
+            #transmiss = ascii.read(self.master_out+'RunNumber'+str(modelID)+'/RunNumber'+str(modelID)+'_SMART.trnst')
+
+            L, measd, measn = self.emission_likeli(dayside_emiss, nightside_emiss)
+        
+        # Attempt to save some info to a text file for quick assessment
+        outstr = str(modelID)
+        outstr = outstr+' '+str(model.global_convergence)
+        outstr = outstr+' '+str(model.multinest_climate_copycase)
+        outstr = outstr+' '+str(model.updated_atm_pressure)
+        outstr = outstr+' '+"{:.4E}".format(L)
+        outstr = outstr+' '+"{:.4E}".format(measd)
+        outstr = outstr+' '+"{:.4E}".format(measn)
+        outstr = outstr+' '+"{:.4E}".format(watflx)
+        outstr = outstr+' '+"{:.4E}".format(oflx)
+        outstr = outstr+' '+"{:.4E}".format(o2flx)
+        outstr = outstr+' '+"{:.3E}".format(o3flx)
+        outstr = outstr+' '+"{:.3E}".format(h2o2flx)
+        outstr = outstr+'\n'
+
+        fsimoutputs = open(self.master_out+'EmceeSimulationOutputs.txt', 'a')
+        fsimoutputs.write(outstr)
+        fsimoutputs.close()
+
         return L
 
 
@@ -1366,16 +1478,17 @@ class Generate_Atmosphere_Parameter_Sweep:
 
         # To skip climate and spectra
         self.mcmc_pressure_only = True
+        self.multinest_fit_data = True
 
         # Set up output file
         self.rank = MPI.COMM_WORLD.Get_rank()
         if self.rank == 0:
             fsimoutputs = open(self.master_out+'EmceeSimulationOutputs.txt', 'w')
-            fsimoutputs.write('ID Converged Psurf H2O O O2 O3 H2O2\n')
+            fsimoutputs.write('ID Converged Copyfrom Psurf Likeli DayEm NightEm H2O O O2 O3 H2O2\n')
             fsimoutputs.close()
 
         # Need to take the closest matching climate and 2 col climate profiles
-        #self.Starting_Point = 'Euclidean'
+        self.Starting_Point = 'Euclidean'
 
         parameters = ['H2OFlx', 'OVeff', 'O2Veff', 'O3Vdep', 'H2O2Vdep']
         nparams = len(parameters)
@@ -1385,7 +1498,7 @@ class Generate_Atmosphere_Parameter_Sweep:
         #prior = partial(self.multinest_prior)
         prior = lambda cube, ndim, nparams: self.multinest_prior(cube, ndim, nparams)
 
-        pymultinest.run(lnlike, prior, nparams, outputfiles_basename='chain/RestrictOEsc_', resume=False, verbose=True, evidence_tolerance=1, n_live_points=800)
+        pymultinest.run(lnlike, prior, nparams, outputfiles_basename='chain/EmisMatch_', resume=False, verbose=True, evidence_tolerance=1, n_live_points=800)
 
 
 

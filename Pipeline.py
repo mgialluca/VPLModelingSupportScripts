@@ -2695,12 +2695,11 @@ class VPLModelingPipeline:
                 ftestingoutput.write('Degraded PT profile created from photochem run '+str(self.num_photochem_runs)+'\n')
             ### Degraded PT Profile finished ------------
             
-            
+            '''
             ### Create new mixing ratios profile file --------------------------
             self.prep_rmix_file(self.photochemDir+'OUTPUT/PTZ_mixingratios_out.dist')
             ### Mixing ratios profile created --------------------------
             
-            #'''
             
             ### Rerun the LBLABC files for the most recent atmosphere ------------------------------
             
@@ -2724,6 +2723,7 @@ class VPLModelingPipeline:
                         #print('LBLABC run for '+gas+' complete, LBLABC iteration '+str(self.num_lblabc_runs+1))
                         #ftestingoutput.write('LBLABC run for '+gas+' complete, LBLABC iteration '+str(self.num_lblabc_runs+1)+'\n')
                 self.num_lblabc_runs += 1
+            '''
                 
             ### Rerun the LBLABC Section Finish ------------------------------
 
@@ -2919,7 +2919,7 @@ class VPLModelingPipeline:
                 with Pool() as p:
                     lblruns = p.map(self.run_lblabc_1instance_Parallel, lblabc_input)
                 
-                smartruninputs = ['Avg', 'dayside', 'nightside']
+                smartruninputs = ['dayside', 'nightside'] #'Avg', 
 
                 with Pool() as p:
                     smartrunsparallel = p.map(self.run_multinest_smart_parallel, smartruninputs)
