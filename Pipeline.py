@@ -368,7 +368,7 @@ class VPLModelingPipeline:
 
             self.make_smart_runscript(whichcol='nightside')
 
-            self.run_smart_1instance(self.SMART_RunScriptDir+'RunSMART_nightside_'+self.casename+'.run', whichcol='dayside')
+            self.run_smart_1instance(self.SMART_RunScriptDir+'RunSMART_nightside_'+self.casename+'.run', whichcol='nightside')
 
             if self.verbose == True:
                 ftestingoutput = open(self.OutPath+self.casename+'_SavingInfoOut.txt', 'a')
