@@ -1680,7 +1680,12 @@ class VPLModelingPipeline:
 
             f.write(str(no_abs_coef)+'			No. of abs coeff types\n')
             f.write('1			HITRAN Line Absorbers\n') # Always start with the line by line
-            f.write(self.LBLABC_AbsFilesDir+m+'_'+self.casename+'.abs\n')
+            if whichcol == None:
+                f.write(self.LBLABC_AbsFilesDir+m+'_'+self.casename+'.abs\n')
+            elif whichcol == 'dayside':
+                f.write(self.LBLABC_AbsFilesDir+m+'_d_'+self.casename+'.abs\n')
+            elif whichcol == 'nightside':
+                f.write(self.LBLABC_AbsFilesDir+m+'_n_'+self.casename+'.abs\n')
             if m in ['O2', 'H2']: # Add CIA
                 f.write('2			Collisionally-induced absorption [CIA] files\n')
                 f.write(self.xsec_Path+m.lower()+'-'+m.lower()+'_abs.cia\n')
