@@ -1443,6 +1443,8 @@ class Generate_Atmosphere_Parameter_Sweep:
         ## This function will match to the emission (day/night) and transmission data 
         if model.global_convergence == False:
             L = -np.inf
+            measd = 0
+            measn = 0
         
         else:
             dayside_emiss = ascii.read(self.master_out+'RunNumber'+str(modelID)+'/RunNumber'+str(modelID)+'_dayside_SMART_toa.rad')

@@ -307,7 +307,7 @@ def get_spec(prefix,res,wnt_lim,wns_lim,nlev,nsza=1,plotsza=False,get_solar=Fals
         return wnt,wlt,t_sflx,flux
     
     
-def open_MIRI_filters(path="/home/mgialluca/Nextcloud/VPL_Modeling/Atmos_Dev/Andrew_HelperFunctions/MIRI.xlsx"):
+def open_MIRI_filters(path="/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/MIRI.xlsx"):
     import pandas as pd
     df_filt = pd.read_excel(path)
     vals = np.array(df_filt.values[1:,:], dtype=float)
