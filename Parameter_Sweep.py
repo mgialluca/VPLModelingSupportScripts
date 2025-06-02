@@ -536,7 +536,7 @@ class Generate_Atmosphere_Parameter_Sweep:
                 closestdist = curr_dist
                 closestmodel = i 
 
-        print('Closest Model: '+closestmodel)
+        #print('Closest Model: '+closestmodel)
 
         return closestmodel
 
