@@ -1500,7 +1500,7 @@ class Generate_Atmosphere_Parameter_Sweep:
         #prior = partial(self.multinest_prior)
         prior = lambda cube, ndim, nparams: self.multinest_prior(cube, ndim, nparams)
 
-        pymultinest.run(lnlike, prior, nparams, outputfiles_basename='chain/EmisMatch_', resume=False, verbose=True, evidence_tolerance=1, n_live_points=800)
+        pymultinest.run(lnlike, prior, nparams, outputfiles_basename='chain/EmisMatch_', resume=True, verbose=True, evidence_tolerance=1, n_live_points=800)
 
 
 
