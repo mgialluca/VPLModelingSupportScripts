@@ -18,8 +18,8 @@ def fix_files(basefilename):
     pattern = re.compile(r'(-?\d+\.\d+)(-)(\d+)')
 
     for f in to_fix:
-        fin = open(indir+f, 'r')
-        fout = open(indir+f+'_fixed', 'w')
+        fin = open(indir+'/'+f, 'r')
+        fout = open(indir+'/'+f+'_fixed', 'w')
         lines = fin.readlines()
         fin.close()
 
@@ -29,6 +29,6 @@ def fix_files(basefilename):
         
         fout.close()
 
-        subprocess.run('rm '+indir+f, shell=True)
-        subprocess.run('mv '+indir+f+'_fixed '+indir+f, shell=True)
+        subprocess.run('rm '+indir+'/'+f, shell=True)
+        subprocess.run('mv '+indir+'/'+f+'_fixed '+indir+'/'+f, shell=True)
 
