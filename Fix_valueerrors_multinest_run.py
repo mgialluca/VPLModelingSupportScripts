@@ -18,17 +18,20 @@ def fix_files(basefilename):
     pattern = re.compile(r'(-?\d+\.\d+)(-)(\d+)')
 
     for f in to_fix:
-        fin = open(indir+'/'+f, 'r')
-        fout = open(indir+'/'+f+'_fixed', 'w')
-        lines = fin.readlines()
-        fin.close()
+        try:
+            fin = open(indir+'/'+f, 'r')
+            fout = open(indir+'/'+f+'_fixed', 'w')
+            lines = fin.readlines()
+            fin.close()
 
-        for line in lines:
-            fixed = pattern.sub(r'\1e\2\3', line)
-            fout.write(fixed)
-        
-        fout.close()
+            for line in lines:
+                fixed = pattern.sub(r'\1e\2\3', line)
+                fout.write(fixed)
+            
+            fout.close()
 
-        subprocess.run('rm '+indir+'/'+f, shell=True)
-        subprocess.run('mv '+indir+'/'+f+'_fixed '+indir+'/'+f, shell=True)
+            subprocess.run('rm '+indir+'/'+f, shell=True)
+            subprocess.run('mv '+indir+'/'+f+'_fixed '+indir+'/'+f, shell=True)
+        except:
+            pass
 
