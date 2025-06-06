@@ -1,5 +1,5 @@
 import re
-from pymultinest.analyse import Analyze
+from pymultinest.analyse import Analyzer
 import os
 import subprocess
 
@@ -32,4 +32,3 @@ def fix_files(basefilename):
         subprocess.run('rm '+indir+f, shell=True)
         subprocess.run('mv '+indir+f+'_fixed '+indir+f, shell=True)
 
-        
