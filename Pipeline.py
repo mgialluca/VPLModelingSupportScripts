@@ -60,7 +60,7 @@ class VPLModelingPipeline:
 
         # Set the number of levels for the fine (photochem) and coarse (everything else) grids
         self.nlevel_fine = 200 # Number of atm layers for fine grids (i.e., for photochem)
-        self.nlevel_coarse = 40 # Number of atm layers for coarse grids (i.e., for all models besides photochem)
+        self.nlevel_coarse = 30 # Number of atm layers for coarse grids (i.e., for all models besides photochem)
 
         # Start counters to track how many times each model has been ran
         self.num_photochem_runs = 0
@@ -1197,7 +1197,7 @@ class VPLModelingPipeline:
             self.s_vmrRayleigh = 1.0 # Volumn Mixing Ratio of Rayleigh scatterer (?)
             
             # Heating Sources (NOTE Climate also uses these, but may be set differently)
-            self.s_NumberStreams = 8 # Number of streams
+            self.s_NumberStreams = 4 # Number of streams
             self.s_HRTSources = 3 # 1 - Solar, 2 - Thermal, 3 - Both
             
             # Host Star Specs (NOTE Climate also uses these, should match)
