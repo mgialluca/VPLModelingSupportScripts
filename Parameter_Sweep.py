@@ -1357,18 +1357,18 @@ class Generate_Atmosphere_Parameter_Sweep:
 
         return measurement.value, starfac, fac
     
-    def emission_likeli(self, day, night):
+    def emission_likeli(self, day, night, modid):
 
         measd = self.get_JWST_measurement(day)[0]
         measn = self.get_JWST_measurement(night)[0]
 
         # Measurements Zieba et al 2023, MG #1, ED #1, TJB #3, ZH Sin
-        Fc_D = np.array([421.,392.,405.,410.,333.9])
-        Fc_D_err = np.array([[94.,63.,71.,110.,78.3],[94.,75.,71.,110.,78.8]]) 
+        Fc_D = np.array([421, 392, 405, 410, 333.9])
+        Fc_D_err = np.array([[94, 63, 71, 110, 78.3],[94, 75, 71, 110, 78.8]]) 
 
         # Night measurements # MG #1, ED #1, TJB #3, ZH Sin
-        Fc_N = np.array([62.,125.,89.,170.])
-        Fc_N_err = np.array([[43.,90.,91.,92.],[60.,90.,91.,31.]])
+        Fc_N = np.array([62, 125, 89, 170])
+        Fc_N_err = np.array([[43, 90, 91, 92],[60, 90, 91, 31]])
 
         '''
         if model.updated_atm_pressure > 0.1:
@@ -1379,23 +1379,32 @@ class Generate_Atmosphere_Parameter_Sweep:
         L = 0
         for dm in range(len(Fc_D)):
 
-            if measd > Fc_D[dm]:
+            if measd < Fc_D[dm]:
                 sigma = Fc_D_err[0][dm]
-            elif measd <= Fc_D[dm]:
+            else:
                 sigma = Fc_D_err[1][dm]
 
-            li = ((measd - Fc_D[dm])**2)/(sigma**2)
+            try:
+                li = ((measd - Fc_D[dm])**2)/(sigma**2)
+            
+            except UnboundLocalError:
+                print('UNBOUND ERROR: ID number '+str(modid)+', Dayside: '+str(measd))
+                li = 1e10
 
             L = L + li
         
         for nm in range(len(Fc_N)):
 
-            if measn > Fc_N[nm]:
+            if measn < Fc_N[nm]:
                 sigma = Fc_N_err[0][nm]
-            elif measn <= Fc_N[nm]:
+            else:
                 sigma = Fc_N_err[1][nm]
 
-            li = ((measn - Fc_N[nm])**2)/(sigma**2)
+            try:
+                li = ((measn - Fc_N[nm])**2)/(sigma**2)
+            except UnboundLocalError:
+                print('UNBOUND ERROR: ID number '+str(modid)+', Nightside: '+str(measn))
+                li = 1e10
 
             L = L + li
 
@@ -1409,10 +1418,20 @@ class Generate_Atmosphere_Parameter_Sweep:
         rng = np.random.default_rng()  # Automatically uses entropy from OS
         modelID = rng.integers(1e5)
         modelID = modelID+self.rank
-        while os.path.exists(self.master_out+'RunNumber'+str(modelID)):
+        try:
+            os.mkdir(self.master_out+'RunNumber'+str(modelID)+'/')
+            made = True
+        except FileExistsError:
+            made = False
+        while made == False:
             rng = np.random.default_rng()  # Automatically uses entropy from OS
             modelID = rng.integers(1e5)
             modelID = modelID + self.rank
+            try:
+                os.mkdir(self.master_out+'RunNumber'+str(modelID)+'/')
+                made = True
+            except FileExistsError:
+                made = False
 
         watflx = cube[0]
         oflx = cube[1]
@@ -1442,35 +1461,48 @@ class Generate_Atmosphere_Parameter_Sweep:
 
         ## This function will match to the emission (day/night) and transmission data 
         if model.global_convergence == False:
-            L = -np.inf
+            L = -1e90
             measd = 0
             measn = 0
         
         else:
-            dayside_emiss = ascii.read(self.master_out+'RunNumber'+str(modelID)+'/RunNumber'+str(modelID)+'_dayside_SMART_toa.rad')
-            nightside_emiss = ascii.read(self.master_out+'RunNumber'+str(modelID)+'/RunNumber'+str(modelID)+'_nightside_SMART_toa.rad')
-            #transmiss = ascii.read(self.master_out+'RunNumber'+str(modelID)+'/RunNumber'+str(modelID)+'_SMART.trnst')
+            try:
+                dayside_emiss = ascii.read(self.master_out+'RunNumber'+str(modelID)+'/RunNumber'+str(modelID)+'_dayside_SMART_toa.rad')
+                nightside_emiss = ascii.read(self.master_out+'RunNumber'+str(modelID)+'/RunNumber'+str(modelID)+'_nightside_SMART_toa.rad')
+                #transmiss = ascii.read(self.master_out+'RunNumber'+str(modelID)+'/RunNumber'+str(modelID)+'_SMART.trnst')
 
-            L, measd, measn = self.emission_likeli(dayside_emiss, nightside_emiss)
+                L, measd, measn = self.emission_likeli(dayside_emiss, nightside_emiss, modelID)
+            
+            except:
+                print('ASCII COULDNT READ IN SPECTRA ERROR, '+str(modelID))
+                L = -1e90
+                measd = 0
+                measn = 0
         
         # Attempt to save some info to a text file for quick assessment
-        outstr = str(modelID)
-        outstr = outstr+' '+str(model.global_convergence)
-        outstr = outstr+' '+str(model.multinest_climate_copycase)
-        outstr = outstr+' '+str(model.updated_atm_pressure)
-        outstr = outstr+' '+"{:.4E}".format(L)
-        outstr = outstr+' '+"{:.4E}".format(measd)
-        outstr = outstr+' '+"{:.4E}".format(measn)
-        outstr = outstr+' '+"{:.4E}".format(watflx)
-        outstr = outstr+' '+"{:.4E}".format(oflx)
-        outstr = outstr+' '+"{:.4E}".format(o2flx)
-        outstr = outstr+' '+"{:.3E}".format(o3flx)
-        outstr = outstr+' '+"{:.3E}".format(h2o2flx)
-        outstr = outstr+'\n'
+        try:
+            outstr = str(modelID)
+            outstr = outstr+' '+str(model.global_convergence)
+            outstr = outstr+' '+str(model.multinest_climate_copycase)
+            outstr = outstr+' '+str(model.updated_atm_pressure)
+            outstr = outstr+' '+"{:.4E}".format(L)
+            outstr = outstr+' '+"{:.4E}".format(measd)
+            outstr = outstr+' '+"{:.4E}".format(measn)
+            outstr = outstr+' '+"{:.4E}".format(watflx)
+            outstr = outstr+' '+"{:.4E}".format(oflx)
+            outstr = outstr+' '+"{:.4E}".format(o2flx)
+            outstr = outstr+' '+"{:.3E}".format(o3flx)
+            outstr = outstr+' '+"{:.3E}".format(h2o2flx)
+            outstr = outstr+'\n'
 
-        fsimoutputs = open(self.master_out+'EmceeSimulationOutputs.txt', 'a')
-        fsimoutputs.write(outstr)
-        fsimoutputs.close()
+            fsimoutputs = open(self.master_out+'EmceeSimulationOutputs.txt', 'a')
+            fsimoutputs.write(outstr)
+            fsimoutputs.close()
+        except:
+            print('FILE WRITING ERROR: DID NOT WORK '+str(modelID))
+
+        if L > 0 and L < 1e-200:
+            L = 0
 
         return L
 
@@ -1500,7 +1532,7 @@ class Generate_Atmosphere_Parameter_Sweep:
         #prior = partial(self.multinest_prior)
         prior = lambda cube, ndim, nparams: self.multinest_prior(cube, ndim, nparams)
 
-        pymultinest.run(lnlike, prior, nparams, outputfiles_basename='chain/EmisMatch_', resume=True, verbose=True, evidence_tolerance=5, n_live_points=800)
+        pymultinest.run(lnlike, prior, nparams, outputfiles_basename='chain/EmisMatch2_', resume=True, verbose=True, evidence_tolerance=10, n_live_points=800)
 
 
 

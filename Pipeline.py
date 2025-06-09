@@ -2921,14 +2921,19 @@ class VPLModelingPipeline:
                     lblabc_input.append([self.lblabc_RunScriptDir+'RunLBLABC_d_'+gas+'_'+self.casename+'.script', gas, 'dayside'])
                     lblabc_input.append([self.lblabc_RunScriptDir+'RunLBLABC_n_'+gas+'_'+self.casename+'.script', gas, 'nightside'])
                 
-                with Pool() as p:
-                    lblruns = p.map(self.run_lblabc_1instance_Parallel, lblabc_input)
+                #with Pool() as p:
+                #    lblruns = p.map(self.run_lblabc_1instance_Parallel, lblabc_input)
+                
+                for lblinp in lblabc_input:
+                    self.run_lblabc_1instance_Parallel(lblinp)
                 
                 smartruninputs = ['dayside', 'nightside'] #'Avg', 
 
-                with Pool() as p:
-                    smartrunsparallel = p.map(self.run_multinest_smart_parallel, smartruninputs)
+                #with Pool() as p:
+                    #smartrunsparallel = p.map(self.run_multinest_smart_parallel, smartruninputs)
 
+                for sminp in smartruninputs:
+                    self.run_multinest_smart_parallel(sminp)
 
         return self.global_convergence
 

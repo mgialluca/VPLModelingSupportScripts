@@ -2,7 +2,7 @@ from Parameter_Sweep import *
 import subprocess
 
 
-test_object = Generate_Atmosphere_Parameter_Sweep('MNEmiss', 
+test_object = Generate_Atmosphere_Parameter_Sweep('MNEmiss2', 
                                   '/gscratch/vsm/gialluca/VPLModelingTools_Dev/VeffTestDepos/RunNumber166/PhotochemInputs/', 
                                 restart_run='ClimTestMulti', 
                                 starting_point='Euclidean',
