@@ -1517,9 +1517,10 @@ class Generate_Atmosphere_Parameter_Sweep:
         # Set up output file
         self.rank = MPI.COMM_WORLD.Get_rank()
         if self.rank == 0:
-            fsimoutputs = open(self.master_out+'EmceeSimulationOutputs.txt', 'w')
-            fsimoutputs.write('ID Converged Copyfrom Psurf Likeli DayEm NightEm H2O O O2 O3 H2O2\n')
-            fsimoutputs.close()
+            if not os.path.exists(self.master_out+'EmceeSimulationOutputs.txt'):
+                fsimoutputs = open(self.master_out+'EmceeSimulationOutputs.txt', 'w')
+                fsimoutputs.write('ID Converged Copyfrom Psurf Likeli DayEm NightEm H2O O O2 O3 H2O2\n')
+                fsimoutputs.close()
 
         # Need to take the closest matching climate and 2 col climate profiles
         self.Starting_Point = 'Euclidean'
