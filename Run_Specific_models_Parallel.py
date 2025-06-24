@@ -3,7 +3,7 @@ import copy
 import subprocess
 from multiprocessing import Pool
 
-master = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/ParallelTest/'
+master = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/ClimMN/'
 #master = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/ClimTestMulti/'
 
 def set_pipeline_vars(casename, pipelineobj, master_out=master):
@@ -42,8 +42,8 @@ def set_pipeline_vars(casename, pipelineobj, master_out=master):
 
     pipelineobj.adjust_atmospheric_pressure = True
     pipelineobj.suppress_IOerrors = True
-    pipelineobj.MCMC_pressure_only = True
-    pipelineobj.MultiNest_DataFit = True # False
+    pipelineobj.MCMC_pressure_only = False
+    pipelineobj.MultiNest_DataFit = False
     
     if pipelineobj.MCMC_pressure_only == True:
         pipelineobj.include_2column_climate = False
@@ -141,30 +141,30 @@ def run_one_model(inputstring):
     else:
         h2o_label = str(int(h2oinput*1e2))+'percent'
     '''
-    case = 'Run'+str(modelid)
+    case = 'RunNumber'+str(modelid)
     #case = inputstring#+'T2'
 
     pipelineobj = VPLModelingPipeline(case, 
-                                  '/gscratch/vsm/gialluca/VPLModelingTools_Dev/ClimTestMulti/'+case+'/PhotochemInputs/', 
+                                  '/gscratch/vsm/gialluca/VPLModelingTools_Dev/MNEmiss2/'+case+'/PhotochemInputs/', 
                                   True, find_molecules_of_interest=False, hitran_year='2020')
     
     set_pipeline_vars(case, pipelineobj)
     #edit_speciesdat(pipelineobj, h2oinput, oin, o2in, o3in, h2o2in)
 
-    '''
+    
     pipelineobj.h2oinput = h2oinput
     pipelineobj.oinput = oin
     pipelineobj.o2input = o2in
     pipelineobj.o3input = o3in
     pipelineobj.h2o2input = h2o2in
-    '''
+    
     
     # Run the Photochem-Climate-SMART pipeline
     converged = pipelineobj.run_automatic()
     #print(converged)
 
     # Clean abs files out as they take up the most space
-    #subprocess.run('rm -rf '+currmodel.LBLABC_AbsFilesDir+'*.abs', shell=True)
+    subprocess.run('rm -rf '+pipelineobj.LBLABC_AbsFilesDir+'*.abs', shell=True)
 
     # Delete copied atmos directory
     subprocess.run('rm -rf '+pipelineobj.atmosDir, shell=True)
@@ -318,4 +318,44 @@ tab = Table(data_for_table, names=output_col_names)
 ascii.write(tab, master+'ParameterSweep_RunStats.dat', delimiter=' ', format='fixed_width')
 '''
 
-testmodel = run_one_model([3.4339E+11, 3.146E-02, 2.359E-02, 1.854E-01, 4.376E-01, 99])
+#testmodel = run_one_model([3.4339E+11, 3.146E-02, 2.359E-02, 1.854E-01, 4.376E-01, 99])
+
+sims = ascii.read('/gscratch/vsm/gialluca/VPLModelingTools_Dev/MNEmiss2/EmceeSimulationOutputs.txt')
+likeli = sims['Likeli']
+likelinonan = likeli[np.where(np.isnan(likeli) != True)]
+
+inds = []
+for i in np.sort(likelinonan)[-40:]:
+    inds.append(list(likeli).index(i))
+
+inputs = []
+for i in inds:
+    string = []
+    string.append(sims['H2O'][i])
+    string.append(sims['O'][i])
+    string.append(sims['O2'][i])
+    string.append(sims['O3'][i])
+    string.append(sims['H2O2'][i])
+    string.append(sims['ID'][i])
+
+    inputs.append(string)
+
+with Pool() as p:
+    models = p.map(run_one_model, inputs)
+
+convergence = [m.global_convergence for m in models]
+run_names = [m.casename for m in models]
+h2os = [m.h2oinput for m in models]
+oins = [m.oinput for m in models]
+o2s = [m.o2input for m in models]
+o3s = [m.o3input for m in models]
+h2o2s = [m.h2o2input for m in models]
+psurf = [m.updated_atm_pressure for m in models]
+
+data_for_table = [run_names, convergence, psurf, h2os, oins, o2s, o3s, h2o2s]
+output_col_names = ['RunName', 'Converged', 'Psurf', 'H2OInput', 'OInput', 'O2Input', 'O3Input', 'H2O2Input']
+
+tab = Table(data_for_table, names=output_col_names)
+
+# Save output info
+ascii.write(tab, master+'ParameterSweep_RunStats.dat', delimiter=' ', format='fixed_width')

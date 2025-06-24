@@ -2707,7 +2707,7 @@ class VPLModelingPipeline:
             
             
             ### Rerun the LBLABC files for the most recent atmosphere ------------------------------
-            '''
+            
             self.make_lblabc_runscripts()
 
             if self.MultiNest_DataFit == True: # To run LBLABC gases in parallel
@@ -2728,7 +2728,7 @@ class VPLModelingPipeline:
                         #print('LBLABC run for '+gas+' complete, LBLABC iteration '+str(self.num_lblabc_runs+1))
                         #ftestingoutput.write('LBLABC run for '+gas+' complete, LBLABC iteration '+str(self.num_lblabc_runs+1)+'\n')
                 self.num_lblabc_runs += 1
-            '''
+            
                 
             ### Rerun the LBLABC Section Finish ------------------------------
 
