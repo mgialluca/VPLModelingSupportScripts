@@ -346,8 +346,14 @@ likeli = sims['Likeli']
 likelinonan = likeli[np.where(np.isnan(likeli) != True)]
 
 inds = []
-for i in np.sort(likelinonan)[-40:]:
-    inds.append(list(likeli).index(i))
+#for i in np.sort(likelinonan)[-40:]:
+#    inds.append(list(likeli).index(i))
+for sds, ds, fis in os.walk('/gscratch/vsm/gialluca/VPLModelingTools_Dev/ClimMN'):
+    break
+
+dsnum = [int(run.split('RunNumber')[1]) for run in ds]
+for i in dsnum:
+    inds.append(list(sims['ID']).index(i))
 
 inds = set(inds)
 inputs = []
