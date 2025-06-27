@@ -165,7 +165,7 @@ def run_one_model(inputstring):
     else:
     #elif 'FINAL_PTZ_mixingratios_out_FAILED.dist' in fis:
         for fhold in fishol:
-            subprocess.run('rm -rf '+master+case+'/'+fhold)
+            subprocess.run('rm '+master+case+'/'+fhold, shell=True)
         
         atmos_Dir = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/megan_atmos/atmos/'
         shutil.copytree(atmos_Dir,  master+case+'/atmos/')
