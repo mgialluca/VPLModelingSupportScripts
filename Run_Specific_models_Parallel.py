@@ -11,10 +11,10 @@ def set_pipeline_vars(casename, pipelineobj, master_out=master):
     # Paths are the main thing to set, because they will be massive amounts of running/files, want to keep each sweep colocated in one master dir
     atmos_Dir = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/megan_atmos/atmos/'
     # Create casename dir
-    if not os.path.exists(master_out+casename+'/'):
-        os.mkdir(master_out+casename+'/')
+    #if not os.path.exists(master_out+casename+'/'):
+    #    os.mkdir(master_out+casename+'/')
     
-    shutil.copytree(atmos_Dir,  master_out + casename + '/atmos/')
+    #shutil.copytree(atmos_Dir,  master_out + casename + '/atmos/')
 
     pipelineobj.photochemDir = master_out+casename+'/atmos/PHOTOCHEM/' # path to PHOTOCHEM/ dir
     pipelineobj.atmosDir = master_out+casename+'/atmos/' # path to atmos/ dir
@@ -143,13 +143,31 @@ def run_one_model(inputstring):
     '''
     case = 'RunNumber'+str(modelid)
     #case = inputstring#+'T2'
+    master = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/ClimMN/'
 
     pipelineobj = VPLModelingPipeline(case, 
-                                  '/gscratch/vsm/gialluca/VPLModelingTools_Dev/MNEmiss2/'+case+'/PhotochemInputs/', 
+                                  master+case+'/PhotochemInputs/', 
                                   True, find_molecules_of_interest=False, hitran_year='2020')
     
     set_pipeline_vars(case, pipelineobj)
     #edit_speciesdat(pipelineobj, h2oinput, oin, o2in, o3in, h2o2in)
+    for sds, ds, fis in os.walk(master+case):
+        break
+
+    if 'FINAL_PTZ_mixingratios_out.dist' in fis and 'vpl_2col_climate_output_'+case+'.run' in fis:
+        pipelineobj.global_convergence = True
+        pipelineobj.clim2col_restarting = True
+
+    
+    else:
+    #elif 'FINAL_PTZ_mixingratios_out_FAILED.dist' in fis:
+        for fhold in fis:
+            subprocess.run('rm -rf '+master+case+'/'+fhold)
+        
+        atmos_Dir = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/megan_atmos/atmos/'
+        shutil.copytree(atmos_Dir,  master+case+'/atmos/')
+        subprocess.run('rm -rf '+pipelineobj.LBLABC_AbsFilesDir+'*.abs', shell=True)
+
 
     
     pipelineobj.h2oinput = h2oinput
@@ -328,17 +346,19 @@ inds = []
 for i in np.sort(likelinonan)[-40:]:
     inds.append(list(likeli).index(i))
 
+inds = set(inds)
 inputs = []
 for i in inds:
-    string = []
-    string.append(sims['H2O'][i])
-    string.append(sims['O'][i])
-    string.append(sims['O2'][i])
-    string.append(sims['O3'][i])
-    string.append(sims['H2O2'][i])
-    string.append(sims['ID'][i])
+    if sims['ID'][i] != 17825:
+        string = []
+        string.append(sims['H2O'][i])
+        string.append(sims['O'][i])
+        string.append(sims['O2'][i])
+        string.append(sims['O3'][i])
+        string.append(sims['H2O2'][i])
+        string.append(sims['ID'][i])
 
-    inputs.append(string)
+        inputs.append(string)
 
 with Pool() as p:
     models = p.map(run_one_model, inputs)

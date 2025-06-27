@@ -7,6 +7,7 @@ import astropy.constants as const
 from astropy.table import Table
 import json
 import pandas as pd
+import re
 from multiprocessing import Pool
 from NewPressure_HelperFunctions import get_true_number_densities, sum_mixing_ratios, new_total_Ndens, new_mixing_rats, find_tot_column_mass_dens
 
@@ -73,13 +74,14 @@ class VPLModelingPipeline:
         self.climate_global_converge = False
         self.global_convergence = False
         self.max_iterations_master = 100 # Never do anything more than 100x
-        self.max_iterations_climate = 100 # Never run climate more than 15x
+        self.max_iterations_climate = 200 # Never run climate more than 15x
         self.suppress_IOerrors = False # if convergence fails, raise IO errors if False, or just break running function if True
         self.run_spectra = True # If true, finished a converged run with smart 
         self.rerun_smart_for_2col = True # If true, rerun smart for day and night side after climate 2 column mode
         self.fixsgbsl = False # If true, try to fix sgbsl error
         self.MCMC_pressure_only = False # If true, remove everything after photochem for an MCMC pressure fitting walker
         self.MultiNest_DataFit = False # If true, skip any climate runs, parallelize over smart calls and LBLABC
+        self.clim2col_restarting = False # If true, restarting a run that was in the middle of running 2 column
 
         self.include_2column_climate = True
 
@@ -630,8 +632,8 @@ class VPLModelingPipeline:
             dat['FileName'] = self.OutPath+'vpl_2col_climate_output_'+self.casename+'.run'
             fop = open(self.OutPath+'vpl_2col_climate_output_'+self.casename+'.run', 'r')
         else:
-            dat['FileName'] = self.OutPath+'vpl_2col_climate_output_'+self.casename+'_Try'+str(trynum)+'.run'
-            fop = open(self.OutPath+'vpl_2col_climate_output_'+self.casename+'_Try'+str(trynum)+'.run', 'r')
+            dat['FileName'] = self.OutPath+'vpl_2col_climate_output_'+self.casename+'_Subtry'+str(trynum)+'.run'
+            fop = open(self.OutPath+'vpl_2col_climate_output_'+self.casename+'_Subtry'+str(trynum)+'.run', 'r')
         flines = fop.readlines()
         fop.close()
 
@@ -2128,8 +2130,8 @@ class VPLModelingPipeline:
         # Prepare your directory for storing lblabc .abs files
         if not os.path.exists(self.LBLABC_AbsFilesDir):
             os.mkdir(self.LBLABC_AbsFilesDir)
-        else:
-            subprocess.run('rm -rf '+self.LBLABC_AbsFilesDir+'*', shell=True)
+        #else:
+        #    subprocess.run('rm -rf '+self.LBLABC_AbsFilesDir+'*', shell=True)
         # Prepare directory for storing lblabc run script files
         if not os.path.exists(self.lblabc_RunScriptDir):
             os.mkdir(self.lblabc_RunScriptDir)
@@ -2151,7 +2153,10 @@ class VPLModelingPipeline:
         #self.prepare_hyak_env()
 
         if self.verbose == True:
-            ftestingoutput = open(self.OutPath+self.casename+'_SavingInfoOut.txt', 'w')
+            if not os.path.exists(self.OutPath+self.casename+'_SavingInfoOut.txt'):
+                ftestingoutput = open(self.OutPath+self.casename+'_SavingInfoOut.txt', 'w')
+            else:
+                ftestingoutput = open(self.OutPath+self.casename+'_SavingInfoOut.txt', 'a')
 
         if self.adjust_atmospheric_pressure == True:
             self.updated_atm_pressure = -1
@@ -2685,49 +2690,50 @@ class VPLModelingPipeline:
             ##### Generate SMART spectra of the final converged atmosphere ------------------------------
 
             #'''
-            ### Create degraded atmospheric profile to prepare for LBLABC and Climate -------------
-            if self.adjust_atmospheric_pressure == True:
-                if self.updated_atm_pressure < 1e-2:
-                    self.degrade_PT(grid_spacing='log')
-                    if self.verbose == True:
-                        ftestingoutput.write('log spacing used\n')
+            if self.clim2col_restarting == False:
+                ### Create degraded atmospheric profile to prepare for LBLABC and Climate -------------
+                if self.adjust_atmospheric_pressure == True:
+                    if self.updated_atm_pressure < 1e-2:
+                        self.degrade_PT(grid_spacing='log')
+                        if self.verbose == True:
+                            ftestingoutput.write('log spacing used\n')
+                    else:
+                        self.degrade_PT()
                 else:
                     self.degrade_PT()
-            else:
-                self.degrade_PT()
-            if self.verbose == True:
-                #print('Degraded PT profile created from photochem run '+str(self.num_photochem_runs))
-                ftestingoutput.write('Degraded PT profile created from photochem run '+str(self.num_photochem_runs)+'\n')
-            ### Degraded PT Profile finished ------------
-            
-            
-            ### Create new mixing ratios profile file --------------------------
-            self.prep_rmix_file(self.photochemDir+'OUTPUT/PTZ_mixingratios_out.dist')
-            ### Mixing ratios profile created --------------------------
-            
-            
-            ### Rerun the LBLABC files for the most recent atmosphere ------------------------------
-            
-            self.make_lblabc_runscripts()
-
-            if self.MultiNest_DataFit == True: # To run LBLABC gases in parallel
-
-                lblabc_input = []
-                for gas in self.molecule_dict['Gas_names']:
-                    lblabc_input.append([self.lblabc_RunScriptDir+'RunLBLABC_'+gas+'_'+self.casename+'.script', gas, 'Avg'])
+                if self.verbose == True:
+                    #print('Degraded PT profile created from photochem run '+str(self.num_photochem_runs))
+                    ftestingoutput.write('Degraded PT profile created from photochem run '+str(self.num_photochem_runs)+'\n')
+                ### Degraded PT Profile finished ------------
                 
-                with Pool() as p:
-                    lblruns = p.map(self.run_lblabc_1instance_Parallel, lblabc_input)
-            
-            else:
+                
+                ### Create new mixing ratios profile file --------------------------
+                self.prep_rmix_file(self.photochemDir+'OUTPUT/PTZ_mixingratios_out.dist')
+                ### Mixing ratios profile created --------------------------
+                
+                
+                ### Rerun the LBLABC files for the most recent atmosphere ------------------------------
+                
+                self.make_lblabc_runscripts()
 
-                # Now Run LBLABC for all the gases of interest
-                for gas in self.molecule_dict['Gas_names']:
-                    self.run_lblabc_1instance(self.lblabc_RunScriptDir+'RunLBLABC_'+gas+'_'+self.casename+'.script', gas)
-                    #if self.verbose == True:
-                        #print('LBLABC run for '+gas+' complete, LBLABC iteration '+str(self.num_lblabc_runs+1))
-                        #ftestingoutput.write('LBLABC run for '+gas+' complete, LBLABC iteration '+str(self.num_lblabc_runs+1)+'\n')
-                self.num_lblabc_runs += 1
+                if self.MultiNest_DataFit == True: # To run LBLABC gases in parallel
+
+                    lblabc_input = []
+                    for gas in self.molecule_dict['Gas_names']:
+                        lblabc_input.append([self.lblabc_RunScriptDir+'RunLBLABC_'+gas+'_'+self.casename+'.script', gas, 'Avg'])
+                    
+                    with Pool() as p:
+                        lblruns = p.map(self.run_lblabc_1instance_Parallel, lblabc_input)
+                
+                else:
+
+                    # Now Run LBLABC for all the gases of interest
+                    for gas in self.molecule_dict['Gas_names']:
+                        self.run_lblabc_1instance(self.lblabc_RunScriptDir+'RunLBLABC_'+gas+'_'+self.casename+'.script', gas)
+                        #if self.verbose == True:
+                            #print('LBLABC run for '+gas+' complete, LBLABC iteration '+str(self.num_lblabc_runs+1))
+                            #ftestingoutput.write('LBLABC run for '+gas+' complete, LBLABC iteration '+str(self.num_lblabc_runs+1)+'\n')
+                    self.num_lblabc_runs += 1
             
                 
             ### Rerun the LBLABC Section Finish ------------------------------
@@ -2736,61 +2742,98 @@ class VPLModelingPipeline:
             ### Setup and Run 2 column climate to convergence ------------------------------
             if self.include_2column_climate == True:
 
-                
-                # create two pt profiles
-                if self.dayside_starting_PT == None:
-                    shutil.copyfile(self.AtmProfPath+'PT_profile_'+self.casename+'.pt', self.AtmProfPath+'PT_profile_dayside_'+self.casename+'.pt')
-                else:
-                    shutil.copyfile(self.dayside_starting_PT, self.AtmProfPath+'PT_profile_dayside_'+self.casename+'.pt')
-
-                if self.nightside_starting_PT == None:
-                    shutil.copyfile(self.AtmProfPath+'PT_profile_'+self.casename+'.pt', self.AtmProfPath+'PT_profile_nightside_'+self.casename+'.pt')
-                else:
-                    shutil.copyfile(self.nightside_starting_PT, self.AtmProfPath+'PT_profile_nightside_'+self.casename+'.pt')
-
-                
-                # create two surface temps
-                if self.dayside_starting_PT == None and self.nightside_starting_PT == None:
-                    self.surface_temp_dayside = self.surface_temp
-                    self.surface_temp_nightside = self.surface_temp
-                else:
-                    openhold = ascii.read(self.dayside_starting_PT)
-                    self.surface_temp_dayside = openhold['Temp'][len(openhold['Temp'])-1]
-                    openhold = ascii.read(self.nightside_starting_PT)
-                    self.surface_temp_nightside = openhold['Temp'][len(openhold['Temp'])-1]
-
-                # Add 1 to the climate run counter
-                self.num_2col_climate_runs += 1
-
-                # First Generate the climate runscript
-                # Things, e.g., MMW need to be updated, so just do this every time
-                self.make_2column_climate_runscript(trynum=self.num_2col_climate_runs)
-
-                if self.verbose == True:
-                    #print('Climate 2 column Runscript created, beginning first 2 column climate run')
-                    ftestingoutput.write('Climate 2 column Runscript created, beginning first 2 column climate run\n')
-
-                # Now run climate 
-                ftestingoutput.write('The runscript: '+self.vplclimate_RunScriptDir+'RunVPLClimate_2column_'+self.casename+'.script\n')
-                ftestingoutput.write('The executable: '+self.vplclimate_executable+'\n')
-                self.run_climate_1instance(self.vplclimate_RunScriptDir+'RunVPLClimate_2column_'+self.casename+'.script', self.vplclimate_executable, trynum=self.num_2col_climate_runs, twocol=True)
-
-                if self.verbose == True:
-                    #print('First 2 column Climate run completed')
-                    ftestingoutput.write('First 2 column Climate run completed\n')
-
-                    # Check for local convergence of climate, similar to process followed for a given try on photochem            
-                local_climate_convergence, tropheating_dayside, tropheating_nightside, avgflux = self.check_2column_vplclimate_conv(trynum=self.num_2col_climate_runs)
-
-                if self.verbose == True:
-                    if local_climate_convergence == True:
-                        #print('2 column Climate convergence found on first try for run number '+str(self.num_2col_climate_runs))
-                        ftestingoutput.write('2 column Climate convergence found on first try for run number '+str(self.num_2col_climate_runs)+'\n')
+                if self.clim2col_restarting == False:
+                    # create two pt profiles
+                    if self.dayside_starting_PT == None:
+                        shutil.copyfile(self.AtmProfPath+'PT_profile_'+self.casename+'.pt', self.AtmProfPath+'PT_profile_dayside_'+self.casename+'.pt')
                     else:
-                        #print('2 column Climate convergence NOT found on first try for run number '+str(self.num_2col_climate_runs)+', beginning rerun sequence')
-                        ftestingoutput.write('2 column Climate convergence NOT found on first try for run number '+str(self.num_2col_climate_runs)+', beginning rerun sequence\n')
+                        shutil.copyfile(self.dayside_starting_PT, self.AtmProfPath+'PT_profile_dayside_'+self.casename+'.pt')
 
-                climate_subtries = 1
+                    if self.nightside_starting_PT == None:
+                        shutil.copyfile(self.AtmProfPath+'PT_profile_'+self.casename+'.pt', self.AtmProfPath+'PT_profile_nightside_'+self.casename+'.pt')
+                    else:
+                        shutil.copyfile(self.nightside_starting_PT, self.AtmProfPath+'PT_profile_nightside_'+self.casename+'.pt')
+
+                    
+                    # create two surface temps
+                    if self.dayside_starting_PT == None and self.nightside_starting_PT == None:
+                        self.surface_temp_dayside = self.surface_temp
+                        self.surface_temp_nightside = self.surface_temp
+                    else:
+                        openhold = ascii.read(self.dayside_starting_PT)
+                        self.surface_temp_dayside = openhold['Temp'][len(openhold['Temp'])-1]
+                        openhold = ascii.read(self.nightside_starting_PT)
+                        self.surface_temp_nightside = openhold['Temp'][len(openhold['Temp'])-1]
+
+                    # Add 1 to the climate run counter
+                    self.num_2col_climate_runs += 1
+
+                    # First Generate the climate runscript
+                    # Things, e.g., MMW need to be updated, so just do this every time
+                    self.make_2column_climate_runscript(trynum=self.num_2col_climate_runs)
+
+                    if self.verbose == True:
+                        #print('Climate 2 column Runscript created, beginning first 2 column climate run')
+                        ftestingoutput.write('Climate 2 column Runscript created, beginning first 2 column climate run\n')
+
+                    # Now run climate 
+                    ftestingoutput.write('The runscript: '+self.vplclimate_RunScriptDir+'RunVPLClimate_2column_'+self.casename+'.script\n')
+                    ftestingoutput.write('The executable: '+self.vplclimate_executable+'\n')
+                    self.run_climate_1instance(self.vplclimate_RunScriptDir+'RunVPLClimate_2column_'+self.casename+'.script', self.vplclimate_executable, trynum=self.num_2col_climate_runs, twocol=True)
+
+                    if self.verbose == True:
+                        #print('First 2 column Climate run completed')
+                        ftestingoutput.write('First 2 column Climate run completed\n')
+
+                        # Check for local convergence of climate, similar to process followed for a given try on photochem            
+                    local_climate_convergence, tropheating_dayside, tropheating_nightside, avgflux = self.check_2column_vplclimate_conv(trynum=self.num_2col_climate_runs)
+
+                    if self.verbose == True:
+                        if local_climate_convergence == True:
+                            #print('2 column Climate convergence found on first try for run number '+str(self.num_2col_climate_runs))
+                            ftestingoutput.write('2 column Climate convergence found on first try for run number '+str(self.num_2col_climate_runs)+'\n')
+                        else:
+                            #print('2 column Climate convergence NOT found on first try for run number '+str(self.num_2col_climate_runs)+', beginning rerun sequence')
+                            ftestingoutput.write('2 column Climate convergence NOT found on first try for run number '+str(self.num_2col_climate_runs)+', beginning rerun sequence\n')
+
+                    climate_subtries = 1
+                
+                else:
+                    patt = re.compile(r'Subtry(\d+)')
+                    maxsubt = -1
+
+                    for filename in os.listdir('../ClimMN/'+self.casename+'/'):
+                        match = patt.search(filename)
+                        if match:
+                            subtnum = int(match.group(1))
+                            if subtnum > maxsubt:
+                                maxsubt = subtnum
+                    
+                    climate_subtries = maxsubt
+                    
+                    # Re run Climate 
+                    subprocess.run('rm vpl_2col_climate_output_'+self.casename+'.run')
+                    if self.verbose == True:
+                        #print('Beginning 2 column Climate rerun')
+                        ftestingoutput.write('Beginning 2 column Climate rerun\n')
+                    self.run_climate_1instance(self.vplclimate_RunScriptDir+'RunVPLClimate_2column_'+self.casename+'.script', self.vplclimate_executable, trynum=self.num_2col_climate_runs, twocol=True)
+                    if self.verbose == True:
+                        #print('2 column Climate subtry number '+str(climate_subtries)+' completed')
+                        ftestingoutput.write('2 column Climate subtry number '+str(climate_subtries)+' completed\n')
+
+                    # Check convergence
+                    local_climate_convergence, tropheating_dayside, tropheating_nightside, avgflux = self.check_2column_vplclimate_conv(trynum=self.num_2col_climate_runs)
+
+                    if self.verbose == True:
+                        if local_climate_convergence == True:
+                            #print('2 column Climate convergence found on subtry number '+str(climate_subtries)+' for run number '+str(self.num_2col_climate_runs))
+                            ftestingoutput.write('2 column Climate convergence found on subtry number '+str(climate_subtries)+' for run number '+str(self.num_2col_climate_runs)+'\n')
+                        else:
+                            #print('2 column Climate convergence NOT found on subtry number '+str(climate_subtries)+' for run number '+str(self.num_2col_climate_runs)+', continuing rerun sequence')
+                            ftestingoutput.write('2 column Climate convergence NOT found on subtry number '+str(climate_subtries)+' for run number '+str(self.num_2col_climate_runs)+', continuing rerun sequence\n')
+
+
+
                 # Until climate converges, loop through taking new temp profile
                 while local_climate_convergence == False:
 
