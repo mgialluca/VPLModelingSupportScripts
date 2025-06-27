@@ -154,6 +154,9 @@ def run_one_model(inputstring):
     #edit_speciesdat(pipelineobj, h2oinput, oin, o2in, o3in, h2o2in)
     print(master+case)
     for sdshol, dshol, fishol in os.walk(master+case+'/'):
+        print(sdshol)
+        print(dshol)
+        print(fishol)
         break
 
     if 'FINAL_PTZ_mixingratios_out.dist' in fishol and 'vpl_2col_climate_output_'+case+'.run' in fishol:
