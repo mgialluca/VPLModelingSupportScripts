@@ -151,6 +151,7 @@ def run_one_model(inputstring):
     
     set_pipeline_vars(case, pipelineobj)
     #edit_speciesdat(pipelineobj, h2oinput, oin, o2in, o3in, h2o2in)
+    print(master+case)
     for sds, ds, fis in os.walk(master+case):
         break
 
