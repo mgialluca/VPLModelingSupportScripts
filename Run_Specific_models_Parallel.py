@@ -1,6 +1,7 @@
 from Pipeline import *
 import copy
 import subprocess
+import os
 from multiprocessing import Pool
 
 master = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/ClimMN/'
