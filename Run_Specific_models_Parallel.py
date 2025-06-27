@@ -153,17 +153,17 @@ def run_one_model(inputstring):
     set_pipeline_vars(case, pipelineobj)
     #edit_speciesdat(pipelineobj, h2oinput, oin, o2in, o3in, h2o2in)
     print(master+case)
-    for sds, ds, fis in os.walk(master+case):
+    for sdshol, dshol, fishol in os.walk(master+case+'/'):
         break
 
-    if 'FINAL_PTZ_mixingratios_out.dist' in fis and 'vpl_2col_climate_output_'+case+'.run' in fis:
+    if 'FINAL_PTZ_mixingratios_out.dist' in fishol and 'vpl_2col_climate_output_'+case+'.run' in fishol:
         pipelineobj.global_convergence = True
         pipelineobj.clim2col_restarting = True
 
     
     else:
     #elif 'FINAL_PTZ_mixingratios_out_FAILED.dist' in fis:
-        for fhold in fis:
+        for fhold in fishol:
             subprocess.run('rm -rf '+master+case+'/'+fhold)
         
         atmos_Dir = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/megan_atmos/atmos/'
