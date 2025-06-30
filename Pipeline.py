@@ -2802,7 +2802,7 @@ class VPLModelingPipeline:
                     patt = re.compile(r'Subtry(\d+)')
                     maxsubt = -1
 
-                    for filename in os.listdir('../ClimMN/'+self.casename+'/'):
+                    for filename in os.listdir(self.OutPath+self.casename'/'):
                         match = patt.search(filename)
                         if match:
                             subtnum = int(match.group(1))
@@ -2812,7 +2812,7 @@ class VPLModelingPipeline:
                     climate_subtries = maxsubt
                     
                     # Re run Climate 
-                    subprocess.run('rm vpl_2col_climate_output_'+self.casename+'.run')
+                    subprocess.run('rm '+self.OutPath+self.casename+'/vpl_2col_climate_output_'+self.casename+'.run')
                     if self.verbose == True:
                         #print('Beginning 2 column Climate rerun')
                         ftestingoutput.write('Beginning 2 column Climate rerun\n')
