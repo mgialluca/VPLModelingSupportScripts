@@ -2802,7 +2802,7 @@ class VPLModelingPipeline:
                     patt = re.compile(r'Subtry(\d+)')
                     maxsubt = -1
 
-                    for filename in os.listdir(self.OutPath+self.casename'/'):
+                    for filename in os.listdir(self.OutPath+self.casename+'/'):
                         match = patt.search(filename)
                         if match:
                             subtnum = int(match.group(1))
