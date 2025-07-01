@@ -168,7 +168,8 @@ def run_one_model(inputstring):
             subprocess.run('rm '+master+case+'/'+fhold, shell=True)
         
         atmos_Dir = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/megan_atmos/atmos/'
-        shutil.copytree(atmos_Dir,  master+case+'/atmos/')
+        if not os.path.exists(master+case+'/atmos/'):
+            shutil.copytree(atmos_Dir,  master+case+'/atmos/')
         subprocess.run('rm -rf '+pipelineobj.LBLABC_AbsFilesDir+'*.abs', shell=True)
 
 
