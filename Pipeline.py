@@ -73,7 +73,7 @@ class VPLModelingPipeline:
         self.photochem_global_converge = False
         self.climate_global_converge = False
         self.global_convergence = False
-        self.max_iterations_master = 100 # Never do anything more than 100x
+        self.max_iterations_master = 200 # Never do anything more than 100x
         self.max_iterations_climate = 200 # Never run climate more than 15x
         self.suppress_IOerrors = False # if convergence fails, raise IO errors if False, or just break running function if True
         self.run_spectra = True # If true, finished a converged run with smart 
@@ -2714,26 +2714,26 @@ class VPLModelingPipeline:
                 
                 ### Rerun the LBLABC files for the most recent atmosphere ------------------------------
                 
-                self.make_lblabc_runscripts()
+            self.make_lblabc_runscripts()
 
-                if self.MultiNest_DataFit == True: # To run LBLABC gases in parallel
+            if self.MultiNest_DataFit == True: # To run LBLABC gases in parallel
 
-                    lblabc_input = []
-                    for gas in self.molecule_dict['Gas_names']:
-                        lblabc_input.append([self.lblabc_RunScriptDir+'RunLBLABC_'+gas+'_'+self.casename+'.script', gas, 'Avg'])
-                    
-                    with Pool() as p:
-                        lblruns = p.map(self.run_lblabc_1instance_Parallel, lblabc_input)
+                lblabc_input = []
+                for gas in self.molecule_dict['Gas_names']:
+                    lblabc_input.append([self.lblabc_RunScriptDir+'RunLBLABC_'+gas+'_'+self.casename+'.script', gas, 'Avg'])
                 
-                else:
+                with Pool() as p:
+                    lblruns = p.map(self.run_lblabc_1instance_Parallel, lblabc_input)
+            
+            else:
 
-                    # Now Run LBLABC for all the gases of interest
-                    for gas in self.molecule_dict['Gas_names']:
-                        self.run_lblabc_1instance(self.lblabc_RunScriptDir+'RunLBLABC_'+gas+'_'+self.casename+'.script', gas)
-                        #if self.verbose == True:
-                            #print('LBLABC run for '+gas+' complete, LBLABC iteration '+str(self.num_lblabc_runs+1))
-                            #ftestingoutput.write('LBLABC run for '+gas+' complete, LBLABC iteration '+str(self.num_lblabc_runs+1)+'\n')
-                    self.num_lblabc_runs += 1
+                # Now Run LBLABC for all the gases of interest
+                for gas in self.molecule_dict['Gas_names']:
+                    self.run_lblabc_1instance(self.lblabc_RunScriptDir+'RunLBLABC_'+gas+'_'+self.casename+'.script', gas)
+                    #if self.verbose == True:
+                        #print('LBLABC run for '+gas+' complete, LBLABC iteration '+str(self.num_lblabc_runs+1))
+                        #ftestingoutput.write('LBLABC run for '+gas+' complete, LBLABC iteration '+str(self.num_lblabc_runs+1)+'\n')
+                self.num_lblabc_runs += 1
             
                 
             ### Rerun the LBLABC Section Finish ------------------------------
@@ -2816,6 +2816,9 @@ class VPLModelingPipeline:
                     if self.verbose == True:
                         #print('Beginning 2 column Climate rerun')
                         ftestingoutput.write('Beginning 2 column Climate rerun\n')
+                        ftestingoutput.close()
+                        ftestingoutput = open(self.OutPath+self.casename+'_SavingInfoOut.txt', 'a')
+
                     self.run_climate_1instance(self.vplclimate_RunScriptDir+'RunVPLClimate_2column_'+self.casename+'.script', self.vplclimate_executable, trynum=self.num_2col_climate_runs, twocol=True)
                     if self.verbose == True:
                         #print('2 column Climate subtry number '+str(climate_subtries)+' completed')

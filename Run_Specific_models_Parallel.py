@@ -45,6 +45,7 @@ def set_pipeline_vars(casename, pipelineobj, master_out=master):
     pipelineobj.suppress_IOerrors = True
     pipelineobj.MCMC_pressure_only = False
     pipelineobj.MultiNest_DataFit = False
+    pipelineobj.rerun_smart_for_2col = True
     
     if pipelineobj.MCMC_pressure_only == True:
         pipelineobj.include_2column_climate = False
@@ -158,6 +159,7 @@ def run_one_model(inputstring):
         break
 
     if 'FINAL_PTZ_mixingratios_out.dist' in fishol and 'vpl_2col_climate_output_'+case+'.run' in fishol:
+        print('continuing')
         pipelineobj.global_convergence = True
         pipelineobj.clim2col_restarting = True
 
