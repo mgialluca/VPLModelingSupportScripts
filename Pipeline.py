@@ -2680,7 +2680,7 @@ class VPLModelingPipeline:
         if self.verbose == True:
             ftestingoutput.write('Global Convergence, '+str(self.global_convergence)+'\n')
             ftestingoutput.write('Continuing 2 col? '+str(self.clim2col_restarting)+'\n')
-            ftestingoutput.write('runspec: '+str(self.run_spectra)+', include 2 col: '+str(self.include_2column_climate))
+            ftestingoutput.write('runspec: '+str(self.run_spectra)+', include 2 col: '+str(self.include_2column_climate)+'\n')
             ftestingoutput.close()
 
 
@@ -2716,7 +2716,7 @@ class VPLModelingPipeline:
                 
                 ### Rerun the LBLABC files for the most recent atmosphere ------------------------------
                 
-            self.make_lblabc_runscripts()
+                self.make_lblabc_runscripts()
 
             if self.MultiNest_DataFit == True: # To run LBLABC gases in parallel
 
