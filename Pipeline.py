@@ -2718,7 +2718,7 @@ class VPLModelingPipeline:
                 
             if self.clim2col_restarting == True:
 
-                planet = open(self.photochemDir+'INPUTFILES/PLANET.dat', 'r')
+                planet = open(self.photochem_InputsDir+'PLANET.dat', 'r')
                 planet_lines = planet.readlines()
                 planet.close()
                 grav = None
