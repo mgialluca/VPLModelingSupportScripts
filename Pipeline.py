@@ -2830,6 +2830,7 @@ class VPLModelingPipeline:
                     climate_subtries = 1
                 
                 else:
+                    self.num_2col_climate_runs += 1
                     patt = re.compile(r'Subtry(\d+)')
                     maxsubt = -1
 
@@ -2843,7 +2844,8 @@ class VPLModelingPipeline:
                     climate_subtries = maxsubt
                     
                     # Re run Climate 
-                    subprocess.run('rm '+self.OutPath+'vpl_2col_climate_output_'+self.casename+'.run', shell=True)
+                    if os.path.exists(self.OutPath+'vpl_2col_climate_output_'+self.casename+'.run'):
+                        subprocess.run('rm '+self.OutPath+'vpl_2col_climate_output_'+self.casename+'.run', shell=True)
                     if self.verbose == True:
                         #print('Beginning 2 column Climate rerun')
                         ftestingoutput.write('Beginning 2 column Climate rerun\n')
