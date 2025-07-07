@@ -2717,11 +2717,30 @@ class VPLModelingPipeline:
                 ### Rerun the LBLABC files for the most recent atmosphere ------------------------------
                 
             if self.clim2col_restarting == True:
-                f = open(self.OutPath+'RunVPLClimate_2column_'+self.casename+'.script')
+
+                planet = open(self.photochemDir+'INPUTFILES/PLANET.dat', 'r')
+                planet_lines = planet.readlines()
+                planet.close()
+                grav = None
+                rad = None
+                for i in planet_lines:
+                    if len(i.split('= G')) > 1:
+                        grav = float(i.split()[0])*(u.cm*u.s**-2).to(u.m*u.s**-2) #*1e-2 # Get the gravity from the first line of PLANET.dat and convert to m/s**2 (should be originally cm/s**2)
+                    elif len(i.split('= R0')) > 1:
+                        rad = float(i.split()[0])*u.cm.to(u.km) #*1e-5 # Get radius from PLANET.dat and convert from cm to km
+                    elif grav != None and rad != None:
+                        break
+                    
+                # Set object values
+                self.planetary_gravity = grav
+                self.planetary_radius = rad
+                
+                f = open(self.vplclimate_RunScriptDir+'RunVPLClimate_2column_'+self.casename+'.script')
                 lines = f.readlines()
                 for l in lines:
                     if len(l.split('atm mean mol wgt [g/mol]')) > 1:
                         self.MMW = float(l.split()[0])
+                        break
 
 
             self.make_lblabc_runscripts()
