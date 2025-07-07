@@ -2716,7 +2716,15 @@ class VPLModelingPipeline:
                 
                 ### Rerun the LBLABC files for the most recent atmosphere ------------------------------
                 
-                self.make_lblabc_runscripts()
+            if self.clim2col_restarting == True:
+                f = open(self.OutPath+'RunVPLClimate_2column_'+self.casename+'.script')
+                lines = f.readlines()
+                for l in lines:
+                    if len(l.split('atm mean mol wgt [g/mol]')) > 1:
+                        self.MMW = float(l.split()[0])
+
+
+            self.make_lblabc_runscripts()
 
             if self.MultiNest_DataFit == True: # To run LBLABC gases in parallel
 
@@ -2732,10 +2740,12 @@ class VPLModelingPipeline:
                 # Now Run LBLABC for all the gases of interest
                 for gas in self.molecule_dict['Gas_names']:
                     self.run_lblabc_1instance(self.lblabc_RunScriptDir+'RunLBLABC_'+gas+'_'+self.casename+'.script', gas)
-                    #if self.verbose == True:
+                    if self.verbose == True:
                         #print('LBLABC run for '+gas+' complete, LBLABC iteration '+str(self.num_lblabc_runs+1))
-                        #ftestingoutput.write('LBLABC run for '+gas+' complete, LBLABC iteration '+str(self.num_lblabc_runs+1)+'\n')
+                        ftestingoutput.write('LBLABC run for '+gas+' complete, LBLABC iteration '+str(self.num_lblabc_runs+1)+'\n')
                 self.num_lblabc_runs += 1
+                ftestingoutput.close()
+                ftestingoutput = open(self.OutPath+self.casename+'_SavingInfoOut.txt', 'a')
             
                 
             ### Rerun the LBLABC Section Finish ------------------------------
