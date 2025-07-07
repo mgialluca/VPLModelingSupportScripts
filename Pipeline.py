@@ -2680,6 +2680,7 @@ class VPLModelingPipeline:
         if self.verbose == True:
             ftestingoutput.write('Global Convergence, '+str(self.global_convergence)+'\n')
             ftestingoutput.write('Continuing 2 col? '+str(self.clim2col_restarting)+'\n')
+            ftestingoutput.write('runspec: '+str(self.run_spectra)+', include 2 col: '+str(self.include_2column_climate))
             ftestingoutput.close()
 
 
