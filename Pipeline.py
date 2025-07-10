@@ -42,6 +42,7 @@ class VPLModelingPipeline:
 
         # For T1-c 
         self.planetary_mass = 1.308*u.Mearth.to(u.kg)
+        self.c_NumberSolarZeniths = 4
 
         # The climate executable:
         self.vplclimate_executable = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/ClimateModel/vpl_climate_exec' # The VPL Climate executable you want to use WITH FULL PATH
@@ -1013,7 +1014,7 @@ class VPLModelingPipeline:
             self.c_TempChangeTolerance = 0.01
             self.c_DoubledRadiationGrid = True
             self.c_HRTCalcType = 3 # 3 - Global Hrt
-            self.c_NumberSolarZeniths = 4 # number of solar zenith angles used in avg
+            #self.c_NumberSolarZeniths = 4 # number of solar zenith angles used in avg
             self.c_IncludeRadiativeHrt = True
             self.c_IncludeConvectiveHrt = True
             self.c_IncludeConductiveHrt = False
