@@ -39,7 +39,7 @@ def set_pipeline_vars(casename, pipelineobj, master_out=master):
     pipelineobj.nightside_starting_PT = None
     pipelineobj.NewPressure_Psurf_tolerance = 0.035
 
-    pipelineobj.c_NumberSolarZeniths = 1
+    pipelineobj.c_NumberSolarZeniths = 4
 
     pipelineobj.adjust_atmospheric_pressure = True
     pipelineobj.suppress_IOerrors = True
@@ -93,7 +93,7 @@ def set_pipeline_vars(casename, pipelineobj, master_out=master):
         pipelineobj.molecule_dict[gas_names[m]] = pipelineobj.hitran_lookup.loc[gas_names[m]]['HitranNumber']
         pipelineobj.molecule_dict[gas_names[m]+'_RmixCol'] = m+2
 
-case = 'TestRun1'
+case = 'Test4sza'
 
 pipelineobj = VPLModelingPipeline(case, 
                                   master+case+'/PhotochemInputs/', 

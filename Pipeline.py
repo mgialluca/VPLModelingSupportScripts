@@ -2943,51 +2943,31 @@ class VPLModelingPipeline:
                 if self.verbose == True:
                     #print('Terminator SMART run completed')
                     ftestingoutput.write('Terminator SMART run completed\n')
-                    #ftestingoutput.close()
+                    ftestingoutput.close()
 
 
                 if self.rerun_smart_for_2col == True:
 
                     self.make_lblabc_runscripts(whichcol='dayside')
-
-                    # Now Run LBLABC for all the gases of interest
-                    for gas in self.molecule_dict['Gas_names']:
-                        self.run_lblabc_1instance_Parallel([self.lblabc_RunScriptDir+'RunLBLABC_'+gas+'_'+self.casename+'.script', gas, 'dayside'])
-                        #if self.verbose == True:
-                            #print('LBLABC run for '+gas+' complete, LBLABC iteration '+str(self.num_lblabc_runs+1))
-                            #ftestingoutput.write('LBLABC run for '+gas+' complete, LBLABC iteration '+str(self.num_lblabc_runs+1)+'\n')
-                    self.num_lblabc_runs += 1
-
-                    self.make_smart_runscript(whichcol='dayside')
-
-                    self.run_smart_1instance(self.SMART_RunScriptDir+'RunSMART_dayside_'+self.casename+'.run', whichcol='dayside')
-
-                    if self.verbose == True:
-                        #print('Dayside SMART run completed')
-                        ftestingoutput.write('Dayside SMART run completed\n')
-                        #ftestingoutput.close()
-
                     self.make_lblabc_runscripts(whichcol='nightside')
-
-                    # Now Run LBLABC for all the gases of interest
+                    lblabc_input = []
                     for gas in self.molecule_dict['Gas_names']:
-                        self.run_lblabc_1instance_Parallel([self.lblabc_RunScriptDir+'RunLBLABC_'+gas+'_'+self.casename+'.script', gas, 'nightside'])
-                        #if self.verbose == True:
-                            #print('LBLABC run for '+gas+' complete, LBLABC iteration '+str(self.num_lblabc_runs+1))
-                            #ftestingoutput.write('LBLABC run for '+gas+' complete, LBLABC iteration '+str(self.num_lblabc_runs+1)+'\n')
-                    self.num_lblabc_runs += 1
+                        lblabc_input.append([self.lblabc_RunScriptDir+'RunLBLABC_d_'+gas+'_'+self.casename+'.script', gas, 'dayside'])
+                        lblabc_input.append([self.lblabc_RunScriptDir+'RunLBLABC_n_'+gas+'_'+self.casename+'.script', gas, 'nightside'])
+                    
+                    #with Pool() as p:
+                    #    lblruns = p.map(self.run_lblabc_1instance_Parallel, lblabc_input)
+                    
+                    for lblinp in lblabc_input:
+                        self.run_lblabc_1instance_Parallel(lblinp)
+                    
+                    smartruninputs = ['dayside', 'nightside'] #'Avg', 
 
-                    self.make_smart_runscript(whichcol='nightside')
+                    #with Pool() as p:
+                        #smartrunsparallel = p.map(self.run_multinest_smart_parallel, smartruninputs)
 
-                    self.run_smart_1instance(self.SMART_RunScriptDir+'RunSMART_nightside_'+self.casename+'.run', whichcol='nightside')
-
-                    if self.verbose == True:
-                        #print('Nightside SMART run completed')
-                        ftestingoutput.write('Nightside SMART run completed\n')
-                        #ftestingoutput.close()
-                
-                if self.verbose == True:
-                    ftestingoutput.close()
+                    for sminp in smartruninputs:
+                        self.run_multinest_smart_parallel(sminp)
                     
             elif self.run_spectra == True and self.global_convergence == True and self.MultiNest_DataFit == True:
 
