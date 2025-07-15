@@ -21,7 +21,7 @@ from NewPressure_HelperFunctions import get_true_number_densities, sum_mixing_ra
 class VPLModelingPipeline:
 
     # Set Global and initialize atmosphere object:
-    def __init__(self, casename, photochemInitial, verbose, find_molecules_of_interest=False, hitran_year='2020') -> None:
+    def __init__(self, casename, photochemInitial, verbose, find_molecules_of_interest=False, hitran_year='2020', planet='T1c') -> None:
         # Set any and all needed paths
         self.photochemDir = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/megan_atmos/atmos/PHOTOCHEM/' #'/gscratch/vsm/gialluca/VPLModelingTools_Dev/atmos/PHOTOCHEM/' # path to PHOTOCHEM/ dir
         self.atmosDir = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/megan_atmos/atmos/'# '/gscratch/vsm/gialluca/VPLModelingTools_Dev/atmos/' # path to atmos/ dir
@@ -40,9 +40,25 @@ class VPLModelingPipeline:
         self.SMART_RunScriptDir = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/RunFiles/SMART/'+casename+'/' # path to put SMART runscripts in
         self.photochemInitialInput = photochemInitial
 
-        # For T1-c 
-        self.planetary_mass = 1.308*u.Mearth.to(u.kg)
+        # For T1-c, Mp = 1.308*u.Mearth.to(u.kg)
         self.c_NumberSolarZeniths = 4
+        self.planet = planet
+
+        if self.planet == 'T1b':
+            self.planetary_mass = 1.374*u.Mearth.to(u.kg)
+        elif self.planet == 'T1c':
+            self.planetary_mass = 1.308*u.Mearth.to(u.kg)
+        elif self.planet == 'T1d':
+            self.planetary_mass = 0.388*u.Mearth.to(u.kg)
+        elif self.planet == 'T1e':
+            self.planetary_mass = 0.692*u.Mearth.to(u.kg)
+        elif self.planet == 'T1f':
+            self.planetary_mass = 1.039*u.Mearth.to(u.kg)
+        elif self.planet == 'T1g':
+            self.planetary_mass = 1.321*u.Mearth.to(u.kg)
+        elif self.planet == 'T1h':
+            self.planetary_mass = 0.326*u.Mearth.to(u.kg)
+        
 
         # The climate executable:
         self.vplclimate_executable = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/ClimateModel/vpl_climate_exec' # The VPL Climate executable you want to use WITH FULL PATH
@@ -62,7 +78,7 @@ class VPLModelingPipeline:
 
         # Set the number of levels for the fine (photochem) and coarse (everything else) grids
         self.nlevel_fine = 200 # Number of atm layers for fine grids (i.e., for photochem)
-        self.nlevel_coarse = 30 # Number of atm layers for coarse grids (i.e., for all models besides photochem)
+        self.nlevel_coarse = 50 # Number of atm layers for coarse grids (i.e., for all models besides photochem)
 
         # Start counters to track how many times each model has been ran
         self.num_photochem_runs = 0
@@ -1003,88 +1019,115 @@ class VPLModelingPipeline:
     #
     def set_climate_settings(self):
 
-        planet = 'T1c' # Would suggest keeping all settings available for each target, this provides a quick way to switch between them
+        #self.planet = 'T1c' # Would suggest keeping all settings available for each target, this provides a quick way to switch between them
 
-        if planet == 'T1c':
-            self.c_NumberTimesteps = 10000
-            self.c_TimestepLength = 86400.0 # [s]
-            self.c_SubstepIntervals = 20
-            self.c_TimestepOutputIntervals = 50
-            self.c_TimeStepMethodIndex = 7
-            self.c_TempChangeTolerance = 0.01
-            self.c_DoubledRadiationGrid = True
-            self.c_HRTCalcType = 3 # 3 - Global Hrt
-            #self.c_NumberSolarZeniths = 4 # number of solar zenith angles used in avg
-            self.c_IncludeRadiativeHrt = True
-            self.c_IncludeConvectiveHrt = True
-            self.c_IncludeConductiveHrt = False
-            self.c_DayLength = 209260.80000000002 # [s], 2.42 days
-            self.c_YearLength = 1.0 # Length of year in days according to c_DayLength (1 when tidally locked)
-            self.c_OrbitalCalcType = 0 # 0 - fixed orbital distance
+        self.c_NumberTimesteps = 10000
+        self.c_TimestepLength = 86400.0 # [s]
+        self.c_SubstepIntervals = 20
+        self.c_TimestepOutputIntervals = 50
+        self.c_TimeStepMethodIndex = 7
+        self.c_TempChangeTolerance = 0.01
+        self.c_DoubledRadiationGrid = True
+        self.c_HRTCalcType = 3 # 3 - Global Hrt
+        #self.c_NumberSolarZeniths = 4 # number of solar zenith angles used in avg
+        self.c_IncludeRadiativeHrt = True
+        self.c_IncludeConvectiveHrt = True
+        self.c_IncludeConductiveHrt = False
+        # Day length in specific planet settings
+        self.c_YearLength = 1.0 # Length of year in days according to c_DayLength (1 when tidally locked)
+        self.c_OrbitalCalcType = 0 # 0 - fixed orbital distance
+        # Semi Major Axis in specific planet settings
+
+        #### THIS IS SPECIFIC TO THE TYPE OF ATMOSPHERE BEING TESTED, REVISIT
+        self.c_NumberMajorGases = 1 # Number of major absorbing gases?
+        self.c_MajorAbsorbingGas = 4 # For O2
+        ####################################
+
+        self.c_PressureJacobians = 0 # 0 - None, 1 - Radiance, 2 - Flux
+        self.c_TempJacobians = 2 # 0 - None, 1 - Radiance, 2 - Flux
+        self.c_Fractional_dtemp = 0.1
+        self.c_SolarTolerance = 1.0 
+        self.c_ThermalTolerance = 0.03
+        self.c_InternalSurfaceFlux = 0.0 # [W/m2]
+        self.c_ConvectiveType = 2 # 1 - adjustment, 2 - mixing length scheme, 3 - turbulent, 4 - moist mixing
+        self.c_MixingLengthType = 3 # 1 - fixed, 2 - proport to scale height, 3 - Blackadar aymptotic ML
+        self.c_MixingLengthProportionality = 0.01
+        self.c_MinEddyDiffusivity = 0.5 # [m2/s]
+        self.c_SurfaceWindSpeed = 10.0 #[m/s]
+        self.c_SurfRoughnessHeight = 0.0002 # [m]
+        self.c_NumberCondensibles = 0 
+        self.c_NumberAerosols = 0
+
+        # Surface Specs
+        self.c_SurfaceType = 0 # 0 - Lambertian Surface
+        self.c_AlbedoJacobians = 0 # 0 - None
+        self.c_SurfaceProfile = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/albedo/basalt_fresh.alb'
+        self.c_SurfProfile_SkipLines = 16
+        self.c_SurfProfile_wlalbedo_cols = '1,2'
+        self.c_SurfProfile_wlType = 1 # 1 - Wavelength
+        self.c_Convert_SurfProfilewl_microns = 1.0 # Conversion factor to microns
+        self.c_ScaleAlbedo = 1.0 # Factor to scale albedo
+
+        # Heating Specs
+        self.c_NumberStreams = 4
+        self.c_HRTSources = 3 # 1 - Solar, 2 - Thermal, 3 - Both
+
+        # Host Star Specs
+        self.c_StellarSpectrum = '/gscratch/vsm/gialluca/StellarSpectra/TRAPPIST-1_2020.dat'
+        self.c_StellarSpect_SkipLines = 10
+        self.c_SolarFluxUnits = 2 
+        self.c_SolarSpectralUnits = 1
+        self.c_Convert_Stellar_microns = 1.0 # Conversion factor to microns
+        self.c_StellarSpect_wnflux_col = '1,2'
+
+        # Output specs
+        self.c_OutputsType = 1 # 1 - Fluxes
+        self.c_NumberOutputAzimuths = 1
+        self.c_Azimuth = 0.0
+        self.c_OutputsLevel = 1 # 1 - TOA --- UNSURE ABOUT THIS AND THE LAST ONE DIFFERENCE
+        self.c_OutputsUnits = 2 # 2 - Radiance
+        self.c_ThermalMinMaxWn = '40.0,5000.0'
+        self.c_SolarMinMaxWn = '300.0, 50000.0'
+        self.c_SlitFunction = 2 # 2 - Triangular Slit function
+        self.c_SolarHWHM = 10.0
+        self.c_SolarRes = 10.0
+        self.c_ThermalHWHM = 1.0
+        self.c_ThermalRes = 1.0
+        self.c_TauError = 0.5
+        self.c_SingleScatterError = 0.35
+        self.c_AsymmetryParamError = 0.35
+        self.c_AlbedoError = 0.25
+        self.c_OutputFileType = 3 # 1 - ASCII, 3 - Binary No Header Output
+
+        if self.planet == 'T1b':
+            self.c_DayLength = 130464.0 # [s], 1.510 day
+            self.c_SemiMajorAxis = 0.01154 # [AU]
+
+        elif self.planet == 'T1c':
+            self.c_DayLength = 209174.4 # [s], 2.421 days
             self.c_SemiMajorAxis = 0.0158 # [AU]
 
-            #### THIS IS SPECIFIC TO THE TYPE OF ATMOSPHERE BEING TESTED, REVISIT
-            self.c_NumberMajorGases = 1 # Number of major absorbing gases?
-            self.c_MajorAbsorbingGas = 4 # For O2
-            ####################################
+        elif self.planet == 'T1d':
+            self.c_DayLength = 349833.6 # [s], 4.049 days
+            self.c_SemiMajorAxis = 0.02227 # [AU]
+        
+        elif self.planet == 'T1e':
+            self.c_DayLength = 527126.4 # [s], 6.101 days
+            self.c_SemiMajorAxis = 0.02925 # [AU]
 
-            self.c_PressureJacobians = 0 # 0 - None, 1 - Radiance, 2 - Flux
-            self.c_TempJacobians = 2 # 0 - None, 1 - Radiance, 2 - Flux
-            self.c_Fractional_dtemp = 0.1
-            self.c_SolarTolerance = 1.0 
-            self.c_ThermalTolerance = 0.03
-            self.c_InternalSurfaceFlux = 0.0 # [W/m2]
-            self.c_ConvectiveType = 2 # 1 - adjustment, 2 - mixing length scheme, 3 - turbulent, 4 - moist mixing
-            self.c_MixingLengthType = 3 # 1 - fixed, 2 - proport to scale height, 3 - Blackadar aymptotic ML
-            self.c_MixingLengthProportionality = 0.01
-            self.c_MinEddyDiffusivity = 0.5 # [m2/s]
-            self.c_SurfaceWindSpeed = 10.0 #[m/s]
-            self.c_SurfRoughnessHeight = 0.0002 # [m]
-            self.c_NumberCondensibles = 0 
-            self.c_NumberAerosols = 0
+        elif self.planet == 'T1f':
+            self.c_DayLength = 795484.8 # [s], 9.207 days
+            self.c_SemiMajorAxis = 0.03849 # [AU]
 
-            # Surface Specs
-            self.c_SurfaceType = 0 # 0 - Lambertian Surface
-            self.c_AlbedoJacobians = 0 # 0 - None
-            self.c_SurfaceProfile = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/albedo/basalt_fresh.alb'
-            self.c_SurfProfile_SkipLines = 16
-            self.c_SurfProfile_wlalbedo_cols = '1,2'
-            self.c_SurfProfile_wlType = 1 # 1 - Wavelength
-            self.c_Convert_SurfProfilewl_microns = 1.0 # Conversion factor to microns
-            self.c_ScaleAlbedo = 1.0 # Factor to scale albedo
+        elif self.planet == 'T1g':
+            self.c_DayLength = 1067212.8 # [s], 12.352 days
+            self.c_SemiMajorAxis = 0.04683 # [AU]
 
-            # Heating Specs
-            self.c_NumberStreams = 4
-            self.c_HRTSources = 3 # 1 - Solar, 2 - Thermal, 3 - Both
+        elif self.planet == 'T1h':
+            self.c_DayLength = 1621900.8 # [s], 18.772 days
+            self.c_SemiMajorAxis = 0.06189 # [AU]
 
-            # Host Star Specs
-            self.c_StellarSpectrum = '/gscratch/vsm/gialluca/StellarSpectra/TRAPPIST-1_2020.dat'
-            self.c_StellarSpect_SkipLines = 10
-            self.c_SolarFluxUnits = 2 
-            self.c_SolarSpectralUnits = 1
-            self.c_Convert_Stellar_microns = 1.0 # Conversion factor to microns
-            self.c_StellarSpect_wnflux_col = '1,2'
-
-            # Output specs
-            self.c_OutputsType = 1 # 1 - Fluxes
-            self.c_NumberOutputAzimuths = 1
-            self.c_Azimuth = 0.0
-            self.c_OutputsLevel = 1 # 1 - TOA --- UNSURE ABOUT THIS AND THE LAST ONE DIFFERENCE
-            self.c_OutputsUnits = 2 # 2 - Radiance
-            self.c_ThermalMinMaxWn = '40.0,5000.0'
-            self.c_SolarMinMaxWn = '300.0, 50000.0'
-            self.c_SlitFunction = 2 # 2 - Triangular Slit function
-            self.c_SolarHWHM = 10.0
-            self.c_SolarRes = 10.0
-            self.c_ThermalHWHM = 1.0
-            self.c_ThermalRes = 1.0
-            self.c_TauError = 0.5
-            self.c_SingleScatterError = 0.35
-            self.c_AsymmetryParamError = 0.35
-            self.c_AlbedoError = 0.25
-            self.c_OutputFileType = 3 # 1 - ASCII, 3 - Binary No Header Output
-
-        elif planet == 'Earth_SO2':
+        elif self.planet == 'Earth_SO2':
             self.c_NumberTimesteps = 10000
             self.c_TimestepLength = 86400.0 # [s]
             self.c_SubstepIntervals = 10
@@ -1174,65 +1217,66 @@ class VPLModelingPipeline:
     #
     def set_smart_settings(self):
 
-        planet = 'T1c' # Would suggest keeping all settings available for each target, this provides a quick way to switch between them
+        #self.planet = 'T1c' # Would suggest keeping all settings available for each target, this provides a quick way to switch between them
 
-        if planet == 'T1c':
+        self.s_PressJacobians = 0 # 0 - No pressure jacobians
+        self.s_TempJacobians = 0 # 0 - No temperature jacobians
 
-            self.s_PressJacobians = 0 # 0 - No pressure jacobians
-            self.s_TempJacobians = 0 # 0 - No temperature jacobians
+        # Following should be same as what's passed to climate
+        self.s_NumberAerosols = self.c_NumberAerosols # Number of Aerosols, should be same as climate, might be redundant
+        self.s_SurfaceType = self.c_SurfaceType # e.g., 0 for Lambertian reflection
+        self.s_AlbedoJacobians = self.c_AlbedoJacobians # albedo jacobians
+        self.s_SurfaceProfile = self.c_SurfaceProfile # Should be same as climate
+        self.s_SurfProfile_SkipLines = self.c_SurfProfile_SkipLines
+        self.s_SurfProfile_wlalbedo_cols = self.c_SurfProfile_wlalbedo_cols
+        self.s_SurfProfile_wlType = self.c_SurfProfile_wlType
+        self.s_Convert_SurfProfilewl_microns = self.c_Convert_SurfProfilewl_microns
+        self.s_ScaleAlbedo = self.c_ScaleAlbedo
+        self.s_SemiMajorAxis = self.c_SemiMajorAxis # account for planet specific
+        self.s_StellarRadius = 0.1192 # [Rsun]
 
-            # Following should be same as what's passed to climate
-            self.s_NumberAerosols = self.c_NumberAerosols # Number of Aerosols, should be same as climate, might be redundant
-            self.s_SurfaceType = self.c_SurfaceType # e.g., 0 for Lambertian reflection
-            self.s_AlbedoJacobians = self.c_AlbedoJacobians # albedo jacobians
-            self.s_SurfaceProfile = self.c_SurfaceProfile # Should be same as climate
-            self.s_SurfProfile_SkipLines = self.c_SurfProfile_SkipLines
-            self.s_SurfProfile_wlalbedo_cols = self.c_SurfProfile_wlalbedo_cols
-            self.s_SurfProfile_wlType = self.c_SurfProfile_wlType
-            self.s_Convert_SurfProfilewl_microns = self.c_Convert_SurfProfilewl_microns
-            self.s_ScaleAlbedo = self.c_ScaleAlbedo
-            self.s_SemiMajorAxis = 0.0158 # [AU]
-            self.s_StellarRadius = 0.1192 # [Rsun]
+        # Rayleigh scattering
+        self.s_NumRayleigh = 1 # Number of Rayleigh scatterers
+        self.s_RayleighIndex = 1 # Rayleigh scatter index
+        self.s_vmrRayleigh = 1.0 # Volumn Mixing Ratio of Rayleigh scatterer (?)
+        
+        # Heating Sources (NOTE Climate also uses these, but may be set differently)
+        self.s_NumberStreams = 4 # Number of streams
+        self.s_HRTSources = 3 # 1 - Solar, 2 - Thermal, 3 - Both
+        
+        # Host Star Specs (NOTE Climate also uses these, should match)
+        self.s_StellarSpectrum = '/gscratch/vsm/gialluca/StellarSpectra/TRAPPIST-1_2020.dat'
+        self.s_StellarSpect_SkipLines = 10
+        self.s_SolarFluxUnits = 2 
+        self.s_SolarSpectralUnits = 1
+        self.s_Convert_Stellar_microns = 1.0 # Conversion factor to microns
+        self.s_StellarSpect_wnflux_col = '1,2'
 
-            # Rayleigh scattering
-            self.s_NumRayleigh = 1 # Number of Rayleigh scatterers
-            self.s_RayleighIndex = 1 # Rayleigh scatter index
-            self.s_vmrRayleigh = 1.0 # Volumn Mixing Ratio of Rayleigh scatterer (?)
-            
-            # Heating Sources (NOTE Climate also uses these, but may be set differently)
-            self.s_NumberStreams = 4 # Number of streams
-            self.s_HRTSources = 3 # 1 - Solar, 2 - Thermal, 3 - Both
-            
-            # Host Star Specs (NOTE Climate also uses these, should match)
-            self.s_StellarSpectrum = '/gscratch/vsm/gialluca/StellarSpectra/TRAPPIST-1_2020.dat'
-            self.s_StellarSpect_SkipLines = 10
-            self.s_SolarFluxUnits = 2 
-            self.s_SolarSpectralUnits = 1
-            self.s_Convert_Stellar_microns = 1.0 # Conversion factor to microns
-            self.s_StellarSpect_wnflux_col = '1,2'
+        # Orientation Specs
+        self.s_NumZenith = 1 # number of solar zenith angles
+        self.s_ZenithAzimuth_Angles = '60,0' # Zenith and Azimuth angles
+        self.s_ConvergenceCriteria = 0.01 # convergence criteria, unsure exactly what it is in reference to
+        self.s_OutputFormat = 9 # Can't remember exact options, could see in smart manual run
+        self.s_TranistType = 2 # 2 - Ray Tracing Transit, need to verify this one for model generalizability
+        self.s_ImpactParam = 0.0
+        self.s_LimbDarkening = 0 # 0 - No limb darkening
+        self.s_NumAzimuths = 1 # Number of Azimuth angles
+        self.s_AzimuthAngles = 0.0 # Azimuth angles
+        self.s_OutputLevels = 1 # 1 - Top of atmosphere only
+        self.s_OutputUnits = 2 # 2 - [W/m**2/sr/um]
+        self.s_MinMax_wavenumber = '330.,2000.' #'50.,100000.'
+        self.s_GridType = 2 # 2 - slit
+        self.s_SpectralResponseFxn = 2 # 2 - Triangular Spectral Response Function
+        self.s_FWHM = 1.0
+        self.s_SampleRes = 1.0 # Sample resolution [cm**-1]
+        self.s_TauBinError = 0.25 # Error for Tau Binning
+        self.s_pi0BinError = 0.15 # Error for pi0 Binning
+        self.s_gError = 0.15 # g Error
+        self.s_AlbedoError = 0.02 # Albedo Error
+        self.s_OutputFileFormat = 1 # 1 - ascii
 
-            # Orientation Specs
-            self.s_NumZenith = 1 # number of solar zenith angles
-            self.s_ZenithAzimuth_Angles = '60,0' # Zenith and Azimuth angles
-            self.s_ConvergenceCriteria = 0.01 # convergence criteria, unsure exactly what it is in reference to
-            self.s_OutputFormat = 9 # Can't remember exact options, could see in smart manual run
-            self.s_TranistType = 2 # 2 - Ray Tracing Transit, need to verify this one for model generalizability
-            self.s_ImpactParam = 0.0
-            self.s_LimbDarkening = 0 # 0 - No limb darkening
-            self.s_NumAzimuths = 1 # Number of Azimuth angles
-            self.s_AzimuthAngles = 0.0 # Azimuth angles
-            self.s_OutputLevels = 1 # 1 - Top of atmosphere only
-            self.s_OutputUnits = 2 # 2 - [W/m**2/sr/um]
-            self.s_MinMax_wavenumber = '330.,2000.' #'50.,100000.'
-            self.s_GridType = 2 # 2 - slit
-            self.s_SpectralResponseFxn = 2 # 2 - Triangular Spectral Response Function
-            self.s_FWHM = 1.0
-            self.s_SampleRes = 1.0 # Sample resolution [cm**-1]
-            self.s_TauBinError = 0.25 # Error for Tau Binning
-            self.s_pi0BinError = 0.15 # Error for pi0 Binning
-            self.s_gError = 0.15 # g Error
-            self.s_AlbedoError = 0.02 # Albedo Error
-            self.s_OutputFileFormat = 1 # 1 - ascii
+        #if self.planet == 'T1c':
+
 
 
 

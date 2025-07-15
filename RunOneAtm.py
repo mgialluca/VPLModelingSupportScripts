@@ -2,16 +2,17 @@ from Pipeline import *
 import copy
 import subprocess
 import os
+from multiprocessing import Pool
 
-master = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/SZADependenceTest/'
+master = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/UpdatedStarts/'
 
 def set_pipeline_vars(casename, pipelineobj, master_out=master):
 
     # Paths are the main thing to set, because they will be massive amounts of running/files, want to keep each sweep colocated in one master dir
     atmos_Dir = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/megan_atmos/atmos/'
     # Create casename dir
-    #if not os.path.exists(master_out+casename+'/'):
-    #    os.mkdir(master_out+casename+'/')
+    if not os.path.exists(master_out+casename+'/'):
+        os.mkdir(master_out+casename+'/')
     
     shutil.copytree(atmos_Dir,  master_out + casename + '/atmos/')
 
@@ -31,27 +32,25 @@ def set_pipeline_vars(casename, pipelineobj, master_out=master):
     pipelineobj.SMART_RunScriptDir = master_out+casename+'/'
 
     # Adjust the atmospheric pressure
-    pipelineobj.adjust_atmospheric_pressure = True
-    pipelineobj.include_2column_climate = True
+    pipelineobj.adjust_atmospheric_pressure = False
+    pipelineobj.include_2column_climate = False
     pipelineobj.suppress_IOerrors = True
     pipelineobj.run_spectra = True
     pipelineobj.dayside_starting_PT = None
     pipelineobj.nightside_starting_PT = None
     pipelineobj.NewPressure_Psurf_tolerance = 0.035
 
-    pipelineobj.c_NumberSolarZeniths = 4
+    pipelineobj.c_NumberSolarZeniths = 1
 
-    pipelineobj.adjust_atmospheric_pressure = True
-    pipelineobj.suppress_IOerrors = True
     pipelineobj.MCMC_pressure_only = False
     pipelineobj.MultiNest_DataFit = False
-    pipelineobj.rerun_smart_for_2col = True
+    pipelineobj.rerun_smart_for_2col = False
     
     if pipelineobj.MCMC_pressure_only == True:
         pipelineobj.include_2column_climate = False
         pipelineobj.run_spectra = False
     else:
-        pipelineobj.include_2column_climate = True
+        pipelineobj.include_2column_climate = False
         pipelineobj.run_spectra = True
 
     if pipelineobj.MultiNest_DataFit == True:
@@ -93,6 +92,8 @@ def set_pipeline_vars(casename, pipelineobj, master_out=master):
         pipelineobj.molecule_dict[gas_names[m]] = pipelineobj.hitran_lookup.loc[gas_names[m]]['HitranNumber']
         pipelineobj.molecule_dict[gas_names[m]+'_RmixCol'] = m+2
 
+
+''' To run one atmosphere:
 case = 'Test4sza'
 
 pipelineobj = VPLModelingPipeline(case, 
@@ -102,3 +103,49 @@ pipelineobj = VPLModelingPipeline(case,
 set_pipeline_vars(case, pipelineobj)
 
 converged = pipelineobj.run_automatic()
+'''
+
+def run_starting_points(case):
+
+    master = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/UpdatedStarts/'
+
+    if case == 'T1bSt':
+        initin = master+'b/'
+        planet = 'T1b'
+    elif case == 'T1cSt':
+        initin = master+'c/'
+        planet = 'T1c'
+    elif case == 'T1dSt':
+        initin = master+'d/'
+        planet = 'T1d'
+    elif case == 'T1eSt':
+        initin = master+'e/'
+        planet = 'T1e'
+    elif case == 'T1fSt':
+        initin = master+'f/'
+        planet = 'T1f'
+    elif case == 'T1gSt':
+        initin = master+'g/'
+        planet = 'T1g'
+    elif case == 'T1hSt':
+        initin = master+'h/'
+        planet = 'T1h'
+
+    pipelineobj = VPLModelingPipeline(case, 
+                                    initin, 
+                                    True, find_molecules_of_interest=False, hitran_year='2020', planet=planet)
+    
+    set_pipeline_vars(case, pipelineobj)
+
+    converged = pipelineobj.run_automatic()
+
+    return pipelineobj
+
+
+
+cases = ['T1bSt', 'T1cSt', 'T1dSt', 'T1eSt', 'T1fSt', 'T1gSt', 'T1hSt']
+
+with Pool() as p:
+    models = p.map(run_starting_points, cases)
+
+
