@@ -137,13 +137,22 @@ def run_starting_points(case):
     
     set_pipeline_vars(case, pipelineobj)
 
+    for sdshol, dshol, fishol in os.walk(master+case+'/'):
+        fishol = fishol
+        break
+
+    for fhold in fishol:
+        subprocess.run('rm '+master+case+'/'+fhold, shell=True)
+
+    subprocess.run('rm -rf '+pipelineobj.LBLABC_AbsFilesDir+'*.abs', shell=True)
+
     converged = pipelineobj.run_automatic()
 
     return pipelineobj
 
 
 
-cases = ['T1bSt', 'T1cSt', 'T1dSt', 'T1eSt', 'T1fSt', 'T1gSt', 'T1hSt']
+cases = ['T1eSt', 'T1fSt', 'T1gSt']
 
 with Pool() as p:
     models = p.map(run_starting_points, cases)
