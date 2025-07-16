@@ -46,7 +46,7 @@ from mpi4py import MPI
 
 class Generate_Atmosphere_Parameter_Sweep:
 
-    def __init__(self, sweepname, photochemInitial, restart_run=False, starting_point='Exact', hitran_year='2020'):
+    def __init__(self, sweepname, photochemInitial, restart_run=False, starting_point='Exact', hitran_year='2020', climate2col=True, spectra=True, planet='T1c'):
 
         self.sweepname = sweepname # Naming convention for directory structure
         self.photochemInitial = photochemInitial # Input files for photochem to copy and change 
@@ -78,7 +78,7 @@ class Generate_Atmosphere_Parameter_Sweep:
         self.escape_species_molarmass['H2O2'] = [34.014]*(u.g/u.mol) 
 
         self.outgass_sample_type_gridsweep = ['Log'] # How to sample outgassed molecules: 'Linear', 'Log', or 'UserDef' 
-        self.escape_sample_type_gridsweep = ['Linear', 'Linear', 'Linear', 'UserDef'] #['UserDef', 'UserDef', 'UserDef', 'UserDef']
+        self.escape_sample_type_gridsweep = ['UserDef', 'UserDef', 'UserDef', 'UserDef'] #['UserDef', 'UserDef', 'UserDef', 'UserDef']
         # Linear - sample every flux on a linear grid (np.linspace) with some defined resolution
         # Log - sample every flux on a log grid (np.logspace) with some defined resolution
         # UserDef - User defined arrays of samples for every flux to vary 
@@ -94,31 +94,31 @@ class Generate_Atmosphere_Parameter_Sweep:
         #[90000000000.0, 100000000000.0] #[1.65329797e8, 3.00359578e12] # min, max
 
         self.escape_species_MinMax_gridsweep = {}
-        self.escape_species_MinMax_gridsweep['O'] = [0,10]
-        self.escape_species_MinMax_gridsweep['O2'] = [0,10]
-        self.escape_species_MinMax_gridsweep['O3'] = [0,0.5]
-        self.escape_species_MinMax_gridsweep['H2O2'] = [0,1]
+        self.escape_species_MinMax_gridsweep['O'] = []
+        self.escape_species_MinMax_gridsweep['O2'] = []
+        self.escape_species_MinMax_gridsweep['O3'] = []
+        self.escape_species_MinMax_gridsweep['H2O2'] = []
 
         # Sample resolution if using Linear / Log sampling 
-        self.outgass_sample_resolution_gridsweep = [7] # number of samples for each outgassed species
-        self.escape_sample_resolution_gridsweep = [3,3,3,0]
+        self.outgass_sample_resolution_gridsweep = [4] # number of samples for each outgassed species
+        self.escape_sample_resolution_gridsweep = []
 
         # Need to pass samples for user defined option
         self.outgass_samples_gridsweep = {}
         #self.outgass_samples_gridsweep['H2O'] = [78000000000.0]
 
         self.escape_samples_gridsweep = {}
-        #self.escape_samples_gridsweep['O'] = [0.01, 0.1]#[0, 1e27, 1e29]#[0, 1e27, 1e28, 1e29] #[1e28, 1e29, 1e30] #[0, 1e26, 1e27] #[0, 1e23, 5e23, 1e24, 5e24, 1e25, 5e25, 1e26]
-        #self.escape_samples_gridsweep['O2'] = [0.01, 0.1]#[1e26, 5e26, 1e27]
-        #self.escape_samples_gridsweep['O3'] = [0.01, 0.2, 0.4] 
-        self.escape_samples_gridsweep['H2O2'] = [0.02]
+        self.escape_samples_gridsweep['O'] = [0.01, 1]#[0, 1e27, 1e29]#[0, 1e27, 1e28, 1e29] #[1e28, 1e29, 1e30] #[0, 1e26, 1e27] #[0, 1e23, 5e23, 1e24, 5e24, 1e25, 5e25, 1e26]
+        self.escape_samples_gridsweep['O2'] = [0.01, 0.1]#[1e26, 5e26, 1e27]
+        self.escape_samples_gridsweep['O3'] = [0.02, 0.4] 
+        self.escape_samples_gridsweep['H2O2'] = [0.02, 1]
         
 
 
         # Units for either Min/Max values, or the user defined samples 
         self.outgass_species_units_gridsweep = 1 / (u.cm**2 * u.s) # molecules / cm2*s (can convert from mass/time with molar mass or mol/time)
         #self.escape_species_units_gridsweep = 1 / u.s # Molecules per second
-        self.escape_species_units_gridsweep = [u.cm/u.s, u.cm/u.s, u.cm / u.s, u.cm/u.s] # Molecules per second
+        self.escape_species_units_gridsweep = [u.cm/u.s, u.cm/u.s, u.cm/u.s, u.cm/u.s] # Molecules per second
 
         #######################################################################
 
@@ -129,6 +129,9 @@ class Generate_Atmosphere_Parameter_Sweep:
         # ... if this is 'Exact', that means the runs inputs will be the exact same ...
         # ... otherwise this will point to a run statistics file to use to determine the closest available input files
         self.master_out = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/'+self.sweepname+'/'
+        self.include_clim2col = climate2col
+        self.include_spectra = spectra
+        self.planet = planet
 
         # UNCOMMENT BEFORE RUNNING:
         if not os.path.exists(self.master_out):
@@ -173,13 +176,14 @@ class Generate_Atmosphere_Parameter_Sweep:
         pipelineobj.suppress_IOerrors = True
         pipelineobj.MCMC_pressure_only = self.mcmc_pressure_only
         pipelineobj.MultiNest_DataFit = self.multinest_fit_data
+        pipelineobj.include_2column_climate = self.include_clim2col
+        pipelineobj.rerun_smart_for_2col = self.include_clim2col
+        pipelineobj.run_spectra = self.include_spectra
+        pipelineobj.c_NumberSolarZeniths = 1
         
         if self.mcmc_pressure_only == True:
             pipelineobj.include_2column_climate = False
-            pipelineobj.run_spectra = False
-        else:
-            pipelineobj.include_2column_climate = True
-            pipelineobj.run_spectra = True
+            pipelineobj.run_spectra = False            
 
         if self.multinest_fit_data == True:
             copycase = pipelineobj.multinest_climate_copycase.split('/')[1]
@@ -574,7 +578,7 @@ class Generate_Atmosphere_Parameter_Sweep:
                     currmodel.multinest_climate_copycase = use_starting_point
 
         else:
-            currmodel = VPLModelingPipeline('RunNumber'+str(modelID), self.photochemInitial, verbose, find_molecules_of_interest=False, hitran_year=self.hitran_year)
+            currmodel = VPLModelingPipeline('RunNumber'+str(modelID), self.photochemInitial, verbose, find_molecules_of_interest=False, hitran_year=self.hitran_year, planet=self.planet)
 
         # Set relevant values of object 
         self.set_pipeline_vars('RunNumber'+str(modelID), currmodel)
