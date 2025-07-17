@@ -126,7 +126,8 @@ def run_starting_points(case):
         initin = master+'f/'
         planet = 'T1f'
     elif case == 'T1gSt':
-        initin = master+'g/'
+        #initin = master+'g/'
+        initin = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/UpdatedStarts/T1gSt/PhotochemInputs/'
         planet = 'T1g'
     elif case == 'T1hSt':
         initin = master+'h/'
@@ -153,7 +154,7 @@ def run_starting_points(case):
 
 
 
-cases = ['T1eSt', 'T1fSt', 'T1gSt']
+cases = ['T1gSt']
 
 with Pool() as p:
     models = p.map(run_starting_points, cases)

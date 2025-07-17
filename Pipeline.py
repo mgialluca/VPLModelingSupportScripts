@@ -995,7 +995,7 @@ class VPLModelingPipeline:
             f.write(str(self.planetary_gravity)+'                                   gravitational acceleration\n') # grav accel
             f.write(str(self.planetary_radius)+'                               planet radius\n') # planet radius
             f.write(str(self.MMW)+'                      mol. wgt. of atmosphere (kg/kmole)\n')
-            f.write('330.,2000.                               min, max wavenumber\n')
+            f.write('330.,20000.                               min, max wavenumber\n')
             f.write('200.                                    maximum line width\n')
             f.write('1.e-5                                   minimum column optical depth\n')
             f.write(self.HITRAN_FundamentalFile+'\n')
@@ -1264,7 +1264,7 @@ class VPLModelingPipeline:
         self.s_AzimuthAngles = 0.0 # Azimuth angles
         self.s_OutputLevels = 1 # 1 - Top of atmosphere only
         self.s_OutputUnits = 2 # 2 - [W/m**2/sr/um]
-        self.s_MinMax_wavenumber = '330.,2000.' #'50.,100000.'
+        self.s_MinMax_wavenumber = '330.,20000.' #'50.,100000.'
         self.s_GridType = 2 # 2 - slit
         self.s_SpectralResponseFxn = 2 # 2 - Triangular Spectral Response Function
         self.s_FWHM = 1.0
