@@ -982,8 +982,8 @@ class Generate_Atmosphere_Parameter_Sweep:
 
 
         # Compile the information
-        dat = [model_ID, final_state, final_pressure, climate_ran, fail_reason]
-        col_names = ['ModelNumber', 'FinalState', 'LastPsurf', 'ClimateRan', 'FailReason']
+        dat = [model_ID, final_state, clim2col_cnvtype, final_pressure, climate_ran, fail_reason]
+        col_names = ['ModelNumber', 'FinalState', '2colConv', 'LastPsurf', 'ClimateRan', 'FailReason']
         for col in rate_cols:
             col_names.append(col)
         for col in outgass_rates:
