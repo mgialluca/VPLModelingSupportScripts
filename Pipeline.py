@@ -863,7 +863,7 @@ class VPLModelingPipeline:
     # AvgFluxTolerance - Convergence check, last output value of avg flux must be <= this tolerance
     #          [W/m^2] to be converged
     ##
-    def check_2column_vplclimate_conv(self, trynum=1, TropHeatingTolerance=9e-2, AvgFluxTolerance=10):
+    def check_2column_vplclimate_conv(self, trynum=1, TropHeatingTolerance=9e-2, AvgFluxTolerance=10, climsubtry=1):
         # Set the output flag of converged or not (boolean)
         # Guilty until proven innocent
         HasItConverged = False
@@ -910,17 +910,38 @@ class VPLModelingPipeline:
                         break
 
         # Do Convergence checking
-        if np.abs(TropHeating_nightside) <= TropHeatingTolerance and np.abs(TropHeating_dayside) <= TropHeatingTolerance:
-            TropHeatingConverged = True
+        if climsubtry < 50:
+            cnvtype = 'Tier1'
+            if np.abs(TropHeating_nightside) <= TropHeatingTolerance and np.abs(TropHeating_dayside) <= TropHeatingTolerance:
+                TropHeatingConverged = True
 
-        AvgFlux = AvgFlux_dayside + AvgFlux_nightside
-        if np.abs(AvgFlux) <= AvgFluxTolerance:
-            AvgFluxConverged = True
+            AvgFlux = AvgFlux_dayside + AvgFlux_nightside
+            if np.abs(AvgFlux) <= AvgFluxTolerance:
+                AvgFluxConverged = True
 
-        # Overall convergence check:
-        if TropHeatingConverged == True and AvgFluxConverged == True:
-            HasItConverged = True
+            # Overall convergence check:
+            if TropHeatingConverged == True and AvgFluxConverged == True:
+                HasItConverged = True
+        
+        else:
+            AvgFlux = AvgFlux_dayside + AvgFlux_nightside
+            if np.abs(AvgFlux) <= AvgFluxTolerance:
+                AvgFluxConverged = True
 
+            # Overall convergence check:
+            if TropHeatingConverged == True and AvgFluxConverged == True:
+                HasItConverged = True
+
+            if np.abs(TropHeating_nightside) <= TropHeatingTolerance and np.abs(TropHeating_dayside) <= TropHeatingTolerance:
+                TropHeatingConverged = True
+                cnvtype = 'Tier1'
+            
+            elif np.abs(TropHeating_nightside) <= TropHeatingTolerance or np.abs(TropHeating_dayside) <= TropHeatingTolerance:
+                cnvtype = 'Tier2'
+            
+            else:
+                cnvtype = 'Tier3'
+            
         '''
         # Print messages:
         if self.verbose == True:
@@ -933,7 +954,7 @@ class VPLModelingPipeline:
             print('Avg Flux: '+str(AvgFlux)+' W/m**2\n')
         '''
 
-        return HasItConverged, TropHeating_dayside, TropHeating_nightside, AvgFlux
+        return HasItConverged, TropHeating_dayside, TropHeating_nightside, AvgFlux, cnvtype
     # usage should be 'convergence, tropheating_dayside, tropheating_nightside, avgflux = check_vplclimate_conv()
 
     ### Save the photochem run outputs to the backup directory
@@ -2861,8 +2882,10 @@ class VPLModelingPipeline:
                         #print('First 2 column Climate run completed')
                         ftestingoutput.write('First 2 column Climate run completed\n')
 
+                    climate_subtries = 1
+
                         # Check for local convergence of climate, similar to process followed for a given try on photochem            
-                    local_climate_convergence, tropheating_dayside, tropheating_nightside, avgflux = self.check_2column_vplclimate_conv(trynum=self.num_2col_climate_runs)
+                    local_climate_convergence, tropheating_dayside, tropheating_nightside, avgflux, cnvtype = self.check_2column_vplclimate_conv(trynum=self.num_2col_climate_runs, climsubtry=climate_subtries)
 
                     if self.verbose == True:
                         if local_climate_convergence == True:
@@ -2872,7 +2895,7 @@ class VPLModelingPipeline:
                             #print('2 column Climate convergence NOT found on first try for run number '+str(self.num_2col_climate_runs)+', beginning rerun sequence')
                             ftestingoutput.write('2 column Climate convergence NOT found on first try for run number '+str(self.num_2col_climate_runs)+', beginning rerun sequence\n')
 
-                    climate_subtries = 1
+                    
                 
                 else:
                     self.num_2col_climate_runs += 1
@@ -2903,12 +2926,13 @@ class VPLModelingPipeline:
                         ftestingoutput.write('2 column Climate subtry number '+str(climate_subtries)+' completed\n')
 
                     # Check convergence
-                    local_climate_convergence, tropheating_dayside, tropheating_nightside, avgflux = self.check_2column_vplclimate_conv(trynum=self.num_2col_climate_runs)
+                    local_climate_convergence, tropheating_dayside, tropheating_nightside, avgflux, cnvtype = self.check_2column_vplclimate_conv(trynum=self.num_2col_climate_runs, climsubtry=climate_subtries)
 
                     if self.verbose == True:
                         if local_climate_convergence == True:
                             #print('2 column Climate convergence found on subtry number '+str(climate_subtries)+' for run number '+str(self.num_2col_climate_runs))
                             ftestingoutput.write('2 column Climate convergence found on subtry number '+str(climate_subtries)+' for run number '+str(self.num_2col_climate_runs)+'\n')
+                            ftestingoutput.write('2 col cnv type: '+str(cnvtype)+'\n')
                         else:
                             #print('2 column Climate convergence NOT found on subtry number '+str(climate_subtries)+' for run number '+str(self.num_2col_climate_runs)+', continuing rerun sequence')
                             ftestingoutput.write('2 column Climate convergence NOT found on subtry number '+str(climate_subtries)+' for run number '+str(self.num_2col_climate_runs)+', continuing rerun sequence\n')
@@ -2948,12 +2972,13 @@ class VPLModelingPipeline:
                         ftestingoutput.write('2 column Climate subtry number '+str(climate_subtries)+' completed\n')
 
                     # Check convergence
-                    local_climate_convergence, tropheating_dayside, tropheating_nightside, avgflux = self.check_2column_vplclimate_conv(trynum=self.num_2col_climate_runs)
+                    local_climate_convergence, tropheating_dayside, tropheating_nightside, avgflux, cnvtype = self.check_2column_vplclimate_conv(trynum=self.num_2col_climate_runs, climsubtry=climate_subtries)
 
                     if self.verbose == True:
                         if local_climate_convergence == True:
                             #print('2 column Climate convergence found on subtry number '+str(climate_subtries)+' for run number '+str(self.num_2col_climate_runs))
                             ftestingoutput.write('2 column Climate convergence found on subtry number '+str(climate_subtries)+' for run number '+str(self.num_2col_climate_runs)+'\n')
+                            ftestingoutput.write('2 col cnv type: '+str(cnvtype)+'\n')
                         else:
                             #print('2 column Climate convergence NOT found on subtry number '+str(climate_subtries)+' for run number '+str(self.num_2col_climate_runs)+', continuing rerun sequence')
                             ftestingoutput.write('2 column Climate convergence NOT found on subtry number '+str(climate_subtries)+' for run number '+str(self.num_2col_climate_runs)+', continuing rerun sequence\n')

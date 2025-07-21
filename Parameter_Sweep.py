@@ -783,6 +783,7 @@ class Generate_Atmosphere_Parameter_Sweep:
 
         fail_reason = [] # Reason for failure, or NaN / None
         climate_ran = [] # If climate has starting running
+        clim2col_cnvtype = []
 
         # Set up data calls for outgassing & escape rates
         rate_cols = []
@@ -808,6 +809,7 @@ class Generate_Atmosphere_Parameter_Sweep:
             # If the run failed, try to find out why
             if os.path.exists(path_hold+'FINAL_out_FAILED.out'):
                 final_state.append('Failed')
+                clim2col_cnvtype.append('NA')
 
                 if dict_output == True:
                     d[model_ID_hold]['FinalState'] = 'Failed'
@@ -853,11 +855,37 @@ class Generate_Atmosphere_Parameter_Sweep:
 
             # The run was successful
             elif os.path.exists(path_hold+'FINAL_out.out'):
-                final_state.append('Converged')
-                fail_reason.append('NA')
+                if os.path.exists(path_hold+'RunSMART_'+model_ID_hold+'.trnst'):
+                    final_state.append('Converged')
+                    fail_reason.append('NA')
+
+                    if os.path.exists(path_hold+'RunVPLClimate_2column_'+model_ID_hold+'.script'):
+                        f = open(path_hold+model_ID_hold+'_SavingInfoOut.txt', 'r')
+                        lines = f.readlines()
+                        f.close()
+
+                        cnvtypehold = 'Tier1'
+                        for l in reversed(lines):
+                            hold = l.split('2 col cnv type')
+                            if len(hold) > 1:
+                                cnvtypehold = l.split()[len(l.split())-1]
+                                break
+                        
+                        clim2col_cnvtype.append(cnvtypehold)
+                        
+                else:
+                    if os.path.exists(path_hold+'RunVPLClimate_2column_'+model_ID_hold+'.script'):
+                        final_state.append('Unconv2col')
+                    else:
+                        final_state.append('Converged')
+                    fail_reason.append('NA')
+                    clim2col_cnvtype.append('NA')
 
                 if dict_output == True:
-                    d[model_ID_hold]['FinalState'] = 'Converged'
+                    if os.path.exists(path_hold+'RunSMART_'+model_ID_hold+'.trnst'):
+                        d[model_ID_hold]['FinalState'] = 'Converged'
+                    else:
+                        d[model_ID_hold]['FinalState'] = 'Unconv2col'
 
                     ptz = ascii.read(path_hold+'FINAL_PTZ_mixingratios_out.dist')
                     d[model_ID_hold]['PTZFile'] = {}
