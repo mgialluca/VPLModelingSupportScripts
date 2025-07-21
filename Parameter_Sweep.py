@@ -855,7 +855,7 @@ class Generate_Atmosphere_Parameter_Sweep:
 
             # The run was successful
             elif os.path.exists(path_hold+'FINAL_out.out'):
-                if os.path.exists(path_hold+'RunSMART_'+model_ID_hold+'.trnst'):
+                if os.path.exists(path_hold+'RunSMART_'+model_ID_hold+'.run'):
                     final_state.append('Converged')
                     fail_reason.append('NA')
 
