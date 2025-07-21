@@ -965,10 +965,11 @@ class Generate_Atmosphere_Parameter_Sweep:
         tab = Table(dat, names=col_names)
         ascii.write(tab, self.master_out+'ParameterSweep_RunStats_failedrun.dat', delimiter=' ', format='fixed_width')
 
-        f = open(self.master_out+'DataCompilation_wAtmProfiles.json', 'w')
-        dh = json.dumps(d)
-        json.dump(dh, f)
-        f.close()
+        if dict_output == True:
+            f = open(self.master_out+'DataCompilation_wAtmProfiles.json', 'w')
+            dh = json.dumps(d)
+            json.dump(dh, f)
+            f.close()
 
     # Compile the SMART spectra from converged runs for plotting
     def compile_smart_spectra(self, Num_of_Models=150):
