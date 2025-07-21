@@ -872,6 +872,9 @@ class Generate_Atmosphere_Parameter_Sweep:
                                 break
                         
                         clim2col_cnvtype.append(cnvtypehold)
+                    
+                    else:
+                        clim2col_cnvtype.append('NA')
                         
                 else:
                     if os.path.exists(path_hold+'RunVPLClimate_2column_'+model_ID_hold+'.script'):
@@ -897,6 +900,7 @@ class Generate_Atmosphere_Parameter_Sweep:
             else:
                 final_state.append('Timeout')
                 fail_reason.append('NA')
+                clim2col_cnvtype.append('NA')
 
                 if dict_output == True:
                     d[model_ID_hold]['FinalState'] = 'Timeout'
