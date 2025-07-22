@@ -929,7 +929,7 @@ class VPLModelingPipeline:
                 AvgFluxConverged = True
 
             # Overall convergence check:
-            if TropHeatingConverged == True and AvgFluxConverged == True:
+            if AvgFluxConverged == True:
                 HasItConverged = True
 
             if np.abs(TropHeating_nightside) <= TropHeatingTolerance and np.abs(TropHeating_dayside) <= TropHeatingTolerance:
