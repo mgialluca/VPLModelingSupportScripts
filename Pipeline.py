@@ -58,6 +58,8 @@ class VPLModelingPipeline:
             self.planetary_mass = 1.321*u.Mearth.to(u.kg)
         elif self.planet == 'T1h':
             self.planetary_mass = 0.326*u.Mearth.to(u.kg)
+        elif self.planet == 'Earth':
+            self.planetary_mass = 1*u.Mearth.to(u.kg)
         
 
         # The climate executable:
@@ -1016,7 +1018,10 @@ class VPLModelingPipeline:
             f.write(str(self.planetary_gravity)+'                                   gravitational acceleration\n') # grav accel
             f.write(str(self.planetary_radius)+'                               planet radius\n') # planet radius
             f.write(str(self.MMW)+'                      mol. wgt. of atmosphere (kg/kmole)\n')
-            f.write('330.,20000.                               min, max wavenumber\n')
+            if self.planet == 'Earth':
+                f.write('50.,100000.                               min, max wavenumber\n')   
+            else:
+                f.write('330.,20000.                               min, max wavenumber\n')
             f.write('200.                                    maximum line width\n')
             f.write('1.e-5                                   minimum column optical depth\n')
             f.write(self.HITRAN_FundamentalFile+'\n')
@@ -1147,6 +1152,29 @@ class VPLModelingPipeline:
         elif self.planet == 'T1h':
             self.c_DayLength = 1621900.8 # [s], 18.772 days
             self.c_SemiMajorAxis = 0.06189 # [AU]
+        
+        elif self.planet == 'Earth':
+            self.c_DayLength = 86400.0 # [s], 2.42 days
+            self.c_YearLength = 365.25 # Length of year in days according to c_DayLength (1 when tidally locked)
+            self.c_SemiMajorAxis = 1 # [AU]
+
+            self.c_SurfaceType = 0 # 0 - Lambertian Surface
+            self.c_AlbedoJacobians = 0 # 0 - None
+            self.c_SurfaceProfile = '/gscratch/vsm/alinc/fixed_input/albedo/earth1.alb'
+            self.c_SurfProfile_SkipLines = 6
+            self.c_SurfProfile_wlalbedo_cols = '1,2'
+            self.c_SurfProfile_wlType = 1 # 1 - Wavelength
+            self.c_Convert_SurfProfilewl_microns = 1.0 # Conversion factor to microns
+            self.c_ScaleAlbedo = 1.15 # Factor to scale albedo
+
+            self.c_StellarSpectrum = '/gscratch/vsm/alinc/fixed_input/specs/Kurucz1cm-1_susim_atlas2_1361.dat'
+            self.c_StellarSpect_SkipLines = 204
+            self.c_SolarFluxUnits = 1 
+            self.c_SolarSpectralUnits = 2
+            self.c_Convert_Stellar_microns = 1.0 # Conversion factor to microns
+            self.c_StellarSpect_wnflux_col = '1,2'
+
+
 
         elif self.planet == 'Earth_SO2':
             self.c_NumberTimesteps = 10000
@@ -1254,7 +1282,10 @@ class VPLModelingPipeline:
         self.s_Convert_SurfProfilewl_microns = self.c_Convert_SurfProfilewl_microns
         self.s_ScaleAlbedo = self.c_ScaleAlbedo
         self.s_SemiMajorAxis = self.c_SemiMajorAxis # account for planet specific
-        self.s_StellarRadius = 0.1192 # [Rsun]
+        if self.planet == 'Earth':
+            self.s_StellarRadius = 1
+        else:
+            self.s_StellarRadius = 0.1192 # [Rsun]
 
         # Rayleigh scattering
         self.s_NumRayleigh = 1 # Number of Rayleigh scatterers
@@ -1266,12 +1297,13 @@ class VPLModelingPipeline:
         self.s_HRTSources = 3 # 1 - Solar, 2 - Thermal, 3 - Both
         
         # Host Star Specs (NOTE Climate also uses these, should match)
-        self.s_StellarSpectrum = '/gscratch/vsm/gialluca/StellarSpectra/TRAPPIST-1_2020.dat'
-        self.s_StellarSpect_SkipLines = 10
-        self.s_SolarFluxUnits = 2 
-        self.s_SolarSpectralUnits = 1
-        self.s_Convert_Stellar_microns = 1.0 # Conversion factor to microns
-        self.s_StellarSpect_wnflux_col = '1,2'
+
+        self.s_StellarSpectrum = self.c_StellarSpectrum 
+        self.s_StellarSpect_SkipLines = self.c_StellarSpect_SkipLines
+        self.s_SolarFluxUnits = self.c_SolarFluxUnits
+        self.s_SolarSpectralUnits = self.c_SolarSpectralUnits
+        self.s_Convert_Stellar_microns = self.c_Convert_Stellar_microns # Conversion factor to microns
+        self.s_StellarSpect_wnflux_col = self.c_StellarSpect_wnflux_col
 
         # Orientation Specs
         self.s_NumZenith = 1 # number of solar zenith angles
@@ -1285,7 +1317,10 @@ class VPLModelingPipeline:
         self.s_AzimuthAngles = 0.0 # Azimuth angles
         self.s_OutputLevels = 1 # 1 - Top of atmosphere only
         self.s_OutputUnits = 2 # 2 - [W/m**2/sr/um]
-        self.s_MinMax_wavenumber = '330.,20000.' #'50.,100000.'
+        if self.planet == 'Earth':
+            self.s_MinMax_wavenumber = '50.,100000.'
+        else:
+            self.s_MinMax_wavenumber = '330.,20000.' #'50.,100000.'
         self.s_GridType = 2 # 2 - slit
         self.s_SpectralResponseFxn = 2 # 2 - Triangular Spectral Response Function
         self.s_FWHM = 1.0

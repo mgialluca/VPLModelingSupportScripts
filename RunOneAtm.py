@@ -4,7 +4,7 @@ import subprocess
 import os
 from multiprocessing import Pool
 
-master = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/UpdatedStarts/'
+master = '/gscratch/vsm/gialluca/PostDocPropose/'
 
 def set_pipeline_vars(casename, pipelineobj, master_out=master):
 
@@ -41,7 +41,7 @@ def set_pipeline_vars(casename, pipelineobj, master_out=master):
     pipelineobj.nightside_starting_PT = None
     pipelineobj.NewPressure_Psurf_tolerance = 0.035
 
-    pipelineobj.c_NumberSolarZeniths = 1
+    pipelineobj.c_NumberSolarZeniths = 4
 
     pipelineobj.MCMC_pressure_only = False
     pipelineobj.MultiNest_DataFit = False
@@ -50,10 +50,7 @@ def set_pipeline_vars(casename, pipelineobj, master_out=master):
     if pipelineobj.MCMC_pressure_only == True:
         pipelineobj.include_2column_climate = False
         pipelineobj.run_spectra = False
-    else:
-        pipelineobj.include_2column_climate = False
-        pipelineobj.run_spectra = True
-
+    
     if pipelineobj.MultiNest_DataFit == True:
         pipelineobj.multinest_climate_copycase = 'ClimTestMulti/Run99'
         copycase = pipelineobj.multinest_climate_copycase.split('/')[1]
@@ -87,25 +84,26 @@ def set_pipeline_vars(casename, pipelineobj, master_out=master):
     # Molecules for the type of atmosphere we're interested in 
 
     pipelineobj.molecule_dict = {} # key-value pairs of molecules of interest (keys, str) and their hitran codes (value, int)
-    gas_names = ['O2', 'H2O', 'O3']
+    gas_names = ['O2', 'H2O', 'O3', 'CO2', 'CO', 'CH4', 'N2O']
     pipelineobj.molecule_dict['Gas_names'] = gas_names
     for m in range(len(gas_names)):
         pipelineobj.molecule_dict[gas_names[m]] = pipelineobj.hitran_lookup.loc[gas_names[m]]['HitranNumber']
         pipelineobj.molecule_dict[gas_names[m]+'_RmixCol'] = m+2
 
 
-''' To run one atmosphere:
-case = 'Test4sza'
+# To run one atmosphere:
+case = 'Baseline'
 
 pipelineobj = VPLModelingPipeline(case, 
-                                  master+case+'/PhotochemInputs/', 
-                                  True, find_molecules_of_interest=False, hitran_year='2020')
+                                  '/gscratch/vsm/gialluca/VPLModelingTools_Dev/atmos/PHOTOCHEM/INPUTFILES/TEMPLATES/ModernEarth/', 
+                                  True, find_molecules_of_interest=False, hitran_year='2020', planet='Earth')
     
 set_pipeline_vars(case, pipelineobj)
 
 converged = pipelineobj.run_automatic()
-'''
 
+
+'''
 def run_starting_points(case):
 
     master = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/UpdatedStarts/'
@@ -159,4 +157,4 @@ cases = ['T1gSt']
 with Pool() as p:
     models = p.map(run_starting_points, cases)
 
-
+'''
