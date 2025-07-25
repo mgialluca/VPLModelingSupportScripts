@@ -57,6 +57,8 @@ class Generate_Atmosphere_Parameter_Sweep:
         elif hitran_year == '2016':
             self.lblabc_qtxt_dir = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/lblabc/hitranQtips/'
 
+        self.planet = planet
+
         if self.planet == 'T1b':
             self.R_p = 1.116*u.Rearth
         elif self.planet == 'T1c':
@@ -144,7 +146,7 @@ class Generate_Atmosphere_Parameter_Sweep:
         self.master_out = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/'+self.sweepname+'/'
         self.include_clim2col = climate2col
         self.include_spectra = spectra
-        self.planet = planet
+        
 
         # UNCOMMENT BEFORE RUNNING:
         if not os.path.exists(self.master_out):
