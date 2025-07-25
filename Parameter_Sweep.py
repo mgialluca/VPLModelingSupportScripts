@@ -30,9 +30,9 @@ from scipy.optimize import minimize
 # - Load the ompi module
 # - Add the multinest path to LD_LIBRARY_PATH
 
-#import pymultinest
-#import mpi4py
-#from mpi4py import MPI
+import pymultinest
+import mpi4py
+from mpi4py import MPI
 
 
 # Need to figure out how parameter sweeps are running:
@@ -123,10 +123,10 @@ class Generate_Atmosphere_Parameter_Sweep:
         #self.outgass_samples_gridsweep['H2O'] = [78000000000.0]
 
         self.escape_samples_gridsweep = {}
-        self.escape_samples_gridsweep['O'] = [0.01, 0.5]#[0, 1e27, 1e29]#[0, 1e27, 1e28, 1e29] #[1e28, 1e29, 1e30] #[0, 1e26, 1e27] #[0, 1e23, 5e23, 1e24, 5e24, 1e25, 5e25, 1e26]
-        self.escape_samples_gridsweep['O2'] = [0.01, 0.05]#[1e26, 5e26, 1e27]
-        self.escape_samples_gridsweep['O3'] = [0.02, 0.4] 
-        self.escape_samples_gridsweep['H2O2'] = [0.02, 1]
+        self.escape_samples_gridsweep['O'] = [0.001, 0.005]#[0, 1e27, 1e29]#[0, 1e27, 1e28, 1e29] #[1e28, 1e29, 1e30] #[0, 1e26, 1e27] #[0, 1e23, 5e23, 1e24, 5e24, 1e25, 5e25, 1e26]
+        self.escape_samples_gridsweep['O2'] = [0.001, 0.005]#[1e26, 5e26, 1e27]
+        self.escape_samples_gridsweep['O3'] = [0.001, 0.01] 
+        self.escape_samples_gridsweep['H2O2'] = [0.001, 0.01]
         
 
 
