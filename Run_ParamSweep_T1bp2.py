@@ -3,7 +3,7 @@ import subprocess
 
 
 #'/gscratch/vsm/gialluca/VPLModelingTools_Dev/SensTestH2O/RunNumber175/
-test_object = Generate_Atmosphere_Parameter_Sweep('BT2', 
+test_object = Generate_Atmosphere_Parameter_Sweep('BT2p2', 
                                   '/gscratch/vsm/gialluca/VPLModelingTools_Dev/UpdatedStarts/T1bSt/PhotochemInputs/', 
                                 restart_run= False, 
                                 starting_point='Exact',
@@ -23,8 +23,8 @@ test_object.escape_samples_gridsweep['O'] = []
 test_object.escape_species_MinMax_gridsweep['O'] = [0.175, 0.835]
 
 test_object.escape_samples_gridsweep['O2'] = [0.1]#[1e26, 5e26, 1e27]
-test_object.escape_samples_gridsweep['O3'] = [0.4] 
-test_object.escape_samples_gridsweep['H2O2'] = [1]
+test_object.escape_samples_gridsweep['O3'] = [0.02] 
+test_object.escape_samples_gridsweep['H2O2'] = [0.02]
 
 #test_object.compile_info_failed_run()
 test_object.run_grid_sweep()

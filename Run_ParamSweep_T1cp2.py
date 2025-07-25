@@ -20,7 +20,7 @@ test_object.escape_sample_type_gridsweep = ['UserDef', 'UserDef', 'UserDef', 'Us
 test_object.escape_sample_resolution_gridsweep = []
 
 test_object.escape_samples_gridsweep['O'] = [0.01]
-test_object.escape_samples_gridsweep['O2'] = [0.001, 0.005, 0.05, 0.15, 0.2]#[1e26, 5e26, 1e27]
+test_object.escape_samples_gridsweep['O2'] = [0.005, 0.05, 0.1, 0.5, 2]#[1e26, 5e26, 1e27]
 test_object.escape_samples_gridsweep['O3'] = [0.02] 
 test_object.escape_samples_gridsweep['H2O2'] = [0.02]
 

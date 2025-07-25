@@ -57,7 +57,20 @@ class Generate_Atmosphere_Parameter_Sweep:
         elif hitran_year == '2016':
             self.lblabc_qtxt_dir = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/lblabc/hitranQtips/'
 
-        self.R_p = 1.097*u.Rearth # Currently radius of Trappist-1c 
+        if self.planet == 'T1b':
+            self.R_p = 1.116*u.Rearth
+        elif self.planet == 'T1c':
+            self.R_p = 1.097*u.Rearth # Currently radius of Trappist-1c 
+        elif self.planet == 'T1d':
+            self.R_p = 0.788*u.Rearth
+        elif self.planet == 'T1e':
+            self.R_p = 0.920*u.Rearth
+        elif self.planet == 'T1f':
+            self.R_p = 1.045*u.Rearth
+        elif self.planet == 'T1g':
+            self.R_p = 1.129*u.Rearth
+        elif self.planet == 'T1h':
+            self.R_p = 0.755*u.Rearth
 
         self.atmos_Dir = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/atmos/' # Path to dir containing atmos, will be copied for runs 
 
