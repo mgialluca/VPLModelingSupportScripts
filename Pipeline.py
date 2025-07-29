@@ -1837,7 +1837,8 @@ class VPLModelingPipeline:
         f.write(str(self.s_StellarSpect_SkipLines)+'			Lines to Skip\n')
         f.write(str(self.s_SolarFluxUnits)+'			Units solar flux\n')
         f.write(str(self.s_SolarSpectralUnits)+'			Solar spectral units\n')
-        f.write(str(self.s_Convert_Stellar_microns)+'			Micron Conversion Factor\n')
+        if self.s_SolarSpectralUnits != 2:
+            f.write(str(self.s_Convert_Stellar_microns)+'			Micron Conversion Factor\n')
         f.write(str(self.s_StellarSpect_wnflux_col)+' 		Columns of wn and Flux\n')
         f.write(str(self.s_NumZenith)+'			Number of Solar Zenith Angles\n')
         f.write(str(self.s_ZenithAzimuth_Angles)+'			Zenith and Azimuth Angles\n')
