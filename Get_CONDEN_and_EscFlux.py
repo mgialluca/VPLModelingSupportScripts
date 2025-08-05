@@ -2,6 +2,7 @@ import os
 from astropy.io import ascii
 import numpy as np 
 import astropy.units as u
+import json
 
 def get_conden_esc_flux(sweepdir, planet='T1b'):
 
@@ -55,6 +56,9 @@ def get_conden_esc_flux(sweepdir, planet='T1b'):
                     d[run]['Oesc'] = oesc
                     d[run]['O2esc'] = o2esc
 
-                
-                
+    f = open(sweepdir+planet+'_conden_escapefluxes.json', 'w')
+    dh = json.dumps(d)
+    json.dump(dh, f)
+    f.close()
+    
     return d
