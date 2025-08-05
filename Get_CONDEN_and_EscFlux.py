@@ -57,3 +57,4 @@ def get_conden_esc_flux(sweepdir, planet='T1b'):
 
                 
                 
+    return d
