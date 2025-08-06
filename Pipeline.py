@@ -2281,7 +2281,8 @@ class VPLModelingPipeline:
         planetdat_new.close()
         planetdat_old.close()
 
-
+        subprocess.run('rm '+self.photochem_InputsDir+'PLANET.dat', shell=True)
+        subprocess.run('mv '+self.photochem_InputsDir+'New_PLANET.dat '+self.photochem_InputsDir+'PLANET.dat', shell=True)
 
 
 
@@ -2371,8 +2372,8 @@ class VPLModelingPipeline:
 
             # If you need more N2 than pressure available, update the species and PLANET.dat
             if self.n2mixingrat >= 1:
-                self.updated_atm_pressure = self.N2_fixed_pressure/0.9
-                self.n2mixingrat = 0.9
+                self.updated_atm_pressure = self.N2_fixed_pressure/0.99
+                self.n2mixingrat = 0.99
 
                 self.update_N2_totalpressure_planetdat()
 
@@ -2459,8 +2460,8 @@ class VPLModelingPipeline:
 
                             # If you need more N2 than pressure available, update the species and PLANET.dat
                             if self.n2mixingrat >= 1:
-                                self.updated_atm_pressure = self.N2_fixed_pressure/0.9
-                                self.n2mixingrat = 0.9
+                                self.updated_atm_pressure = self.N2_fixed_pressure/0.99
+                                self.n2mixingrat = 0.99
 
                                 self.update_N2_totalpressure_planetdat()
 
@@ -2534,8 +2535,8 @@ class VPLModelingPipeline:
 
                         # If you need more N2 than pressure available, update the species and PLANET.dat
                         if self.n2mixingrat >= 1:
-                            self.updated_atm_pressure = self.N2_fixed_pressure/0.9
-                            self.n2mixingrat = 0.9
+                            self.updated_atm_pressure = self.N2_fixed_pressure/0.99
+                            self.n2mixingrat = 0.99
 
                             self.update_N2_totalpressure_planetdat()
 
@@ -2597,8 +2598,8 @@ class VPLModelingPipeline:
 
                     # If you need more N2 than pressure available, update the species and PLANET.dat
                     if self.n2mixingrat >= 1:
-                        self.updated_atm_pressure = self.N2_fixed_pressure/0.9
-                        self.n2mixingrat = 0.9
+                        self.updated_atm_pressure = self.N2_fixed_pressure/0.99
+                        self.n2mixingrat = 0.99
                         n2converged = False
 
                         self.update_N2_totalpressure_planetdat()
@@ -2707,13 +2708,14 @@ class VPLModelingPipeline:
 
                             # If you need more N2 than pressure available, update the species and PLANET.dat
                             if self.n2mixingrat >= 1:
-                                self.updated_atm_pressure = self.N2_fixed_pressure/0.9
-                                self.n2mixingrat = 0.9
+                                self.updated_atm_pressure = self.N2_fixed_pressure/0.99
+                                self.n2mixingrat = 0.99
                                 ftestingoutput.write('N2 too large, updated pressure should be:'+str(self.updated_atm_pressure)+'\n')
+                                
+                                self.update_N2_totalpressure_planetdat(ftestingoutput)
                                 ftestingoutput.close()
                                 ftestingoutput = open(self.OutPath+self.casename+'_SavingInfoOut.txt', 'a')
 
-                                self.update_N2_totalpressure_planetdat()
 
                             # Update species file for N2:
                             self.update_N2_mixingrat_speciesdat()
