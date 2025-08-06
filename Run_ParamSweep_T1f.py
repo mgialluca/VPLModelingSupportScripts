@@ -3,7 +3,7 @@ import subprocess
 
 
 #'/gscratch/vsm/gialluca/VPLModelingTools_Dev/SensTestH2O/RunNumber175/
-test_object = Generate_Atmosphere_Parameter_Sweep('Finit', 
+test_object = Generate_Atmosphere_Parameter_Sweep('Fhighn2', 
                                   '/gscratch/vsm/gialluca/VPLModelingTools_Dev/UpdatedStarts/T1fSt/PhotochemInputs/', 
                                 restart_run= True, 
                                 starting_point='Exact',
@@ -14,6 +14,7 @@ test_object = Generate_Atmosphere_Parameter_Sweep('Finit',
 
 # Outgassing rate for T1h
 test_object.outgass_species_MinMax_gridsweep['H2O'] = [44380169.91551189, 7.39523609e11]
+test_object.adjust_N2 = 0.05 # 0.05 bars of N2 fixed
 
 #test_object.compile_info_failed_run()
 test_object.run_grid_sweep()

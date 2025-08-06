@@ -146,6 +146,7 @@ class Generate_Atmosphere_Parameter_Sweep:
         self.master_out = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/'+self.sweepname+'/'
         self.include_clim2col = climate2col
         self.include_spectra = spectra
+        self.adjust_N2 = False # Set to the partial pressure number if you want to change that in the runs
         
 
         # UNCOMMENT BEFORE RUNNING:
@@ -195,6 +196,10 @@ class Generate_Atmosphere_Parameter_Sweep:
         pipelineobj.rerun_smart_for_2col = self.include_clim2col
         pipelineobj.run_spectra = self.include_spectra
         pipelineobj.c_NumberSolarZeniths = 1
+
+        if type(self.adjust_N2) != bool:
+            pipelineobj.adjust_N2_amount = True
+            pipelineobj.N2_fixed_pressure = self.adjust_N2
         
         if self.mcmc_pressure_only == True:
             pipelineobj.include_2column_climate = False

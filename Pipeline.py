@@ -102,6 +102,9 @@ class VPLModelingPipeline:
         self.MultiNest_DataFit = False # If true, skip any climate runs, parallelize over smart calls and LBLABC
         self.clim2col_restarting = False # If true, restarting a run that was in the middle of running 2 column
 
+        self.adjust_N2_amount = False # If true, adjust inert N2 to a specific pressure given by self.N2_fixed_pressure
+        self.N2_fixed_pressure = 0.05 # pressure to adjust inert N2 to, in bars
+
         self.include_2column_climate = True
 
         # Option to start with a different 2 column dayside/nightside PT than what is found through 1D 
@@ -2213,8 +2216,73 @@ class VPLModelingPipeline:
         subprocess.run('rm '+self.photochem_InputsDir+'in.dist', shell=True)
         subprocess.run('mv '+self.photochem_InputsDir+'NEWin.dist '+self.photochem_InputsDir+'in.dist', shell=True)
 
-
     ### 
+
+    ### Purpose: Update the inert N2 mixing ratio in species.dat
+    ##
+    ## Attribute Dependencies:
+    # self.photochem_InputsDir - to find the species.dat file to update
+    #
+    ## Fxn-specific Inputs:
+    # n2mixingrat - new mixing ratio to use
+    ##
+    def update_N2_mixingrat_speciesdat(self, n2mixingrat):
+
+        species_new = open(self.photochem_InputsDir+'New_species.dat', 'w')
+        species_old = open(self.photochem_InputsDir+'species.dat', 'r')
+
+        lines = species_old.readlines()
+        for l in lines:
+            if len(l.split()) > 1:
+                if l.split()[0] == 'N2':
+                    species_new.write('N2         IN  0 0 0 0 2 0    '+"{:.3E}".format(n2mixingrat)+'\n')
+                else:
+                    species_new.write(l)
+            else:
+                species_new.write(l)
+
+        species_new.close()
+        species_old.close()
+        
+        # Delete old species and rename fixed version to be species.dat
+        subprocess.run('rm '+self.photochem_InputsDir+'species.dat', shell=True)
+        subprocess.run('mv '+self.photochem_InputsDir+'New_species.dat '+self.photochem_InputsDir+'species.dat', shell=True)
+
+
+    ### Purpose: Update the planet.dat total pressure if N2 was meant to be much greater than the total 
+    ##
+    ## Attribute Dependencies:
+    # self.photochem_InputsDir - to find the planet.dat file to update
+    #
+    ## Fxn-specific Inputs:
+    # 
+    ##
+    def update_N2_totalpressure_planetdat(self):
+
+        # Updating planet dat:
+        planetdat_new = open(self.photochem_InputsDir+'New_PLANET.dat', 'w')
+        planetdat_old = open(self.photochem_InputsDir+'PLANET.dat', 'r')
+
+        planetdat_lines = planetdat_old.readlines()
+        for l in planetdat_lines:
+            hold = l.split()
+            if 'surface' in hold and 'pressure' in hold:
+                planetdat_new.write("{:.2e}".format(self.updated_atm_pressure))
+                planetdat_new.write(' = P0, surface pressure [bar] \n')
+            else:
+                if 'DZGRID' in hold:
+                    if self.updated_atm_pressure >= 1:
+                        planetdat_new.write('0.75e+05 = DZGRID [cm] \n')
+                    else:
+                        planetdat_new.write('4.95e+04 = DZGRID [cm] \n')
+                else:
+                    planetdat_new.write(l)
+
+        planetdat_new.close()
+        planetdat_old.close()
+
+
+
 
 
     ### AUTOMATIC PIPELINE, calls all above functions sequentially defined by flow chart, updates necessary object parameters
@@ -2260,20 +2328,25 @@ class VPLModelingPipeline:
             else:
                 ftestingoutput = open(self.OutPath+self.casename+'_SavingInfoOut.txt', 'a')
 
+
+        ##########################
+        # Find the atmospheric pressure used 
+        self.updated_atm_pressure = -1
+
+        # Get original pressure and update DZGrid
         if self.adjust_atmospheric_pressure == True:
-            self.updated_atm_pressure = -1
-
-            # Get original pressure and update DZGrid
             planetdat_new = open(self.photochem_InputsDir+'New_PLANET.dat', 'w')
-            planetdat_old = open(self.photochem_InputsDir+'PLANET.dat', 'r')
+        planetdat_old = open(self.photochem_InputsDir+'PLANET.dat', 'r')
 
-            planetdat_lines = planetdat_old.readlines()
-            for l in planetdat_lines:
-                hold = l.split()
-                if 'surface' in hold and 'pressure' in hold:
-                    self.updated_atm_pressure = float(hold[0])
+        planetdat_lines = planetdat_old.readlines()
+        for l in planetdat_lines:
+            hold = l.split()
+            if 'surface' in hold and 'pressure' in hold:
+                self.updated_atm_pressure = float(hold[0])
+                if self.adjust_atmospheric_pressure == True:
                     planetdat_new.write(l)
-                else:
+            else:
+                if self.adjust_atmospheric_pressure == True:
                     if 'DZGRID' in hold:
                         if self.updated_atm_pressure >= 1:
                             planetdat_new.write('0.75e+05 = DZGRID [cm] \n')
@@ -2282,15 +2355,34 @@ class VPLModelingPipeline:
                     else:
                         planetdat_new.write(l)
 
+        if self.adjust_atmospheric_pressure == True:
             planetdat_new.close()
-            planetdat_old.close()
+        planetdat_old.close()
 
+        if self.adjust_atmospheric_pressure == True:
             subprocess.run('rm '+self.photochem_InputsDir+'PLANET.dat', shell=True)
             subprocess.run('mv '+self.photochem_InputsDir+'New_PLANET.dat '+self.photochem_InputsDir+'PLANET.dat', shell=True)
+        ##########################
 
+        ##########################
+        # If N2 is supposed to be adjusted, find the mixing ratio and set in the species file
+        if self.adjust_N2_amount == True:
+            n2mixingrat = self.N2_fixed_pressure / self.updated_atm_pressure
 
-            if self.verbose == True:
-                ftestingoutput.write('Starting pressure: '+str(self.updated_atm_pressure)+' bars\n')
+            # If you need more N2 than pressure available, update the species and PLANET.dat
+            if n2mixingrat >= 1:
+                self.updated_atm_pressure = self.N2_fixed_pressure/0.9
+                n2mixingrat = 0.9
+
+                self.update_N2_totalpressure_planetdat()
+
+            # Update species file for N2:
+            self.update_N2_mixingrat_speciesdat(n2mixingrat)
+
+        ##########################
+
+        if self.verbose == True:
+            ftestingoutput.write('Starting pressure: '+str(self.updated_atm_pressure)+' bars\n')
 
         climate_subtries = 0
 
@@ -2350,11 +2442,27 @@ class VPLModelingPipeline:
                                 break
 
                         pressure_converged, maxchange, holdnewsurfp = self.change_atmospheric_pressure(after_sgbsl_err=True)
+
+                        # If N2 needs to be adjusted:
+                        if self.adjust_N2_amount == True:
+                            n2mixingrat = self.N2_fixed_pressure / self.updated_atm_pressure
+
+                            # If you need more N2 than pressure available, update the species and PLANET.dat
+                            if n2mixingrat >= 1:
+                                self.updated_atm_pressure = self.N2_fixed_pressure/0.9
+                                n2mixingrat = 0.9
+
+                                self.update_N2_totalpressure_planetdat()
+
+                            # Update species file for N2:
+                            self.update_N2_mixingrat_speciesdat(n2mixingrat)
+
                         if self.verbose == True:
                             #print('Attempting to adjust pressure to fix SGBSL error')
                             #print('New Pressure would be: '+str(holdnewsurfp)+' bars, using pressure of: '+str(self.updated_atm_pressure)+' bars')
                             ftestingoutput.write('Attempting to adjust pressure to fix SGBSL error\n')
                             ftestingoutput.write('New Pressure would be: '+str(holdnewsurfp)+' bars, using pressure of: '+str(self.updated_atm_pressure)+' bars\n\n')
+
 
             # If photochem did not converge, try try again
             while local_photochem_conv == False:
@@ -2409,6 +2517,21 @@ class VPLModelingPipeline:
                             self.MMW = float(i.split()[len(i.split())-1])
                             break
                     pressure_converged, maxchange, holdnewsurfp = self.change_atmospheric_pressure(after_sgbsl_err=True)
+
+                    # If N2 needs to be adjusted:
+                    if self.adjust_N2_amount == True:
+                        n2mixingrat = self.N2_fixed_pressure / self.updated_atm_pressure
+
+                        # If you need more N2 than pressure available, update the species and PLANET.dat
+                        if n2mixingrat >= 1:
+                            self.updated_atm_pressure = self.N2_fixed_pressure/0.9
+                            n2mixingrat = 0.9
+
+                            self.update_N2_totalpressure_planetdat()
+
+                        # Update species file for N2:
+                        self.update_N2_mixingrat_speciesdat(n2mixingrat)
+
                     if self.verbose == True:
                         #print('Attempting to adjust pressure to fix SGBSL error')
                         #print('New Pressure: '+str(holdnewsurfp)+' bars, using pressure of: '+str(self.updated_atm_pressure)+' bars')
@@ -2457,12 +2580,31 @@ class VPLModelingPipeline:
             if self.adjust_atmospheric_pressure == True:
                 pressure_converged, maxchange, holdnewsurfp = self.change_atmospheric_pressure()
 
+                # If N2 needs to be adjusted:
+                if self.adjust_N2_amount == True:
+                    n2mixingrat = self.N2_fixed_pressure / self.updated_atm_pressure
+                    n2converged = True
+
+                    # If you need more N2 than pressure available, update the species and PLANET.dat
+                    if n2mixingrat >= 1:
+                        self.updated_atm_pressure = self.N2_fixed_pressure/0.9
+                        n2mixingrat = 0.9
+                        n2converged = False
+
+                        self.update_N2_totalpressure_planetdat()
+
+                    # Update species file for N2:
+                    self.update_N2_mixingrat_speciesdat(n2mixingrat)
+
                 if self.verbose == True:
                     #print('New Pressure found: '+"{:.4e}".format(holdnewsurfp)+' bars')
                     ftestingoutput.write('New Pressure found: '+"{:.4e}".format(holdnewsurfp)+' bars\n')
                     if pressure_converged == True:
                         #print('Pressure converged, no need to rerun photochem')
                         ftestingoutput.write('Pressure converged, no need to rerun photochem\n')
+                        if n2converged == False:
+                            ftestingoutput.write('BUT N2 pressure larger than total, rerunning\n')
+                            pressure_converged = False
                 
                 if pressure_converged == False:
 
@@ -2548,6 +2690,21 @@ class VPLModelingPipeline:
                                 break
 
                         pressure_converged, maxchange, holdnewsurfp = self.change_atmospheric_pressure(after_sgbsl_err=sgbslerror)
+
+                        # If N2 needs to be adjusted:
+                        if self.adjust_N2_amount == True:
+                            n2mixingrat = self.N2_fixed_pressure / self.updated_atm_pressure
+
+                            # If you need more N2 than pressure available, update the species and PLANET.dat
+                            if n2mixingrat >= 1:
+                                self.updated_atm_pressure = self.N2_fixed_pressure/0.9
+                                n2mixingrat = 0.9
+                                pressure_converged = False
+
+                                self.update_N2_totalpressure_planetdat()
+
+                            # Update species file for N2:
+                            self.update_N2_mixingrat_speciesdat(n2mixingrat)
 
                         if pressure_converged == True and sgbslerror == True:
                             pressure_converged = False
