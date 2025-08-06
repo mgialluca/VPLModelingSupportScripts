@@ -18,7 +18,8 @@ def get_true_number_densities(indistdic):
 
 # Find the sum of mixing ratios as a function of altitude
 # NZ - the number of layers used in photochem (self.nlevel_fine in the pipeline)
-def sum_mixing_ratios(indistdic, NZ):
+# n2mixingrat - fixed mixing ratio of N2
+def sum_mixing_ratios(indistdic, NZ, n2mixingrat):
 
     sumsarr = np.zeros(NZ)
 
@@ -26,6 +27,9 @@ def sum_mixing_ratios(indistdic, NZ):
         for i in indistdic.keys():
             if i not in ['Temp', 'Edd', 'NDens']: # Exclude these from the calculation for now ig
                 sumsarr[lvl] = sumsarr[lvl] + indistdic[i][lvl]
+
+        # Add the N2
+        sumsarr[lvl] = sumsarr[lvl] + n2mixingrat
 
     return sumsarr
 
