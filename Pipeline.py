@@ -2712,7 +2712,7 @@ class VPLModelingPipeline:
                                 self.n2mixingrat = 0.99
                                 ftestingoutput.write('N2 too large, updated pressure should be:'+str(self.updated_atm_pressure)+'\n')
                                 
-                                self.update_N2_totalpressure_planetdat(ftestingoutput)
+                                self.update_N2_totalpressure_planetdat()
                                 ftestingoutput.close()
                                 ftestingoutput = open(self.OutPath+self.casename+'_SavingInfoOut.txt', 'a')
 
