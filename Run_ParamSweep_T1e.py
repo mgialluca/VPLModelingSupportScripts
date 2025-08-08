@@ -3,7 +3,7 @@ import subprocess
 
 
 #'/gscratch/vsm/gialluca/VPLModelingTools_Dev/SensTestH2O/RunNumber175/
-test_object = Generate_Atmosphere_Parameter_Sweep('Einit', 
+test_object = Generate_Atmosphere_Parameter_Sweep('Ezoom1', 
                                   '/gscratch/vsm/gialluca/VPLModelingTools_Dev/UpdatedStarts/T1eSt/PhotochemInputs/', 
                                 restart_run= True, 
                                 starting_point='Exact',
