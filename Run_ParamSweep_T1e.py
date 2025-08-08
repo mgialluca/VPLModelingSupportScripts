@@ -13,7 +13,14 @@ test_object = Generate_Atmosphere_Parameter_Sweep('Einit',
                                 planet='T1e')
 
 # Outgassing rate for T1h
-test_object.outgass_species_MinMax_gridsweep['H2O'] = [41227874.20930379, 5.1613525e11]
+test_object.outgass_species_MinMax_gridsweep['H2O'] = [22228000000.0, 5.1613525e11]#[41227874.20930379, 5.1613525e11]
+
+test_object.outgass_sample_resolution_gridsweep = [16]
+
+test_object.escape_samples_gridsweep['O'] = [0.0001, 0.001]
+test_object.escape_samples_gridsweep['O2'] = [0.0001, 0.001]
+test_object.escape_samples_gridsweep['O3'] = [0.02] 
+test_object.escape_samples_gridsweep['H2O2'] = [0.02]
 
 #test_object.compile_info_failed_run()
 test_object.run_grid_sweep()
