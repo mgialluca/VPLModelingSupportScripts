@@ -3,7 +3,7 @@ import subprocess
 
 
 #'/gscratch/vsm/gialluca/VPLModelingTools_Dev/SensTestH2O/RunNumber175/
-test_object = Generate_Atmosphere_Parameter_Sweep('Binit', 
+test_object = Generate_Atmosphere_Parameter_Sweep('Bzoom1', 
                                   '/gscratch/vsm/gialluca/VPLModelingTools_Dev/UpdatedStarts/T1bSt/PhotochemInputs/', 
                                 restart_run= True, 
                                 starting_point='Exact',
@@ -13,7 +13,7 @@ test_object = Generate_Atmosphere_Parameter_Sweep('Binit',
                                 planet='T1b')
 
 # Outgassing rate for T1b
-test_object.outgass_species_MinMax_gridsweep['H2O'] = [45737798.59485552, 1.01148276e12]
+test_object.outgass_species_MinMax_gridsweep['H2O'] = [3.60355158e10, 1.01148276e12]#[45737798.59485552, 1.01148276e12]
 
 '''
 test_object.outgass_sample_resolution_gridsweep = [4]
