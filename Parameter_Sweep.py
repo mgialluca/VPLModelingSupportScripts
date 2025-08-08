@@ -200,7 +200,7 @@ class Generate_Atmosphere_Parameter_Sweep:
         if type(self.adjust_N2) != bool:
             pipelineobj.adjust_N2_amount = True
             pipelineobj.N2_fixed_pressure = self.adjust_N2
-            pipelineobj.NewPressure_Psurf_tolerance = 0.05
+            pipelineobj.NewPressure_Psurf_tolerance = 0.06
         
         if self.mcmc_pressure_only == True:
             pipelineobj.include_2column_climate = False
