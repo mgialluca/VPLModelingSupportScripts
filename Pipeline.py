@@ -2613,9 +2613,10 @@ class VPLModelingPipeline:
                     if pressure_converged == True:
                         #print('Pressure converged, no need to rerun photochem')
                         ftestingoutput.write('Pressure converged, no need to rerun photochem\n')
-                        if n2converged == False:
-                            ftestingoutput.write('BUT N2 pressure larger than total, rerunning\n')
-                            pressure_converged = False
+                        if self.adjust_N2_amount == True:
+                            if n2converged == False:
+                                ftestingoutput.write('BUT N2 pressure larger than total, rerunning\n')
+                                pressure_converged = False
                 
                 if pressure_converged == False:
 
