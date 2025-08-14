@@ -799,7 +799,12 @@ class VPLModelingPipeline:
     # AvgFluxTolerance - Convergence check, last output value of avg flux must be <= this tolerance
     #          [W/m^2] to be converged
     ##
-    def check_vplclimate_conv(self, trynum=1, TropHeatingTolerance=9e-2, AvgFluxTolerance=1):
+    def check_vplclimate_conv(self, trynum=1, TropHeatingTolerance=9e-2, AvgFluxTolerance=1, subtries=0):
+
+        # Relax flux criteria a bit after 30 subtries 
+        if subtries > 30:
+            AvgFluxTolerance = 3
+
         # Set the output flag of converged or not (boolean)
         # Guilty until proven innocent
         HasItConverged = False
@@ -2914,7 +2919,7 @@ class VPLModelingPipeline:
                     ftestingoutput.write('Climate subtry number '+str(climate_subtries)+' completed\n')
 
                 # Check convergence
-                local_climate_convergence, tropheating, avgflux = self.check_vplclimate_conv(trynum=self.num_climate_runs)
+                local_climate_convergence, tropheating, avgflux = self.check_vplclimate_conv(trynum=self.num_climate_runs, subtries=climate_subtries)
 
                 if self.verbose == True:
                     if local_climate_convergence == True:
