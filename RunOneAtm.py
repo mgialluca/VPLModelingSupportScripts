@@ -4,9 +4,9 @@ import subprocess
 import os
 from multiprocessing import Pool
 
-master = '/gscratch/vsm/gialluca/PostDocPropose/'
+master = '/gscratch/vsm/gialluca/T1dAtms/'
 
-def set_pipeline_vars(casename, pipelineobj, master_out=master):
+def set_pipeline_vars(casename, pipelineobj, gas_names, master_out=master):
 
     # Paths are the main thing to set, because they will be massive amounts of running/files, want to keep each sweep colocated in one master dir
     atmos_Dir = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/megan_atmos/atmos/'
@@ -34,7 +34,7 @@ def set_pipeline_vars(casename, pipelineobj, master_out=master):
 
     # Adjust the atmospheric pressure
     pipelineobj.adjust_atmospheric_pressure = False
-    pipelineobj.include_2column_climate = False
+    pipelineobj.include_2column_climate = True
     pipelineobj.suppress_IOerrors = True
     pipelineobj.run_spectra = True
     pipelineobj.dayside_starting_PT = None
@@ -45,7 +45,7 @@ def set_pipeline_vars(casename, pipelineobj, master_out=master):
 
     pipelineobj.MCMC_pressure_only = False
     pipelineobj.MultiNest_DataFit = False
-    pipelineobj.rerun_smart_for_2col = False
+    pipelineobj.rerun_smart_for_2col = True
     
     if pipelineobj.MCMC_pressure_only == True:
         pipelineobj.include_2column_climate = False
@@ -84,13 +84,14 @@ def set_pipeline_vars(casename, pipelineobj, master_out=master):
     # Molecules for the type of atmosphere we're interested in 
 
     pipelineobj.molecule_dict = {} # key-value pairs of molecules of interest (keys, str) and their hitran codes (value, int)
-    gas_names = ['O2', 'H2O', 'O3', 'CO2', 'CO', 'CH4', 'N2O']
+    #gas_names = ['O2', 'H2O', 'O3', 'CO2', 'CO', 'CH4', 'N2O']
     pipelineobj.molecule_dict['Gas_names'] = gas_names
     for m in range(len(gas_names)):
         pipelineobj.molecule_dict[gas_names[m]] = pipelineobj.hitran_lookup.loc[gas_names[m]]['HitranNumber']
         pipelineobj.molecule_dict[gas_names[m]+'_RmixCol'] = m+2
 
 
+'''
 # To run one atmosphere:
 case = 'Baseline'
 
@@ -101,13 +102,16 @@ pipelineobj = VPLModelingPipeline(case,
 set_pipeline_vars(case, pipelineobj)
 
 converged = pipelineobj.run_automatic()
-
-
 '''
-def run_starting_points(case):
 
-    master = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/UpdatedStarts/'
 
+def run_starting_points(inputs):
+
+    master = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/T1dAtms/'
+    case, gasnames = inputs
+    initin = master+case+'/PhotochemInputs/'
+
+    '''
     if case == 'T1bSt':
         initin = master+'b/'
         planet = 'T1b'
@@ -130,13 +134,15 @@ def run_starting_points(case):
     elif case == 'T1hSt':
         initin = master+'h/'
         planet = 'T1h'
+    '''
 
     pipelineobj = VPLModelingPipeline(case, 
                                     initin, 
                                     True, find_molecules_of_interest=False, hitran_year='2020', planet=planet)
     
-    set_pipeline_vars(case, pipelineobj)
+    set_pipeline_vars(case, pipelineobj, gasnames)
 
+    '''
     for sdshol, dshol, fishol in os.walk(master+case+'/'):
         fishol = fishol
         break
@@ -145,6 +151,7 @@ def run_starting_points(case):
         subprocess.run('rm '+master+case+'/'+fhold, shell=True)
 
     subprocess.run('rm -rf '+pipelineobj.LBLABC_AbsFilesDir+'*.abs', shell=True)
+    '''
 
     converged = pipelineobj.run_automatic()
 
@@ -152,9 +159,15 @@ def run_starting_points(case):
 
 
 
-cases = ['T1gSt']
+inputs = [['O2CO201', ['O2', 'H2O', 'O3', 'CO2', 'CO']], 
+          ['O2CO2', ['O2', 'H2O', 'O3', 'CO2', 'CO']], 
+          ['O2H2O01', ['O2', 'H2O', 'O3']], 
+          ['O2H2O', ['O2', 'H2O', 'O3']], 
+          ['O2SO2', ['O2', 'H2O', 'O3', 'SO2', 'SO3']], 
+          ['O2SO201', ['O2', 'H2O', 'O3', 'SO2', 'SO3']],
+          ['PureO2', ['O2', 'H2O', 'O3']],
+          ['PureO2p1', ['O2', 'H2O', 'O3']]]
 
 with Pool() as p:
-    models = p.map(run_starting_points, cases)
+    models = p.map(run_starting_points, inputs)
 
-'''
