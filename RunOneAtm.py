@@ -110,6 +110,7 @@ def run_starting_points(inputs):
     master = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/T1dAtms/'
     case, gasnames = inputs
     initin = master+case+'/PhotochemInputs/'
+    planet = 'T1d'
 
     '''
     if case == 'T1bSt':
