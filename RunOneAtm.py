@@ -4,7 +4,7 @@ import subprocess
 import os
 from multiprocessing import Pool
 
-master = '/gscratch/vsm/gialluca/T1dAtms/'
+master = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/T1dAtms/'
 
 def set_pipeline_vars(casename, pipelineobj, gas_names, master_out=master):
 
