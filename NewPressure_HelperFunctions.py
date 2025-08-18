@@ -29,7 +29,7 @@ def sum_mixing_ratios(indistdic, NZ, n2mixingrat):
                 sumsarr[lvl] = sumsarr[lvl] + indistdic[i][lvl]
 
         # Add the N2
-        sumsarr[lvl] = sumsarr[lvl] + n2mixingrat
+        sumsarr[lvl] = sumsarr[lvl] #+ n2mixingrat
 
     return sumsarr
 
