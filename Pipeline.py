@@ -625,6 +625,8 @@ class VPLModelingPipeline:
                     dat['f_net[W/m/m]'] = Fnet
                     break
 
+        self.dzg = dat['Alt[km]'][0]*u.km.to(u.cm)
+
         return dat
     
     ### Purpose: Get only the last DAYSIDE and NIGHTSIDE profile output from a TWO COLUMN climate run
@@ -2099,11 +2101,16 @@ class VPLModelingPipeline:
                 planetdat_new.write("{:.2e}".format(self.updated_atm_pressure))
                 planetdat_new.write(' = P0, surface pressure [bar] \n')
             else:
-                if 'DZGRID' in hold:
-                    if self.updated_atm_pressure >= 1:
-                        planetdat_new.write('0.75e+05 = DZGRID [cm] \n')
+                if self.num_climate_runs == 0: # Only change if we don't have dzg already
+                    if 'DZGRID' in hold:
+                        if self.updated_atm_pressure >= 1:
+                            self.dzg = 0.75e5
+                            planetdat_new.write("{:.2E}".format(self.dzg)+' = DZGRID [cm] \n')
+                        else:
+                            self.dzg = 5e4
+                            planetdat_new.write("{:.2E}".format(self.dzg)+' = DZGRID [cm] \n')
                     else:
-                        planetdat_new.write('4.95e+04 = DZGRID [cm] \n')
+                        planetdat_new.write(l)
                 else:
                     planetdat_new.write(l)
 
@@ -2275,11 +2282,16 @@ class VPLModelingPipeline:
                 planetdat_new.write("{:.2e}".format(self.updated_atm_pressure))
                 planetdat_new.write(' = P0, surface pressure [bar] \n')
             else:
-                if 'DZGRID' in hold:
-                    if self.updated_atm_pressure >= 1:
-                        planetdat_new.write('0.75e+05 = DZGRID [cm] \n')
+                if self.num_climate_runs == 0: # Only change if we don't have dzg already
+                    if 'DZGRID' in hold:
+                        if self.updated_atm_pressure >= 1:
+                            self.dzg = 0.75e5
+                            planetdat_new.write("{:.2E}".format(self.dzg)+' = DZGRID [cm] \n')
+                        else:
+                            self.dzg = 5e4
+                            planetdat_new.write("{:.2E}".format(self.dzg)+' = DZGRID [cm] \n')
                     else:
-                        planetdat_new.write('4.95e+04 = DZGRID [cm] \n')
+                        planetdat_new.write(l)
                 else:
                     planetdat_new.write(l)
 
@@ -2338,6 +2350,7 @@ class VPLModelingPipeline:
         ##########################
         # Find the atmospheric pressure used 
         self.updated_atm_pressure = -1
+        self.dzg = 0.75e5 # Just a default in case
 
         # Get original pressure and update DZGrid
         if self.adjust_atmospheric_pressure == True:
@@ -2355,9 +2368,11 @@ class VPLModelingPipeline:
                 if self.adjust_atmospheric_pressure == True:
                     if 'DZGRID' in hold:
                         if self.updated_atm_pressure >= 1:
-                            planetdat_new.write('0.75e+05 = DZGRID [cm] \n')
+                            self.dzg = 0.75e5
+                            planetdat_new.write("{:.2E}".format(self.dzg)+' = DZGRID [cm] \n')
                         else:
-                            planetdat_new.write('4.95e+04 = DZGRID [cm] \n')
+                            self.dzg = 5e4
+                            planetdat_new.write("{:.2E}".format(self.dzg)+' = DZGRID [cm] \n')
                     else:
                         planetdat_new.write(l)
 
@@ -2406,6 +2421,25 @@ class VPLModelingPipeline:
         while self.global_convergence == False:
 
             ### Run photochem section start ---------------------
+
+            # Need to adjust DZGrid
+            if self.num_climate_runs > 0: 
+                planetdat_new = open(self.photochem_InputsDir+'New_PLANET.dat', 'w')
+                planetdat_old = open(self.photochem_InputsDir+'PLANET.dat', 'r')
+
+                planetdat_lines = planetdat_old.readlines()
+                for l in planetdat_lines:
+                    hold = l.split()
+                    if 'DZGRID' in hold:
+                        planetdat_new.write("{:.2E}".format(self.dzg)+' = DZGRID [cm] \n')
+                    else:
+                        planetdat_new.write(l)
+
+                planetdat_new.close()
+                planetdat_old.close()
+
+                subprocess.run('rm '+self.photochem_InputsDir+'PLANET.dat', shell=True)
+                subprocess.run('mv '+self.photochem_InputsDir+'New_PLANET.dat '+self.photochem_InputsDir+'PLANET.dat', shell=True)
 
             self.num_photochem_runs += 1
             if self.verbose == True:
