@@ -3,7 +3,7 @@ import subprocess
 
 
 #'/gscratch/vsm/gialluca/VPLModelingTools_Dev/SensTestH2O/RunNumber175/
-test_object = Generate_Atmosphere_Parameter_Sweep('Czoom1', 
+test_object = Generate_Atmosphere_Parameter_Sweep('Cinit', 
                                   '/gscratch/vsm/gialluca/VPLModelingTools_Dev/UpdatedStarts/T1cSt/PhotochemInputs/', 
                                 restart_run= True, 
                                 starting_point='Exact',
@@ -13,15 +13,15 @@ test_object = Generate_Atmosphere_Parameter_Sweep('Czoom1',
                                 planet='T1c')
 
 # Outgassing rate for T1c
-test_object.outgass_species_MinMax_gridsweep['H2O'] = [3.42084639e10, 9.47899801e11]#[44552887.2545331, 9.47899801e11]
+test_object.outgass_species_MinMax_gridsweep['H2O'] = [44552887.2545331, 9.47899801e11] #[3.42084639e10, 9.47899801e11]
 
 
-test_object.outgass_sample_resolution_gridsweep = [16]
+test_object.outgass_sample_resolution_gridsweep = [4]#[16]
 
-test_object.escape_samples_gridsweep['O'] = [0.001, 0.01]
-test_object.escape_samples_gridsweep['O2'] = [0.001, 0.01]
-test_object.escape_samples_gridsweep['O3'] = [0.02] 
-test_object.escape_samples_gridsweep['H2O2'] = [0.02]
+test_object.escape_samples_gridsweep['O'] = [0.01, 1]#[0.001, 0.01]
+test_object.escape_samples_gridsweep['O2'] = [0.01, 0.1]#[0.001, 0.01]
+test_object.escape_samples_gridsweep['O3'] = [0.02, 0.4] 
+test_object.escape_samples_gridsweep['H2O2'] = [0.02, 0.4]
 
 
 test_object.run_grid_sweep()
