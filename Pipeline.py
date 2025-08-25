@@ -625,7 +625,7 @@ class VPLModelingPipeline:
                     dat['f_net[W/m/m]'] = Fnet
                     break
 
-        self.dzg = dat['Alt[km]'][0]*u.km.to(u.cm)
+        self.dzg = dat['Alt[km]'][0]*u.km.to(u.cm)/200
 
         return dat
     
