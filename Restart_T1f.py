@@ -4,7 +4,7 @@ import subprocess
 import os
 from multiprocessing import Pool
 
-master = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/Cinit/'
+master = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/Finit/'
 #master = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/ClimTestMulti/'
 
 def set_pipeline_vars(casename, pipelineobj, master_out=master):
@@ -34,7 +34,7 @@ def set_pipeline_vars(casename, pipelineobj, master_out=master):
 
     # Adjust the atmospheric pressure
     pipelineobj.adjust_atmospheric_pressure = True
-    pipelineobj.include_2column_climate = True
+    pipelineobj.include_2column_climate = False
     pipelineobj.suppress_IOerrors = True
     pipelineobj.run_spectra = True
     pipelineobj.dayside_starting_PT = None
@@ -43,7 +43,7 @@ def set_pipeline_vars(casename, pipelineobj, master_out=master):
 
     pipelineobj.MCMC_pressure_only = False
     pipelineobj.MultiNest_DataFit = False
-    pipelineobj.rerun_smart_for_2col = True
+    pipelineobj.rerun_smart_for_2col = False
     
     if pipelineobj.MCMC_pressure_only == True:
         pipelineobj.include_2column_climate = False
@@ -95,11 +95,11 @@ def run_one_model(inputstring):
 
     #case = 'RunNumber'+str(modelid)
     #case = inputstring#+'T2'
-    master = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/Cinit/'
+    master = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/Finit/'
 
     pipelineobj = VPLModelingPipeline(case, 
                                   master+case+'/PhotochemInputs/', 
-                                  True, find_molecules_of_interest=False, hitran_year='2020', planet='T1c')
+                                  True, find_molecules_of_interest=False, hitran_year='2020', planet='T1f')
     
     set_pipeline_vars(case, pipelineobj)
     #edit_speciesdat(pipelineobj, h2oinput, oin, o2in, o3in, h2o2in)

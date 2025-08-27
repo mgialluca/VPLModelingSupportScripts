@@ -114,7 +114,8 @@ def run_one_model(inputstring):
         pipelineobj.clim2col_restarting = True
 
     
-    elif 'FINAL_PTZ_mixingratios_out_FAILED.dist' in fishol:
+    #elif 'FINAL_PTZ_mixingratios_out_FAILED.dist' in fishol:
+    else:
         for fhold in fishol:
             subprocess.run('rm '+master+case+'/'+fhold, shell=True)
         
