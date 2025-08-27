@@ -817,7 +817,7 @@ class VPLModelingPipeline:
         # Relax flux criteria a bit after 30 subtries 
         if subtries > 30:
             AvgFluxTolerance = 3
-            TropHeatingTolerance = 1
+            TropHeatingTolerance = 5
 
         # Set the output flag of converged or not (boolean)
         # Guilty until proven innocent
