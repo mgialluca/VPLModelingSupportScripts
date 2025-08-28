@@ -1,5 +1,5 @@
 import numpy as np
-import astropy.io as ascii
+from astropy.io import ascii
 import os
 import json
 
