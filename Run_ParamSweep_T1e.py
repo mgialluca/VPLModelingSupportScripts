@@ -3,7 +3,7 @@ import subprocess
 
 
 #'/gscratch/vsm/gialluca/VPLModelingTools_Dev/SensTestH2O/RunNumber175/
-test_object = Generate_Atmosphere_Parameter_Sweep('Ezoom2', 
+test_object = Generate_Atmosphere_Parameter_Sweep('Ezoom3', 
                                   '/gscratch/vsm/gialluca/VPLModelingTools_Dev/UpdatedStarts/T1eSt/PhotochemInputs/', 
                                 restart_run= True, 
                                 starting_point='Exact',
@@ -17,8 +17,8 @@ test_object.outgass_species_MinMax_gridsweep['H2O'] = [31604000000.0, 7.33839562
 
 test_object.outgass_sample_resolution_gridsweep = [16]
 
-test_object.escape_samples_gridsweep['O'] = [0.000001, 0.00001]
-test_object.escape_samples_gridsweep['O2'] = [0.000001, 0.00001]
+test_object.escape_samples_gridsweep['O'] = [0.0000001, 0.00000001]
+test_object.escape_samples_gridsweep['O2'] = [0.0000001, 0.00000001]
 test_object.escape_samples_gridsweep['O3'] = [0.02] 
 test_object.escape_samples_gridsweep['H2O2'] = [0.02]
 
