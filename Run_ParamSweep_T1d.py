@@ -3,8 +3,8 @@ import subprocess
 
 
 #'/gscratch/vsm/gialluca/VPLModelingTools_Dev/SensTestH2O/RunNumber175/
-test_object = Generate_Atmosphere_Parameter_Sweep('Dzoom2', 
-                                  '/gscratch/vsm/gialluca/VPLModelingTools_Dev/UpdatedStarts/T1dSt/PhotochemInputs/', 
+test_object = Generate_Atmosphere_Parameter_Sweep('Dco2', 
+                                  '/gscratch/vsm/gialluca/VPLModelingTools_Dev/UpdatedStarts/T1dStco2/PhotochemInputs/', 
                                 restart_run= True, 
                                 starting_point='Exact',
                                 hitran_year='2020',
@@ -13,9 +13,13 @@ test_object = Generate_Atmosphere_Parameter_Sweep('Dzoom2',
                                 planet='T1d')
 
 # Outgassing rate for T1d
-test_object.outgass_species_MinMax_gridsweep['H2O'] = [28624000000.0, 5.77317886e11] #[70364682.46349563, 5.77317886e11]
+test_object.outgass_species_gridsweep = ['H2O', 'CO2']
+test_object.outgass_species_MinMax_gridsweep['H2O'] = [70364682.46349563, 5.77317886e11] #[28624000000.0, 5.77317886e11]
+test_object.outgass_species_MinMax_gridsweep['CO2'] = [153076.85319471, 3.61599082e10]
+test_object.outgass_species_molarmass['CO2'] = [44.01]*(u.g/u.mol)
+test_object.outgass_sample_type_gridsweep = ['Log', 'Log']
 
-test_object.outgass_sample_resolution_gridsweep = [16]
+test_object.outgass_sample_resolution_gridsweep = [4, 4]
 
 test_object.escape_samples_gridsweep['O'] = [0.001, 0.01]
 test_object.escape_samples_gridsweep['O2'] = [0.00001, 0.000001]
