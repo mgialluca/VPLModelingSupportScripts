@@ -242,7 +242,7 @@ class Generate_Atmosphere_Parameter_Sweep:
         # Molecules for the type of atmosphere we're interested in 
 
         pipelineobj.molecule_dict = {} # key-value pairs of molecules of interest (keys, str) and their hitran codes (value, int)
-        gas_names = ['O2', 'H2O', 'O3']
+        gas_names = ['O2', 'H2O', 'O3', 'CO2', 'CO']
         pipelineobj.molecule_dict['Gas_names'] = gas_names
         for m in range(len(gas_names)):
             pipelineobj.molecule_dict[gas_names[m]] = pipelineobj.hitran_lookup.loc[gas_names[m]]['HitranNumber']
