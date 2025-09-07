@@ -74,6 +74,9 @@ def add_spectra(planet='T1b', atm_type='H2O-O2', sweep_dir=None):
                 # Set path to take data from
                 currpath = sweep_dir+partab['ModelNumber'][i]+'/'
 
+                # Save path in case
+                fj[atm_type]['Atm'+str(curr_id)]['OriginalPath'] = currpath
+
                 # List surface pressure
                 fj[atm_type]['Atm'+str(curr_id)]['SurfPress'] = float(partab['LastPsurf'][i])
 
