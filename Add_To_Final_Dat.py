@@ -2,10 +2,26 @@ import numpy as np
 from astropy.io import ascii
 import os
 import json
+import astropy.units as u
 
 ### This is to compile all atmospheric spectra from a planets converged set in a database file 
 # atm_type refers to the type of atmospheric composition ('H2O-O2', 'H2O-O2-CO2', 'H2O-O2-SO2', 'H2O-O2-CO2-SO2')
 def add_spectra(planet='T1b', atm_type='H2O-O2', sweep_dir=None):
+
+    if planet == 'T1b':
+        Rp = 1.116*u.Rearth
+    elif planet == 'T1c':
+        Rp = 1.097*u.Rearth
+    elif planet == 'T1d':
+        Rp = 0.788*u.Rearth
+    elif planet == 'T1e':
+        Rp = 0.920*u.Rearth
+    elif planet == 'T1f':
+        Rp = 1.045*u.Rearth
+    elif planet == 'T1g':
+        Rp = 1.129*u.Rearth
+    elif planet == 'T1h':
+        Rp = 0.755*u.Rearth
 
     if os.path.exists('/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/'+planet+'_FinalSpectra_Database.json'):
         f = open('/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/'+planet+'_FinalSpectra_Database.json', 'r')
@@ -81,10 +97,35 @@ def add_spectra(planet='T1b', atm_type='H2O-O2', sweep_dir=None):
                     fj[atm_type]['Atm'+str(curr_id)]['Nightside_Fp'] = list(nightside['col4'])
                     fj[atm_type]['Atm'+str(curr_id)]['Nightside_Fstar'] = list(nightside['col3'])
 
+                # Get the PTZ mixing ratios file in the database 
                 ptz = ascii.read(currpath+'FINAL_PTZ_mixingratios_out.dist')
                 fj[atm_type]['Atm'+str(curr_id)]['PTZOut'] = {}
                 for col in ptz.colnames:
                     fj[atm_type]['Atm'+str(curr_id)]['PTZOut'][col] = list(ptz[col])
+
+                # Get the condensation and escape rates (fluxes)
+                fout = open(currpath+'FINAL_out.out', 'r')
+                lines = fout.readlines()
+                names = ['Z', 'T', 'EDD', 'DEN', 'P', 'H2OSAT', 'H2O', 'RELH', 'CONDEN', 'HFLUX']
+
+                for l in range(len(lines)):
+                    if 'CONDEN' in lines[l].split():
+                        tab = ascii.read(currpath+'FINAL_out.out', data_start=l-83, data_end=l+17, names=names)
+                        fj[atm_type]['Atm'+str(curr_id)]['P_CONDEN'] = list(tab['P'])
+                        fj[atm_type]['Atm'+str(curr_id)]['CONDEN'] = list(tab['CONDEN'])
+                        fj[atm_type]['Atm'+str(curr_id)]['H2O_CONDEN'] = list(tab['H2O'])
+                    
+                    if 'FLUXES' in lines[l].split() and 'ENERGY' not in lines[l].split():
+                        hold = lines[l+105].split()
+                        oesc = float(hold[1])*(1/(u.cm**2 * u.s))
+                        o2esc = float(hold[2])*(1/(u.cm**2 * u.s))
+                        oesc = oesc*(4*np.pi*(Rp**2))
+                        o2esc = o2esc*(4*np.pi*(Rp**2))
+                        oesc = oesc.to(1/u.s).value
+                        o2esc = o2esc.to(1/u.s).value
+
+                        fj[atm_type]['Atm'+str(curr_id)]['Oesc_per-s'] = oesc
+                        fj[atm_type]['Atm'+str(curr_id)]['O2esc_per-s'] = o2esc
 
                 # Iterate the current id for the next atmosphere if more are added 
                 curr_id += 1
