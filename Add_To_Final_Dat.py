@@ -81,6 +81,11 @@ def add_spectra(planet='T1b', atm_type='H2O-O2', sweep_dir=None):
                     fj[atm_type]['Atm'+str(curr_id)]['Nightside_Fp'] = list(nightside['col4'])
                     fj[atm_type]['Atm'+str(curr_id)]['Nightside_Fstar'] = list(nightside['col3'])
 
+                ptz = ascii.read(currpath+'FINAL_PTZ_mixingratios_out.dist')
+                fj[atm_type]['Atm'+str(curr_id)]['PTZOut'] = {}
+                for col in ptz.colnames:
+                    fj[atm_type]['Atm'+str(curr_id)]['PTZOut'][col] = list(ptz[col])
+
                 # Iterate the current id for the next atmosphere if more are added 
                 curr_id += 1
 
