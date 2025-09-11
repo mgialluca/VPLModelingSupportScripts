@@ -34,7 +34,7 @@ def set_pipeline_vars(casename, pipelineobj, master_out=master):
 
     # Adjust the atmospheric pressure
     pipelineobj.adjust_atmospheric_pressure = False
-    pipelineobj.include_2column_climate = True
+    pipelineobj.include_2column_climate = False
     pipelineobj.suppress_IOerrors = True
     pipelineobj.run_spectra = True
     pipelineobj.dayside_starting_PT = None
@@ -45,7 +45,7 @@ def set_pipeline_vars(casename, pipelineobj, master_out=master):
 
     pipelineobj.MCMC_pressure_only = False
     pipelineobj.MultiNest_DataFit = False
-    pipelineobj.rerun_smart_for_2col = True
+    pipelineobj.rerun_smart_for_2col = False
     
     if pipelineobj.MCMC_pressure_only == True:
         pipelineobj.include_2column_climate = False
@@ -121,24 +121,24 @@ def run_starting_points(case):
     elif case == 'T1bInpR':
         initin = master+'T1bInp/'
         planet = 'T1b'
-    elif case == 'T1cSt':
-        initin = master+'c/'
+    elif case == 'T1cInpR':
+        initin = master+'T1cInp/'
         planet = 'T1c'
-    elif case == 'T1dSt':
-        initin = master+'d/'
+    elif case == 'T1dInpR':
+        initin = master+'T1dInp/'
         planet = 'T1d'
-    elif case == 'T1eSt':
-        initin = master+'e/'
+    elif case == 'T1eInpR':
+        initin = master+'T1eInp/'
         planet = 'T1e'
-    elif case == 'T1fSt':
-        initin = master+'f/'
+    elif case == 'T1fInpR':
+        initin = master+'T1fInp/'
         planet = 'T1f'
-    elif case == 'T1gSt':
+    elif case == 'T1gInpR':
         #initin = master+'g/'
-        initin = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/UpdatedStarts/T1gSt/PhotochemInputs/'
+        initin = master+'T1gInp/'
         planet = 'T1g'
-    elif case == 'T1hSt':
-        initin = master+'h/'
+    elif case == 'T1hInpR':
+        initin = master+'T1hInp/'
         planet = 'T1h'
     
 
@@ -172,10 +172,11 @@ inputs = [['O2CO201', ['O2', 'H2O', 'O3', 'CO2', 'CO']],
           ['O2SO2', ['O2', 'H2O', 'O3', 'SO2', 'SO3']], 
           ['O2SO201', ['O2', 'H2O', 'O3', 'SO2', 'SO3']],
           ['PureO2', ['O2', 'H2O', 'O3']],
-          ['PureO2p1', ['O2', 'H2O', 'O3']]]
+          ['PureO2p1', ['O2', 'H2O', 'O3']]]'''
+
+inputs = ['T1cInpR', 'T1dInpR', 'T1eInpR', 'T1fInpR', 'T1gInpR', 'T1hInpR']
 
 with Pool() as p:
     models = p.map(run_starting_points, inputs)
-'''
 
-model = run_starting_points('T1bInpR')
+
