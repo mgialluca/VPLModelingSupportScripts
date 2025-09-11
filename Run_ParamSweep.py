@@ -3,8 +3,8 @@ import subprocess
 
 
 #'/gscratch/vsm/gialluca/VPLModelingTools_Dev/SensTestH2O/RunNumber175/
-test_object = Generate_Atmosphere_Parameter_Sweep('Bco2', 
-                                  '/gscratch/vsm/gialluca/VPLModelingTools_Dev/UpdatedStarts/T1bStco2/PhotochemInputs/', 
+test_object = Generate_Atmosphere_Parameter_Sweep('Btest', 
+                                  '/gscratch/vsm/gialluca/VPLModelingTools_Dev/UpdatedStarts/T1bInpR/PhotochemInputs/', 
                                 restart_run= True, 
                                 starting_point='Exact',
                                 hitran_year='2020',
