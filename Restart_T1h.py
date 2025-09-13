@@ -4,7 +4,7 @@ import subprocess
 import os
 from multiprocessing import Pool
 
-master = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/Finit2/'
+master = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/Hinit/'
 #master = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/ClimTestMulti/'
 
 def set_pipeline_vars(casename, pipelineobj, master_out=master):
@@ -95,11 +95,11 @@ def run_one_model(inputstring):
 
     #case = 'RunNumber'+str(modelid)
     #case = inputstring#+'T2'
-    master = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/Finit2/'
+    master = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/Hinit/'
 
     pipelineobj = VPLModelingPipeline(case, 
                                   master+case+'/PhotochemInputs/', 
-                                  True, find_molecules_of_interest=False, hitran_year='2020', planet='T1f')
+                                  True, find_molecules_of_interest=False, hitran_year='2020', planet='T1g')
     
     set_pipeline_vars(case, pipelineobj)
     #edit_speciesdat(pipelineobj, h2oinput, oin, o2in, o3in, h2o2in)
