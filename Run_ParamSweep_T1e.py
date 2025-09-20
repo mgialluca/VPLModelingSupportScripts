@@ -4,7 +4,7 @@ import subprocess
 
 #'/gscratch/vsm/gialluca/VPLModelingTools_Dev/SensTestH2O/RunNumber175/
 test_object = Generate_Atmosphere_Parameter_Sweep('Eco2', 
-                                  '/gscratch/vsm/gialluca/VPLModelingTools_Dev/UpdatedStarts/T1eStco2/PhotochemInputs/', 
+                                  '/gscratch/vsm/gialluca/VPLModelingTools_Dev/UpdatedStarts/T1eco2/', 
                                 restart_run= True, 
                                 starting_point='Exact',
                                 hitran_year='2020',
