@@ -21,8 +21,8 @@ test_object.outgass_sample_type_gridsweep = ['Log', 'Log']
 
 test_object.outgass_sample_resolution_gridsweep = [4, 4]
 
-test_object.escape_samples_gridsweep['O'] = [0.00001, 0.000001]
-test_object.escape_samples_gridsweep['O2'] = [0.00001, 0.000001]
+test_object.escape_samples_gridsweep['O'] = [0.01, 0.1] #[0.00001, 0.000001]
+test_object.escape_samples_gridsweep['O2'] = [0.01, 0.05]#[0.00001, 0.000001]
 test_object.escape_samples_gridsweep['O3'] = [0.02] 
 test_object.escape_samples_gridsweep['H2O2'] = [0.02]
 

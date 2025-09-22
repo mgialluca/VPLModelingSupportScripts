@@ -2565,6 +2565,17 @@ class VPLModelingPipeline:
                     if local_photochem_conv == False:
                         ftestingoutput.write('Photochem subtry '+str(photochem_subtries)+' NOT converged\n\n')
 
+                # If local convergence cant be found, might need to try adjusting the pressure early (could just be << 100% and running into issues)
+                if photochem_subtries in [50, 100, 150] and self.adjust_atmospheric_pressure == True:
+                    pressure_converged, maxchange, holdnewsurfp = self.change_atmospheric_pressure()
+
+                    if self.verbose == True:
+                        ftestingoutput.write('Subtries reached '+str(photochem_subtries)+', attempting to adjust pressure \n')
+                        ftestingoutput.write('New Pressure: '+str(holdnewsurfp)+', using '+str(self.updated_atm_pressure)+' Bars \n\n')
+                        ftestingoutput.close()
+                        ftestingoutput = open(self.OutPath+self.casename+'_SavingInfoOut.txt', 'a')
+
+
                 if self.fixsgbsl == True and sgbslerror == True and self.adjust_atmospheric_pressure == True:
                     # Need to reset MMW early 
                     # Retrieve atmosphere MMW for use moving forward:
