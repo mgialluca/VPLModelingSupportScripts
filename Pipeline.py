@@ -2567,6 +2567,16 @@ class VPLModelingPipeline:
 
                 # If local convergence cant be found, might need to try adjusting the pressure early (could just be << 100% and running into issues)
                 if photochem_subtries in [50, 100, 150] and self.adjust_atmospheric_pressure == True:
+                    if self.num_photochem_runs == 1:
+                        fi = open(self.OutPath+'photochem_run_output_'+self.casename+'.run', 'r')
+                    else:
+                        fi = open(self.OutPath+'photochem_run_output_'+self.casename+'_Try'+str(self.num_photochem_runs)+'.run', 'r')
+                    lines = fi.readlines()
+                    fi.close()
+                    for i in lines:
+                        if len(i.split('Molecular weight of atmosphere')) > 1:
+                            self.MMW = float(i.split()[len(i.split())-1])
+                            break
                     pressure_converged, maxchange, holdnewsurfp = self.change_atmospheric_pressure()
 
                     if self.verbose == True:

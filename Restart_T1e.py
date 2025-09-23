@@ -4,7 +4,7 @@ import subprocess
 import os
 from multiprocessing import Pool
 
-master = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/Einit/'
+master = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/Eco2/'
 #master = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/ClimTestMulti/'
 
 def set_pipeline_vars(casename, pipelineobj, master_out=master):
@@ -82,7 +82,7 @@ def set_pipeline_vars(casename, pipelineobj, master_out=master):
     # Molecules for the type of atmosphere we're interested in 
 
     pipelineobj.molecule_dict = {} # key-value pairs of molecules of interest (keys, str) and their hitran codes (value, int)
-    gas_names = ['O2', 'H2O', 'O3']
+    gas_names = ['O2', 'H2O', 'O3', 'CO2', 'CO']
     pipelineobj.molecule_dict['Gas_names'] = gas_names
     for m in range(len(gas_names)):
         pipelineobj.molecule_dict[gas_names[m]] = pipelineobj.hitran_lookup.loc[gas_names[m]]['HitranNumber']
@@ -95,7 +95,7 @@ def run_one_model(inputstring):
 
     #case = 'RunNumber'+str(modelid)
     #case = inputstring#+'T2'
-    master = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/Einit/'
+    master = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/Eco2/'
 
     pipelineobj = VPLModelingPipeline(case, 
                                   master+case+'/PhotochemInputs/', 
