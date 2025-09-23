@@ -19,8 +19,8 @@ def set_pipeline_vars(casename, pipelineobj, master_out=master):
 
     # Remove PhotGrid.f and replace with GJ12 updated one; put spectrum in DATA/FLUX
     os.remove(master_out+casename+'/atmos/PHOTOCHEM/SUBROUTINES/Photgrid.f')
-    shutil.copy('/gscratch/vsm/alinc/VPL_RUNS/gj12b/Photgrid.f '+master_out+casename+'/atmos/PHOTOCHEM/SUBROUTINES/Photgrid.f')
-    shutil.copy('/gscratch/vsm/alinc/VPL_RUNS/gj12b/steam/1bar/atmos/PHOTOCHEM/DATA/FLUX/gj12.txt '+master_out+casename+'/atmos/PHOTOCHEM/DATA/FLUX/gj12.txt')
+    shutil.copy('/gscratch/vsm/alinc/VPL_RUNS/gj12b/Photgrid.f', master_out+casename+'/atmos/PHOTOCHEM/SUBROUTINES/Photgrid.f')
+    shutil.copy('/gscratch/vsm/alinc/VPL_RUNS/gj12b/steam/1bar/atmos/PHOTOCHEM/DATA/FLUX/gj12.txt', master_out+casename+'/atmos/PHOTOCHEM/DATA/FLUX/gj12.txt')
 
     pipelineobj.photochemDir = master_out+casename+'/atmos/PHOTOCHEM/' # path to PHOTOCHEM/ dir
     pipelineobj.atmosDir = master_out+casename+'/atmos/' # path to atmos/ dir
