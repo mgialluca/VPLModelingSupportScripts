@@ -52,7 +52,7 @@ def set_pipeline_vars(casename, pipelineobj, master_out=master):
     pipelineobj.MultiNest_DataFit = False
     pipelineobj.rerun_smart_for_2col = False
 
-    pipelineobj.vplclimate_executable = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/ClimateModel/vpl_climate_supernode'
+    pipelineobj.vplclimate_executable = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/ClimateModel/vpl_climate/vpl_climate'
 
     # Molecules for the type of atmosphere we're interested in 
 
