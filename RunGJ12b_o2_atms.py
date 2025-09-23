@@ -83,15 +83,15 @@ def run_starting_points(case):
     
     master = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/GJ12bO2/'
 
-    if case == 'GJo201':
+    if case == 'b01':
         initin = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/GJ12b_Starts/O2_01bar/'
         planet = 'GJ12b'
 
-    elif case == 'GJo21':
+    elif case == 'b1':
         initin = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/GJ12b_Starts/O2_1bar/'
         planet = 'GJ12b'
 
-    elif case == 'GJo210':
+    elif case == 'b10':
         initin = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/GJ12b_Starts/O2_10bar/'
         planet = 'GJ12b'
 
@@ -119,7 +119,7 @@ def run_starting_points(case):
 
 
 
-inputs = ['GJo201', 'GJo21', 'GJo210']
+inputs = ['b01', 'b1', 'b10']
 
 with Pool() as p:
     models = p.map(run_starting_points, inputs)
