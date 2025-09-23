@@ -60,6 +60,9 @@ class VPLModelingPipeline:
             self.planetary_mass = 0.326*u.Mearth.to(u.kg)
         elif self.planet == 'Earth':
             self.planetary_mass = 1*u.Mearth.to(u.kg)
+
+        elif self.planet == 'GJ12b':
+            self.planetary_mass = 0.75*u.Mearth.to(u.kg)
         
 
         # The climate executable:
@@ -1041,7 +1044,9 @@ class VPLModelingPipeline:
             f.write(str(self.planetary_radius)+'                               planet radius\n') # planet radius
             f.write(str(self.MMW)+'                      mol. wgt. of atmosphere (kg/kmole)\n')
             if self.planet == 'Earth':
-                f.write('50.,100000.                               min, max wavenumber\n')   
+                f.write('50.,100000.                               min, max wavenumber\n')
+            elif self.planet == 'GJ12b':
+                f.write('1000.,20000.                              min, max wavenumber\n')   
             else:
                 f.write('330.,20000.                               min, max wavenumber\n')
             f.write('200.                                    maximum line width\n')
@@ -1121,7 +1126,10 @@ class VPLModelingPipeline:
         self.c_HRTSources = 3 # 1 - Solar, 2 - Thermal, 3 - Both
 
         # Host Star Specs
-        self.c_StellarSpectrum = '/gscratch/vsm/gialluca/StellarSpectra/TRAPPIST-1_2020.dat'
+        if self.planet == 'GJ12b':
+            self.c_StellarSpectrum = '/gscratch/vsm/gialluca/StellarSpectra/gj12.dat'
+        else:
+            self.c_StellarSpectrum = '/gscratch/vsm/gialluca/StellarSpectra/TRAPPIST-1_2020.dat'
         self.c_StellarSpect_SkipLines = 10
         self.c_SolarFluxUnits = 2 
         self.c_SolarSpectralUnits = 1
@@ -1176,7 +1184,7 @@ class VPLModelingPipeline:
             self.c_SemiMajorAxis = 0.06189 # [AU]
         
         elif self.planet == 'Earth':
-            self.c_DayLength = 86400.0 # [s], 2.42 days
+            self.c_DayLength = 86400.0 # [s], 1 day
             self.c_YearLength = 365.25 # Length of year in days according to c_DayLength (1 when tidally locked)
             self.c_SemiMajorAxis = 1 # [AU]
 
@@ -1195,6 +1203,10 @@ class VPLModelingPipeline:
             self.c_SolarSpectralUnits = 2
             self.c_Convert_Stellar_microns = 1.0 # Conversion factor to microns
             self.c_StellarSpect_wnflux_col = '1,2'
+
+        elif self.planet == 'GJ12b':
+            self.c_DayLength = 1102586.429 # [s], 12.76 days 
+            self.c_SemiMajorAxis = 0.06681 # [AU]
 
 
 
@@ -1306,6 +1318,8 @@ class VPLModelingPipeline:
         self.s_SemiMajorAxis = self.c_SemiMajorAxis # account for planet specific
         if self.planet == 'Earth':
             self.s_StellarRadius = 1
+        elif self.planet == 'GJ12b':
+            self.s_StellarRadius = 0.2617 # [Rsun]
         else:
             self.s_StellarRadius = 0.1192 # [Rsun]
 
@@ -1341,6 +1355,8 @@ class VPLModelingPipeline:
         self.s_OutputUnits = 2 # 2 - [W/m**2/sr/um]
         if self.planet == 'Earth':
             self.s_MinMax_wavenumber = '50.,100000.'
+        elif self.planet == 'GJ12b':
+            self.s_MinMax_wavenumber = '1000.,20000.' 
         else:
             self.s_MinMax_wavenumber = '330.,20000.' #'50.,100000.'
         self.s_GridType = 2 # 2 - slit
