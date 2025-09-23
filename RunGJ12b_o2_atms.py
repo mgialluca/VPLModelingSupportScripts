@@ -57,7 +57,7 @@ def set_pipeline_vars(casename, pipelineobj, master_out=master):
     # Molecules for the type of atmosphere we're interested in 
 
     pipelineobj.molecule_dict = {} # key-value pairs of molecules of interest (keys, str) and their hitran codes (value, int)
-    gas_names = ['O2', 'H2O', 'O3', 'H2O2', 'OH']#, 'CO2', 'CO', 'CH4', 'N2O']
+    gas_names = ['O2', 'H2O', 'O3', 'H2O2']#, 'CO2', 'CO', 'CH4', 'N2O']
     pipelineobj.molecule_dict['Gas_names'] = gas_names
     for m in range(len(gas_names)):
         pipelineobj.molecule_dict[gas_names[m]] = pipelineobj.hitran_lookup.loc[gas_names[m]]['HitranNumber']
