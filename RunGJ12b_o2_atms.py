@@ -4,7 +4,7 @@ import subprocess
 import os
 from multiprocessing import Pool
 
-master = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/GJ12bO2/'
+master = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/'
 
 def set_pipeline_vars(casename, pipelineobj, master_out=master):
 
@@ -81,17 +81,17 @@ converged = pipelineobj.run_automatic()
 def run_starting_points(case):
 
     
-    master = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/GJ12bO2/'
+    master = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/'
 
-    if case == 'b01':
+    if case == 'GJ12b01':
         initin = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/GJ12b_Starts/O2_01bar/'
         planet = 'GJ12b'
 
-    elif case == 'b1':
+    elif case == 'GJ12b1':
         initin = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/GJ12b_Starts/O2_1bar/'
         planet = 'GJ12b'
 
-    elif case == 'b10':
+    elif case == 'GJ12b10':
         initin = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/GJ12b_Starts/O2_10bar/'
         planet = 'GJ12b'
 
@@ -119,7 +119,7 @@ def run_starting_points(case):
 
 
 
-inputs = ['b01', 'b1', 'b10']
+inputs = ['GJ12b01', 'GJ12b1', 'GJ12b10']#['b01', 'b1', 'b10']
 
 with Pool() as p:
     models = p.map(run_starting_points, inputs)
