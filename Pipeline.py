@@ -1045,8 +1045,8 @@ class VPLModelingPipeline:
             f.write(str(self.MMW)+'                      mol. wgt. of atmosphere (kg/kmole)\n')
             if self.planet == 'Earth':
                 f.write('50.,100000.                               min, max wavenumber\n')
-            elif self.planet == 'GJ12b':
-                f.write('1000.,20000.                              min, max wavenumber\n')   
+            #elif self.planet == 'GJ12b':
+            #    f.write('1000.,20000.                              min, max wavenumber\n')   
             else:
                 f.write('330.,20000.                               min, max wavenumber\n')
             f.write('200.                                    maximum line width\n')
@@ -1128,9 +1128,10 @@ class VPLModelingPipeline:
         # Host Star Specs
         if self.planet == 'GJ12b':
             self.c_StellarSpectrum = '/gscratch/vsm/gialluca/StellarSpectra/gj12.dat'
+            self.c_StellarSpect_SkipLines = 5
         else:
             self.c_StellarSpectrum = '/gscratch/vsm/gialluca/StellarSpectra/TRAPPIST-1_2020.dat'
-        self.c_StellarSpect_SkipLines = 10
+            self.c_StellarSpect_SkipLines = 10
         self.c_SolarFluxUnits = 2 
         self.c_SolarSpectralUnits = 1
         self.c_Convert_Stellar_microns = 1.0 # Conversion factor to microns
@@ -1355,8 +1356,8 @@ class VPLModelingPipeline:
         self.s_OutputUnits = 2 # 2 - [W/m**2/sr/um]
         if self.planet == 'Earth':
             self.s_MinMax_wavenumber = '50.,100000.'
-        elif self.planet == 'GJ12b':
-            self.s_MinMax_wavenumber = '1000.,20000.' 
+        #elif self.planet == 'GJ12b':
+        #    self.s_MinMax_wavenumber = '1000.,20000.' 
         else:
             self.s_MinMax_wavenumber = '330.,20000.' #'50.,100000.'
         self.s_GridType = 2 # 2 - slit
