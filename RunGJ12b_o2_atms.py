@@ -84,15 +84,15 @@ def run_starting_points(case):
     master = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/GJ12bO2/'
 
     if case == 'GJo201':
-        initin = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/GJ12b_Starts/O2_01bar'
+        initin = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/GJ12b_Starts/O2_01bar/'
         planet = 'GJ12b'
 
     elif case == 'GJo21':
-        initin = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/GJ12b_Starts/O2_1bar'
+        initin = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/GJ12b_Starts/O2_1bar/'
         planet = 'GJ12b'
 
     elif case == 'GJo210':
-        initin = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/GJ12b_Starts/O2_10bar'
+        initin = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/GJ12b_Starts/O2_10bar/'
         planet = 'GJ12b'
 
     pipelineobj = VPLModelingPipeline(case, 
