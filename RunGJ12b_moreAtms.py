@@ -132,7 +132,7 @@ def run_starting_points(case):
                                     initin, 
                                     True, find_molecules_of_interest=False, hitran_year='2020', planet=planet)
     
-    set_pipeline_vars(case, pipelineobj)
+    set_pipeline_vars(case, pipelineobj, gas_names)
 
     '''
     for sdshol, dshol, fishol in os.walk(master+case+'/'):
