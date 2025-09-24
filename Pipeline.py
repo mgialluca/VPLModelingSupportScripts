@@ -1126,12 +1126,12 @@ class VPLModelingPipeline:
         self.c_HRTSources = 3 # 1 - Solar, 2 - Thermal, 3 - Both
 
         # Host Star Specs
-        if self.planet == 'GJ12b':
+        '''if self.planet == 'GJ12b':
             self.c_StellarSpectrum = '/gscratch/vsm/gialluca/StellarSpectra/gj12.dat'
             self.c_StellarSpect_SkipLines = 5
-        else:
-            self.c_StellarSpectrum = '/gscratch/vsm/gialluca/StellarSpectra/TRAPPIST-1_2020.dat'
-            self.c_StellarSpect_SkipLines = 10
+        else:'''
+        self.c_StellarSpectrum = '/gscratch/vsm/gialluca/StellarSpectra/TRAPPIST-1_2020.dat'
+        self.c_StellarSpect_SkipLines = 10
         self.c_SolarFluxUnits = 2 
         self.c_SolarSpectralUnits = 1
         self.c_Convert_Stellar_microns = 1.0 # Conversion factor to microns
