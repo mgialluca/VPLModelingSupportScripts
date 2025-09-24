@@ -26,6 +26,7 @@ test_object.escape_species_losstype = ['Veff', 'Veff', 'Vdep', 'Vdep', 'Vdep', '
 test_object.escape_species_molarmass['CO'] = [28.01]*(u.g/u.mol) 
 test_object.escape_species_molarmass['CO2'] = [44.01]*(u.g/u.mol)
 test_object.escape_sample_type_gridsweep = ['UserDef', 'UserDef', 'UserDef', 'UserDef', 'UserDef', 'UserDef'] 
+test_object.escape_species_units_gridsweep = [u.cm/u.s, u.cm/u.s, u.cm/u.s, u.cm/u.s, u.cm/u.s, u.cm/u.s]
 
 test_object.escape_samples_gridsweep['O'] = [0.01] #[0.01, 0.1] #[0.01, 1]
 test_object.escape_samples_gridsweep['O2'] = [0.01] #[0.01, 0.1]
