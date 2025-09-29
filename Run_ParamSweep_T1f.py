@@ -3,7 +3,7 @@ import subprocess
 
 
 #'/gscratch/vsm/gialluca/VPLModelingTools_Dev/SensTestH2O/RunNumber175/
-test_object = Generate_Atmosphere_Parameter_Sweep('Fco2', 
+test_object = Generate_Atmosphere_Parameter_Sweep('Fco2lo', 
                                   '/gscratch/vsm/gialluca/VPLModelingTools_Dev/UpdatedStarts/T1fco2/', 
                                 restart_run= True, 
                                 starting_point='Exact',
@@ -23,8 +23,8 @@ test_object.outgass_sample_type_gridsweep = ['Log', 'Log']
 
 test_object.outgass_sample_resolution_gridsweep = [4, 4]
 
-test_object.escape_samples_gridsweep['O'] = [0.01, 0.1]
-test_object.escape_samples_gridsweep['O2'] = [0.01, 0.05]
+test_object.escape_samples_gridsweep['O'] = [0.001, 0.01] #[0.00001, 0.000001]
+test_object.escape_samples_gridsweep['O2'] = [1e-5, 1e-6]#[0.00001, 0.000001]
 test_object.escape_samples_gridsweep['O3'] = [0.02] 
 test_object.escape_samples_gridsweep['H2O2'] = [0.02]
 
