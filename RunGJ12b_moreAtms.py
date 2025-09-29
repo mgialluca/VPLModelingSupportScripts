@@ -128,6 +128,25 @@ def run_starting_points(case):
         planet = 'GJ12b'
         gas_names = ['O2', 'H2O', 'O3', 'SO2', 'SO3']
 
+    elif case == 'GbPureO2b01':
+        initin = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/GJ12b_Starts/O2_01bar/'
+        planet = 'GJ12b'
+        gas_names = ['O2', 'H2O', 'O3', 'H2O2', 'H2']
+
+    elif case == 'GbPureO2b1':
+        initin = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/GJ12b_Starts/O2_1bar/'
+        planet = 'GJ12b'
+        gas_names = ['O2', 'H2O', 'O3', 'H2O2', 'H2']
+
+    elif case == 'GbPureO2b10':
+        initin = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/GJ12b_Starts/O2_10bar/'
+        planet = 'GJ12b'
+        gas_names = ['O2', 'H2O', 'O3', 'H2O2', 'H2']
+
+    if os.path.exists('/gscratch/vsm/gialluca/VPLModelingTools_Dev/'+case):
+        shutil.rmtree('/gscratch/vsm/gialluca/VPLModelingTools_Dev/'+case)
+
+
     pipelineobj = VPLModelingPipeline(case, 
                                     initin, 
                                     True, find_molecules_of_interest=False, hitran_year='2020', planet=planet)
@@ -152,7 +171,7 @@ def run_starting_points(case):
 
 
 
-inputs = ['GbCO2b01', 'GbCO2b1', 'GbCO2b10', 'GbH2Ob01', 'GbH2Ob1', 'GbH2Ob10', 'Gbo2so2b01', 'Gbo2so2b1', 'Gbo2so2b10']#['b01', 'b1', 'b10']
+inputs = ['GbPureO2b01', 'GbPureO2b1', 'GbPureO2b10', 'GbH2Ob1', 'Gbo2so2b01', 'Gbo2so2b1', 'Gbo2so2b10']#['b01', 'b1', 'b10']
 
 with Pool() as p:
     models = p.map(run_starting_points, inputs)
