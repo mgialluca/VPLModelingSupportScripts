@@ -107,6 +107,11 @@ def run_starting_points(case):
         initin = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/GJ12b_Starts/H2O_1bar/'
         planet = 'GJ12b'
         gas_names = ['O2', 'H2O', 'O3', 'H2O2', 'H2']
+
+    elif case == 'GbH2Ob1try2':
+        initin = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/GJ12b_Starts/H2O_try2_1bar/'
+        planet = 'GJ12b'
+        gas_names = ['O2', 'H2O', 'O3', 'H2O2', 'H2']
     
     elif case == 'GbH2Ob10':
         initin = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/GJ12b_Starts/H2O_10bar/'
@@ -125,6 +130,16 @@ def run_starting_points(case):
     
     elif case == 'Gbo2so2b10':
         initin = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/GJ12b_Starts/O2-SO2_10bar/'
+        planet = 'GJ12b'
+        gas_names = ['O2', 'H2O', 'O3', 'SO2', 'SO3']
+
+    elif case == 'Gbdryo2so2b01':
+        initin = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/GJ12b_Starts/O2-SO2_dry_01bar/'
+        planet = 'GJ12b'
+        gas_names = ['O2', 'H2O', 'O3', 'SO2', 'SO3']
+
+    elif case == 'Gbdryo2so2b1':
+        initin = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/GJ12b_Starts/O2-SO2_dry_1bar/'
         planet = 'GJ12b'
         gas_names = ['O2', 'H2O', 'O3', 'SO2', 'SO3']
 
@@ -171,7 +186,7 @@ def run_starting_points(case):
 
 
 
-inputs = ['GbPureO2b01', 'GbPureO2b1', 'GbPureO2b10', 'GbH2Ob1', 'Gbo2so2b01', 'Gbo2so2b1', 'Gbo2so2b10']#['b01', 'b1', 'b10']
+inputs = ['GbH2Ob1try2', 'Gbdryo2so2b01', 'Gbdryo2so2b1']#['b01', 'b1', 'b10']
 
 with Pool() as p:
     models = p.map(run_starting_points, inputs)
