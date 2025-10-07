@@ -4,7 +4,7 @@ import subprocess
 import os
 from multiprocessing import Pool
 
-master = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/Fco2/'
+master = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/Fco2wL/'
 #master = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/ClimTestMulti/'
 
 def set_pipeline_vars(casename, pipelineobj, master_out=master):
@@ -95,7 +95,7 @@ def run_one_model(inputstring):
 
     #case = 'RunNumber'+str(modelid)
     #case = inputstring#+'T2'
-    master = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/Fco2/'
+    master = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/Fco2wL/'
 
     pipelineobj = VPLModelingPipeline(case, 
                                   master+case+'/PhotochemInputs/', 
@@ -139,10 +139,10 @@ def run_one_model(inputstring):
 for ds, sds, fis in os.walk(master):
     break
 
-restart = []
-for sd in sds:
+restart = ['RunNumber'+str(i) for i in range(199,256)]
+'''for sd in sds:
     if not os.path.exists(master+sd+'/'+sd+'_SMART.trnst'):
-        restart.append(sd)
+        restart.append(sd)'''
 
 print('Restarting '+str(len(restart)))
 
