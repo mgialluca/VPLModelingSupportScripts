@@ -4,7 +4,7 @@ import numpy as np
 import astropy.units as u
 import json
 
-def get_conden_esc_flux(sweepdir, planet='T1b'):
+def get_conden_esc_flux(sweepdir, planet='T1b', co2=True):
 
     if planet == 'T1b':
         R_p = 1.116*u.Rearth
@@ -45,6 +45,8 @@ def get_conden_esc_flux(sweepdir, planet='T1b'):
                     d[run]['H2O'] = list(tab['H2O'])
                 
                 if 'FLUXES' in lines[l].split() and 'ENERGY' not in lines[l].split():
+                    assert lines[l+3].split()[1] == 'O'
+                    assert lines[l+3].split()[2] == 'O2'
                     hold = lines[l+105].split()
                     oesc = float(hold[1])*(1/(u.cm**2 * u.s))
                     o2esc = float(hold[2])*(1/(u.cm**2 * u.s))
@@ -53,6 +55,14 @@ def get_conden_esc_flux(sweepdir, planet='T1b'):
                     oesc = oesc.to(1/u.s).value
                     o2esc = o2esc.to(1/u.s).value
 
+                    if co2 == True:
+                        assert lines[l+211].split()[9] == 'CO2'
+                        hold = lines[l+313].split()
+                        co2esc = float(hold[9])*(1/(u.cm**2 * u.s))
+                        co2esc = co2esc*(4*np.pi*(R_p**2))
+                        co2esc = co2esc.to(1/u.s).value
+                        d[run]['CO2esc'] = co2esc
+                        
                     d[run]['Oesc'] = oesc
                     d[run]['O2esc'] = o2esc
 
