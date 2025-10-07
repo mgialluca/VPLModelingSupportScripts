@@ -38,11 +38,11 @@ def get_conden_esc_flux(sweepdir, planet='T1b', co2=True):
             lines = f.readlines()
 
             for l in range(len(lines)):
-                if 'CONDEN' in lines[l].split():
+                '''if 'CONDEN' in lines[l].split():
                     tab = ascii.read(sweepdir+run+'/FINAL_out.out', data_start=l-83, data_end=l+17, names=names)
                     d[run]['P'] = list(tab['P'])
                     d[run]['CONDEN'] = list(tab['CONDEN'])
-                    d[run]['H2O'] = list(tab['H2O'])
+                    d[run]['H2O'] = list(tab['H2O'])'''
                 
                 if 'FLUXES' in lines[l].split() and 'ENERGY' not in lines[l].split():
                     assert lines[l+3].split()[1] == 'O'
@@ -62,7 +62,7 @@ def get_conden_esc_flux(sweepdir, planet='T1b', co2=True):
                         co2esc = co2esc*(4*np.pi*(R_p**2))
                         co2esc = co2esc.to(1/u.s).value
                         d[run]['CO2esc'] = co2esc
-                        
+
                     d[run]['Oesc'] = oesc
                     d[run]['O2esc'] = o2esc
 
