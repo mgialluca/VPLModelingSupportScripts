@@ -93,12 +93,12 @@ def run_starting_points(case):
         planet = 'GJ12b'
         gas_names = ['O2', 'H2O', 'O3', 'CO2', 'CO']
 
-    elif case == 'Gb10xO2b01':
+    elif case == 'Gb100xO2b01':
         initin = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/GJ12b_Starts/O2_01bar/'
         planet = 'GJ12b'
         gas_names = ['O2', 'H2O', 'O3', 'H2O2']
 
-    elif case == 'Gb10xO2b1':
+    elif case == 'Gb100xO2b1':
         initin = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/GJ12b_Starts/O2_1bar/'
         planet = 'GJ12b'
         gas_names = ['O2', 'H2O', 'O3', 'H2O2']
@@ -127,7 +127,7 @@ def run_starting_points(case):
 
 
 
-inputs = ['Gb10xO2b01', 'Gb10xO2b1', 'GbO2-CO2b01', 'GbO2-CO2b1']#['b01', 'b1', 'b10']
+inputs = ['Gb100xO2b01', 'Gb100xO2b1']#['b01', 'b1', 'b10']
 
 with Pool() as p:
     models = p.map(run_starting_points, inputs)
