@@ -158,6 +158,26 @@ def run_starting_points(case):
         planet = 'GJ12b'
         gas_names = ['O2', 'H2O', 'O3', 'H2O2', 'H2']
 
+    elif case == 'GbO220pH2Ob01':
+        initin = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/GJ12b_Starts/O220p_01bar/'
+        planet = 'GJ12b'
+        gas_names = ['O2', 'H2O', 'O3', 'H2O2', 'H2']
+
+    elif case == 'GbO220pH2Ob1':
+        initin = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/GJ12b_Starts/O220p_1bar/'
+        planet = 'GJ12b'
+        gas_names = ['O2', 'H2O', 'O3', 'H2O2', 'H2']
+
+    elif case == 'GbO230pH2Ob01':
+        initin = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/GJ12b_Starts/O230p_01bar/'
+        planet = 'GJ12b'
+        gas_names = ['O2', 'H2O', 'O3', 'H2O2', 'H2']
+
+    elif case == 'GbO230pH2Ob1':
+        initin = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/GJ12b_Starts/O230p_1bar/'
+        planet = 'GJ12b'
+        gas_names = ['O2', 'H2O', 'O3', 'H2O2', 'H2']
+
     if os.path.exists('/gscratch/vsm/gialluca/VPLModelingTools_Dev/'+case):
         shutil.rmtree('/gscratch/vsm/gialluca/VPLModelingTools_Dev/'+case)
 
@@ -186,7 +206,7 @@ def run_starting_points(case):
 
 
 
-inputs = ['GbH2Ob1try2', 'Gbdryo2so2b01', 'Gbdryo2so2b1']#['b01', 'b1', 'b10']
+inputs = ['GbO220pH2Ob01', 'GbO220pH2Ob1', 'GbO230pH2Ob01', 'GbO230pH2Ob1']#['b01', 'b1', 'b10']
 
 with Pool() as p:
     models = p.map(run_starting_points, inputs)
