@@ -117,11 +117,11 @@ def add_spectra(planet='T1b', atm_type='H2O-O2', sweep_dir=None):
                 names = ['Z', 'T', 'EDD', 'DEN', 'P', 'H2OSAT', 'H2O', 'RELH', 'CONDEN', 'HFLUX']
 
                 for l in range(len(lines)):
-                    if 'CONDEN' in lines[l].split():
+                    '''if 'CONDEN' in lines[l].split():
                         tab = ascii.read(currpath+'FINAL_out.out', data_start=l-83, data_end=l+17, names=names)
                         fj[atm_type]['Atm'+str(curr_id)]['P_CONDEN'] = list(tab['P'])
                         fj[atm_type]['Atm'+str(curr_id)]['CONDEN'] = list(tab['CONDEN'])
-                        fj[atm_type]['Atm'+str(curr_id)]['H2O_CONDEN'] = list(tab['H2O'])
+                        fj[atm_type]['Atm'+str(curr_id)]['H2O_CONDEN'] = list(tab['H2O'])'''
                     
                     if 'FLUXES' in lines[l].split() and 'ENERGY' not in lines[l].split():
                         hold = lines[l+105].split()
