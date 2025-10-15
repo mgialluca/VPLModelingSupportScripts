@@ -3,7 +3,7 @@ import subprocess
 
 
 #'/gscratch/vsm/gialluca/VPLModelingTools_Dev/SensTestH2O/RunNumber175/
-test_object = Generate_Atmosphere_Parameter_Sweep('Gco2wL', 
+test_object = Generate_Atmosphere_Parameter_Sweep('Gco2wL2', 
                                   '/gscratch/vsm/gialluca/VPLModelingTools_Dev/UpdatedStarts/T1gco2/', 
                                 restart_run= True, 
                                 starting_point='Exact',
@@ -29,11 +29,11 @@ test_object.escape_species_molarmass['CO2'] = [44.01]*(u.g/u.mol)
 test_object.escape_sample_type_gridsweep = ['UserDef', 'UserDef', 'UserDef', 'UserDef', 'UserDef', 'UserDef'] 
 test_object.escape_species_units_gridsweep = [u.cm/u.s, u.cm/u.s, u.cm/u.s, u.cm/u.s, u.cm/u.s, u.cm/u.s]
 
-test_object.escape_samples_gridsweep['O'] = [0.01, 0.1]
-test_object.escape_samples_gridsweep['O2'] = [0.01, 0.05]
+test_object.escape_samples_gridsweep['O'] = [0.01]
+test_object.escape_samples_gridsweep['O2'] = [0.01]
 test_object.escape_samples_gridsweep['O3'] = [0.02] 
 test_object.escape_samples_gridsweep['H2O2'] = [0.02]
-test_object.escape_samples_gridsweep['CO'] = [0.0, 0.01]
+test_object.escape_samples_gridsweep['CO'] = [0.001, 0.0001]
 test_object.escape_samples_gridsweep['CO2'] = [0.01, 0.1]
 
 
