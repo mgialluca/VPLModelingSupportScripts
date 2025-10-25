@@ -66,6 +66,17 @@ def add_spectra(planet='T1b', atm_type='H2O-O2', sweep_dir=None):
                     if fj[atm_type][key]['MetaData'] == metadat:
                         add_to_db = False
 
+            # Need to exclude bad atmospheres:
+            if add_to_db == True:
+                ptz = ascii.read(currpath+'FINAL_PTZ_mixingratios_out.dist')
+                if atm_type == 'H2O-O2':
+                    if (ptz['O'][0] + ptz['O2'][0] + ptz['H2O'][0] + ptz['O3'][0]) < 0.9:
+                        add_to_db = False
+                elif atm_type == 'CO2':
+                    if ptz['C'][0] > 0.05:
+                        add_to_db = False
+
+
             # If you need to add it to DB, do so
             if add_to_db == True:
 
@@ -106,7 +117,7 @@ def add_spectra(planet='T1b', atm_type='H2O-O2', sweep_dir=None):
                     fj[atm_type]['Atm'+str(curr_id)]['Nightside_Fstar'] = list(nightside['col3'])
 
                 # Get the PTZ mixing ratios file in the database 
-                ptz = ascii.read(currpath+'FINAL_PTZ_mixingratios_out.dist')
+                #ptz = ascii.read(currpath+'FINAL_PTZ_mixingratios_out.dist') # Now read in above
                 fj[atm_type]['Atm'+str(curr_id)]['PTZOut'] = {}
                 for col in ptz.colnames:
                     fj[atm_type]['Atm'+str(curr_id)]['PTZOut'][col] = list(ptz[col])
