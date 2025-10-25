@@ -68,6 +68,7 @@ def add_spectra(planet='T1b', atm_type='H2O-O2', sweep_dir=None):
 
             # Need to exclude bad atmospheres:
             if add_to_db == True:
+                currpath = sweep_dir+partab['ModelNumber'][i]+'/'
                 ptz = ascii.read(currpath+'FINAL_PTZ_mixingratios_out.dist')
                 if atm_type == 'H2O-O2':
                     if (ptz['O'][0] + ptz['O2'][0] + ptz['H2O'][0] + ptz['O3'][0]) < 0.9:
