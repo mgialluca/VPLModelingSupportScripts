@@ -149,7 +149,7 @@ def run_one_model(inputs):
     splpath = originalpath.split('/')
     ogmaster = splpath[len(splpath)-3]
     ogcase = splpath[len(splpath)-2]
-    initin = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/'+ogmaster+'/'+ogcase+'/'
+    initin = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/'+ogmaster+'/'+ogcase+'/PhotochemInputs/'
     newmaster = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/AddSO2/'+ogmaster+'/'
 
     pipelineobj = VPLModelingPipeline(case, 

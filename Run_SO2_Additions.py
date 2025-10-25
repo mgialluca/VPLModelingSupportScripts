@@ -149,7 +149,7 @@ def run_one_model(inputs):
     splpath = originalpath.split('/')
     ogmaster = splpath[len(splpath)-3]
     ogcase = splpath[len(splpath)-2]
-    initin = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/'+ogmaster+'/'+ogcase+'/'
+    initin = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/'+ogmaster+'/'+ogcase+'/PhotochemInputs/'
     newmaster = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/AddSO2/'+ogmaster+'/'
 
     pipelineobj = VPLModelingPipeline(case, 
@@ -282,7 +282,7 @@ def populate_tracking_json(planet): # Want a function to run once that checks th
 # First need the tracking document
 
 planet = 'T1b' # CHANGES PLANET TO PLANET 
-avail_cores = 192 # in case we use a 40 core node
+avail_cores = 40 # in case we use a 40 core node
 
 if not os.path.exists('/gscratch/vsm/gialluca/VPLModelingTools_Dev/AddSO2/'+planet+'_Tracking.json'):
     populate_tracking_json(planet)
