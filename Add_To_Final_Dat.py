@@ -68,7 +68,10 @@ def add_spectra(planet='T1b', atm_type='H2O-O2', sweep_dir=None):
 
             # Need to exclude bad atmospheres:
             if add_to_db == True:
-                currpath = sweep_dir+partab['ModelNumber'][i]+'/'
+                if partab['ModelNumber'][i][0] == 'u':
+                    modnum = 'R'+partab['ModelNumber'][i]
+                
+                currpath = sweep_dir+modnum+'/'
                 ptz = ascii.read(currpath+'FINAL_PTZ_mixingratios_out.dist')
                 if atm_type == 'H2O-O2':
                     if (ptz['O'][0] + ptz['O2'][0] + ptz['H2O'][0] + ptz['O3'][0]) < 0.9:
@@ -89,7 +92,7 @@ def add_spectra(planet='T1b', atm_type='H2O-O2', sweep_dir=None):
                 fj[atm_type]['Atm'+str(curr_id)]['MetaData'] = metadat
 
                 # Set path to take data from
-                currpath = sweep_dir+partab['ModelNumber'][i]+'/'
+                currpath = sweep_dir+modnum+'/'
 
                 # Save path in case
                 fj[atm_type]['Atm'+str(curr_id)]['OriginalPath'] = currpath
@@ -101,18 +104,18 @@ def add_spectra(planet='T1b', atm_type='H2O-O2', sweep_dir=None):
                 fj[atm_type]['Atm'+str(curr_id)]['ConvTier'] = partab['2colConv'][i]
 
                 # Read in transmission data from limb 
-                trnst = ascii.read(currpath+partab['ModelNumber'][i]+'_SMART.trnst')
+                trnst = ascii.read(currpath+modnum+'_SMART.trnst')
                 fj[atm_type]['Atm'+str(curr_id)]['Trnst_Wav'] = list(trnst['col1'])
                 fj[atm_type]['Atm'+str(curr_id)]['Trnst_Depth'] = list(trnst['col4'])
 
                 # If the planet is interior, need to get the emission data too 
                 if planet in ['T1b', 'T1c', 'T1d']:
-                    dayside = ascii.read(currpath+partab['ModelNumber'][i]+'_dayside_SMART_toa.rad')
+                    dayside = ascii.read(currpath+modnum+'_dayside_SMART_toa.rad')
                     fj[atm_type]['Atm'+str(curr_id)]['Dayside_Wav'] = list(dayside['col1'])
                     fj[atm_type]['Atm'+str(curr_id)]['Dayside_Fp'] = list(dayside['col4'])
                     fj[atm_type]['Atm'+str(curr_id)]['Dayside_Fstar'] = list(dayside['col3'])
 
-                    nightside = ascii.read(currpath+partab['ModelNumber'][i]+'_nightside_SMART_toa.rad')
+                    nightside = ascii.read(currpath+modnum+'_nightside_SMART_toa.rad')
                     fj[atm_type]['Atm'+str(curr_id)]['Nightside_Wav'] = list(nightside['col1'])
                     fj[atm_type]['Atm'+str(curr_id)]['Nightside_Fp'] = list(nightside['col4'])
                     fj[atm_type]['Atm'+str(curr_id)]['Nightside_Fstar'] = list(nightside['col3'])
