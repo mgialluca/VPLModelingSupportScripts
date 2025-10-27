@@ -70,6 +70,8 @@ def add_spectra(planet='T1b', atm_type='H2O-O2', sweep_dir=None):
             if add_to_db == True:
                 if partab['ModelNumber'][i][0] == 'u':
                     modnum = 'R'+partab['ModelNumber'][i]
+                else:
+                    modnum = partab['ModelNumber'][i]
                 
                 currpath = sweep_dir+modnum+'/'
                 ptz = ascii.read(currpath+'FINAL_PTZ_mixingratios_out.dist')
