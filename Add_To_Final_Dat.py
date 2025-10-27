@@ -152,13 +152,13 @@ def add_spectra(planet='T1b', atm_type='H2O-O2', sweep_dir=None):
                         fj[atm_type]['Atm'+str(curr_id)]['Oesc_per-s'] = oesc
                         fj[atm_type]['Atm'+str(curr_id)]['O2esc_per-s'] = o2esc
 
-                        if atm_type == 'CO2':
+                        '''if atm_type == 'CO2':
                             assert lines[l+211].split()[9] == 'CO2'
                             hold = lines[l+313].split()
                             co2esc = float(hold[9])*(1/(u.cm**2 * u.s))
                             co2esc = co2esc*(4*np.pi*(Rp**2))
                             co2esc = co2esc.to(1/u.s).value
-                            fj[atm_type]['Atm'+str(curr_id)]['CO2esc_per-s'] = co2esc
+                            fj[atm_type]['Atm'+str(curr_id)]['CO2esc_per-s'] = co2esc'''
 
                 # Iterate the current id for the next atmosphere if more are added 
                 curr_id += 1
