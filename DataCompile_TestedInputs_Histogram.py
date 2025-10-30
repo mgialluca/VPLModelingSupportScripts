@@ -1,4 +1,4 @@
-import astropy.io as ascii 
+from astropy.io import ascii 
 import json
 
 # Compile all the tested input options for outgassing, escape, etc to later make a histogram 
