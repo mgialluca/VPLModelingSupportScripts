@@ -33,7 +33,7 @@ def compile_for_hist_inputs(planet, sweepdirs, atmtype):
             o3dep.append(float(partab['O3_EscapeRate'][i]))
             h2o2dep.append(float(partab['H2O2_EscapeRate'][i]))
 
-            if atmtype[i] == 'CO2':
+            if atmtype[sd] == 'CO2':
                 co2outg.append(float(partab['CO2_OutgassRate'][i]))
                 co2toa.append(float(partab['CO2_EscapeRate'][i]))
                 codep.append(float(partab['CO_EscapeRate'][i]))
@@ -45,7 +45,7 @@ def compile_for_hist_inputs(planet, sweepdirs, atmtype):
                 o3dep_stable.append(float(partab['O3_EscapeRate'][i]))
                 h2o2dep_stable.append(float(partab['H2O2_EscapeRate'][i]))
 
-                if atmtype[i] == 'CO2':
+                if atmtype[sd] == 'CO2':
                     co2outg_stable.append(float(partab['CO2_OutgassRate'][i]))
                     co2toa_stable.append(float(partab['CO2_EscapeRate'][i]))
                     codep_stable.append(float(partab['CO_EscapeRate'][i]))
