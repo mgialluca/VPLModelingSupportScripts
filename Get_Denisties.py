@@ -97,7 +97,7 @@ def get_numdens(planet):
         photochempath = path+'PhotochemInputs/'
         outdist = ingest_outdist(photochempath, path)
 
-        speciesndens = get_numdens(outdist)
+        speciesndens = get_true_number_densities(outdist)
 
         d['H2O-O2']['Atm'+str(atm)] = speciesndens
 
@@ -107,7 +107,7 @@ def get_numdens(planet):
         photochempath = path+'PhotochemInputs/'
         outdist = ingest_outdist(photochempath, path)
 
-        speciesndens = get_numdens(outdist)
+        speciesndens = get_true_number_densities(outdist)
 
         d['CO2']['Atm'+str(atm)] = speciesndens
 
