@@ -1,5 +1,6 @@
 import json
 import numpy as np
+from astropy.io import ascii
 
 def ingest_outdist(photochem_InputsDir, originalpth):
 
