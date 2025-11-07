@@ -23,6 +23,12 @@ def add_spectra(planet='T1b', atm_type='H2O-O2', sweep_dir=None):
     elif planet == 'T1h':
         Rp = 0.755*u.Rearth
 
+    if atm_type in ['SO2-H2O', 'SO2-CO2']:
+        fso2 = open('/gscratch/vsm/gialluca/VPLModelingTools_Dev/AddSO2/'+planet+'_Tracking.json', 'r')
+        fjso2 = json.load(fso2)
+        fjso2 = json.loads(fjso2)
+        fso2.close()
+
     if os.path.exists('/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/'+planet+'_FinalSpectra_Database.json'):
         f = open('/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/'+planet+'_FinalSpectra_Database.json', 'r')
         fj = json.load(f)
@@ -57,6 +63,16 @@ def add_spectra(planet='T1b', atm_type='H2O-O2', sweep_dir=None):
             elif atm_type == 'CO2':
                 metadat = [float(partab['H2O_OutgassRate'][i]), float(partab['CO2_OutgassRate'][i]), float(partab['O_EscapeRate'][i]), 
                            float(partab['O2_EscapeRate'][i]), float(partab['O3_EscapeRate'][i]),
+                           float(partab['H2O2_EscapeRate'][i]), float(partab['CO_EscapeRate'][i]), float(partab['CO2_EscapeRate'][i])]
+                
+            elif atm_type == 'SO2-H2O':
+                metadat = [float(partab['H2O_OutgassRate'][i]), float(partab['SO2_OutgassRate']), float(partab['O_EscapeRate'][i]), 
+                           float(partab['O2_EscapeRate'][i]), float(partab['O3_EscapeRate'][i]),
+                           float(partab['H2O2_EscapeRate'][i])]
+            
+            elif atm_type == 'SO2-CO2':
+                metadat = [float(partab['H2O_OutgassRate'][i]), float(partab['CO2_OutgassRate'][i]), float(partab['SO2_OutgassRate']), 
+                           float(partab['O_EscapeRate'][i]), float(partab['O2_EscapeRate'][i]), float(partab['O3_EscapeRate'][i]),
                            float(partab['H2O2_EscapeRate'][i]), float(partab['CO_EscapeRate'][i]), float(partab['CO2_EscapeRate'][i])]
                 
             # Check if this atmosphere is already in the database
@@ -98,6 +114,15 @@ def add_spectra(planet='T1b', atm_type='H2O-O2', sweep_dir=None):
 
                 # Save path in case
                 fj[atm_type]['Atm'+str(curr_id)]['OriginalPath'] = currpath
+
+                # If this is an SO2 atmosphere, need to sort out the original stable atmosphere
+                if atm_type in ['SO2-H2O', 'SO2-CO2']:
+                    ogsweep = sweep_dir.split('/')[len(sweep_dir.split('/'))-2]
+                    modnum_num = modnum.split('RunNumber')[1]
+                    copiedatm = fjso2[ogsweep]['Atm'+str(modnum_num)]['Inputs'][0]
+                    so2amount = fjso2[ogsweep]['Atm'+str(modnum_num)]['SO2Amount']
+                    fj[atm_type]['Atm'+str(curr_id)]['CopiedStableAtm'] = copiedatm
+                    fj[atm_type]['Atm'+str(curr_id)]['SO2Amount'] = so2amount
 
                 # List surface pressure
                 fj[atm_type]['Atm'+str(curr_id)]['SurfPress'] = float(partab['LastPsurf'][i])
