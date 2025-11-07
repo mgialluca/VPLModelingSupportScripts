@@ -313,7 +313,7 @@ for i in range(avail_cores):
 
     # If no atm has been found you are towards the end 
     if found_atm_to_run == False:
-        print('At the end of atmospheres for this planet, running '+str(avail_cores)+' cases')
+        print('At the end of atmospheres for this planet, running '+str(len(all_inputs_curr_iteration))+' cases')
         break
 
 assert len(all_inputs_curr_iteration) <= avail_cores # Just to be safe 
