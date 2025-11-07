@@ -5,7 +5,7 @@ import os
 from multiprocessing import Pool
 import os
 
-# Currently set up for: TRAPPIST-1E
+# Currently set up for: TRAPPIST-1B
 
 
 def set_pipeline_vars(casename, pipelineobj, master_out, gas_names = ['O2', 'H2O', 'O3']):
@@ -36,7 +36,7 @@ def set_pipeline_vars(casename, pipelineobj, master_out, gas_names = ['O2', 'H2O
 
     # Adjust the atmospheric pressure
     pipelineobj.adjust_atmospheric_pressure = True
-    pipelineobj.include_2column_climate = False # Might need to change
+    pipelineobj.include_2column_climate = True # Might need to change
     pipelineobj.suppress_IOerrors = True
     pipelineobj.run_spectra = True
     pipelineobj.dayside_starting_PT = None
@@ -47,7 +47,7 @@ def set_pipeline_vars(casename, pipelineobj, master_out, gas_names = ['O2', 'H2O
 
     pipelineobj.MCMC_pressure_only = False
     pipelineobj.MultiNest_DataFit = False
-    pipelineobj.rerun_smart_for_2col = False # Might need to change
+    pipelineobj.rerun_smart_for_2col = True # Might need to change
     
     if pipelineobj.MCMC_pressure_only == True:
         pipelineobj.include_2column_climate = False
@@ -154,7 +154,7 @@ def run_one_model(inputs):
 
     pipelineobj = VPLModelingPipeline(case, 
                                     initin, 
-                                    True, find_molecules_of_interest=False, hitran_year='2020', planet='T1e')
+                                    True, find_molecules_of_interest=False, hitran_year='2020', planet='T1b')
     
     if atmtype == 'H2O-O2':
         gases = ['O2', 'H2O', 'O3', 'H2', 'SO2', 'SO'] # DOUBLE CHECK 
@@ -281,8 +281,8 @@ def populate_tracking_json(planet): # Want a function to run once that checks th
 
 # First need the tracking document
 
-planet = 'T1e' # CHANGES PLANET TO PLANET 
-avail_cores = 192 # in case we use a 40 core node
+planet = 'T1b' # CHANGES PLANET TO PLANET 
+avail_cores = 40 # in case we use a 40 core node
 
 if not os.path.exists('/gscratch/vsm/gialluca/VPLModelingTools_Dev/AdjSO2/'+planet+'_Tracking.json'):
     populate_tracking_json(planet)
