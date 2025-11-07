@@ -66,12 +66,12 @@ def add_spectra(planet='T1b', atm_type='H2O-O2', sweep_dir=None):
                            float(partab['H2O2_EscapeRate'][i]), float(partab['CO_EscapeRate'][i]), float(partab['CO2_EscapeRate'][i])]
                 
             elif atm_type == 'SO2-H2O':
-                metadat = [float(partab['H2O_OutgassRate'][i]), float(partab['SO2_OutgassRate']), float(partab['O_EscapeRate'][i]), 
+                metadat = [float(partab['H2O_OutgassRate'][i]), float(partab['SO2_OutgassRate'][i]), float(partab['O_EscapeRate'][i]), 
                            float(partab['O2_EscapeRate'][i]), float(partab['O3_EscapeRate'][i]),
                            float(partab['H2O2_EscapeRate'][i])]
             
             elif atm_type == 'SO2-CO2':
-                metadat = [float(partab['H2O_OutgassRate'][i]), float(partab['CO2_OutgassRate'][i]), float(partab['SO2_OutgassRate']), 
+                metadat = [float(partab['H2O_OutgassRate'][i]), float(partab['CO2_OutgassRate'][i]), float(partab['SO2_OutgassRate'][i]), 
                            float(partab['O_EscapeRate'][i]), float(partab['O2_EscapeRate'][i]), float(partab['O3_EscapeRate'][i]),
                            float(partab['H2O2_EscapeRate'][i]), float(partab['CO_EscapeRate'][i]), float(partab['CO2_EscapeRate'][i])]
                 
