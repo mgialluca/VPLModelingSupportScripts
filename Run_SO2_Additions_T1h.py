@@ -5,7 +5,7 @@ import os
 from multiprocessing import Pool
 import os
 
-# Currently set up for: TRAPPIST-1E
+# Currently set up for: TRAPPIST-1H
 
 
 def set_pipeline_vars(casename, pipelineobj, master_out, gas_names = ['O2', 'H2O', 'O3']):
@@ -154,7 +154,7 @@ def run_one_model(inputs):
 
     pipelineobj = VPLModelingPipeline(case, 
                                     initin, 
-                                    True, find_molecules_of_interest=False, hitran_year='2020', planet='T1e')
+                                    True, find_molecules_of_interest=False, hitran_year='2020', planet='T1h')
     
     if atmtype == 'H2O-O2':
         gases = ['O2', 'H2O', 'O3', 'H2', 'SO2', 'SO'] # DOUBLE CHECK 
@@ -281,7 +281,7 @@ def populate_tracking_json(planet): # Want a function to run once that checks th
 
 # First need the tracking document
 
-planet = 'T1e' # CHANGES PLANET TO PLANET 
+planet = 'T1h' # CHANGES PLANET TO PLANET 
 avail_cores = 96 # in case we use a 40 core node
 
 if not os.path.exists('/gscratch/vsm/gialluca/VPLModelingTools_Dev/AdjSO2/'+planet+'_Tracking.json'):
