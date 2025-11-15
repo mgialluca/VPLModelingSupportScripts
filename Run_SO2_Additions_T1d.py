@@ -35,7 +35,7 @@ def set_pipeline_vars(casename, pipelineobj, master_out, gas_names = ['O2', 'H2O
     pipelineobj.SMART_RunScriptDir = master_out+casename+'/'
 
     # Adjust the atmospheric pressure
-    pipelineobj.adjust_atmospheric_pressure = False
+    pipelineobj.adjust_atmospheric_pressure = True
     pipelineobj.include_2column_climate = True # Might need to change
     pipelineobj.suppress_IOerrors = True
     pipelineobj.run_spectra = True
@@ -150,7 +150,7 @@ def run_one_model(inputs):
     ogmaster = splpath[len(splpath)-3]
     ogcase = splpath[len(splpath)-2]
     initin = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/'+ogmaster+'/'+ogcase+'/PhotochemInputs/'
-    newmaster = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/AddSO2/'+ogmaster+'/'
+    newmaster = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/AdjSO2/'+ogmaster+'/'
 
     pipelineobj = VPLModelingPipeline(case, 
                                     initin, 
@@ -207,8 +207,8 @@ def populate_tracking_json(planet): # Want a function to run once that checks th
         else:
             curr_id = tracking[ogmaster]['AtmIDs'][len(tracking[ogmaster]['AtmIDs'])-1]+1
 
-        if not os.path.exists('/gscratch/vsm/gialluca/VPLModelingTools_Dev/AddSO2/'+ogmaster+'/'):
-            os.mkdir('/gscratch/vsm/gialluca/VPLModelingTools_Dev/AddSO2/'+ogmaster+'/')
+        if not os.path.exists('/gscratch/vsm/gialluca/VPLModelingTools_Dev/AdjSO2/'+ogmaster+'/'):
+            os.mkdir('/gscratch/vsm/gialluca/VPLModelingTools_Dev/AdjSO2/'+ogmaster+'/')
 
         tracking[ogmaster]['Atm'+str(curr_id)] = {}
         tracking[ogmaster]['Atm'+str(curr_id)]['SO2Amount'] = 1e-4 
@@ -246,8 +246,8 @@ def populate_tracking_json(planet): # Want a function to run once that checks th
         else:
             curr_id = tracking[ogmaster]['AtmIDs'][len(tracking[ogmaster]['AtmIDs'])-1]+1
 
-        if not os.path.exists('/gscratch/vsm/gialluca/VPLModelingTools_Dev/AddSO2/'+ogmaster+'/'):
-            os.mkdir('/gscratch/vsm/gialluca/VPLModelingTools_Dev/AddSO2/'+ogmaster+'/')
+        if not os.path.exists('/gscratch/vsm/gialluca/VPLModelingTools_Dev/AdjSO2/'+ogmaster+'/'):
+            os.mkdir('/gscratch/vsm/gialluca/VPLModelingTools_Dev/AdjSO2/'+ogmaster+'/')
 
         tracking[ogmaster]['Atm'+str(curr_id)] = {}
         tracking[ogmaster]['Atm'+str(curr_id)]['SO2Amount'] = 1e-4 
@@ -270,7 +270,7 @@ def populate_tracking_json(planet): # Want a function to run once that checks th
         tracking[ogmaster]['AtmIDs'].append(curr_id)
 
 
-    f = open('/gscratch/vsm/gialluca/VPLModelingTools_Dev/AddSO2/'+planet+'_Tracking.json', 'w')
+    f = open('/gscratch/vsm/gialluca/VPLModelingTools_Dev/AdjSO2/'+planet+'_Tracking.json', 'w')
     dh = json.dumps(tracking)
     json.dump(dh, f)
     f.close()
@@ -284,10 +284,10 @@ def populate_tracking_json(planet): # Want a function to run once that checks th
 planet = 'T1d' # CHANGES PLANET TO PLANET 
 avail_cores = 192 # in case we use a 40 core node
 
-if not os.path.exists('/gscratch/vsm/gialluca/VPLModelingTools_Dev/AddSO2/'+planet+'_Tracking.json'):
+if not os.path.exists('/gscratch/vsm/gialluca/VPLModelingTools_Dev/AdjSO2/'+planet+'_Tracking.json'):
     populate_tracking_json(planet)
 
-f = open('/gscratch/vsm/gialluca/VPLModelingTools_Dev/AddSO2/'+planet+'_Tracking.json', 'r')
+f = open('/gscratch/vsm/gialluca/VPLModelingTools_Dev/AdjSO2/'+planet+'_Tracking.json', 'r')
 fj = json.load(f)
 track = json.loads(fj)
 f.close()
@@ -318,7 +318,7 @@ for i in range(avail_cores):
 
 assert len(all_inputs_curr_iteration) <= avail_cores # Just to be safe 
 
-f = open('/gscratch/vsm/gialluca/VPLModelingTools_Dev/AddSO2/'+planet+'_Tracking.json', 'w')
+f = open('/gscratch/vsm/gialluca/VPLModelingTools_Dev/AdjSO2/'+planet+'_Tracking.json', 'w')
 dh = json.dumps(track)
 json.dump(dh, f)
 f.close()
