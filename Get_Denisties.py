@@ -85,7 +85,8 @@ def get_numdens(planet):
     fj = json.loads(fj)
     fh2o = fj['H2O-O2']
     fco2 = fj['CO2']
-    fso2h2o = fj['SO2-H2O']
+    if planet not in ['T1f', 'T1g', 'T1h']:
+        fso2h2o = fj['SO2-H2O']
     fso2co2 = fj['SO2-CO2']
     f.close()
 
@@ -115,15 +116,16 @@ def get_numdens(planet):
 
         d['CO2']['Atm'+str(atm)] = speciesndens
 
-    for atm in fso2h2o['AtmIDs']:
+    if planet not in ['T1f', 'T1g', 'T1h']:
+        for atm in fso2h2o['AtmIDs']:
 
-        path = fso2h2o['Atm'+str(atm)]['OriginalPath']
-        photochempath = path+'PhotochemInputs/'
-        outdist = ingest_outdist(photochempath, path)
+            path = fso2h2o['Atm'+str(atm)]['OriginalPath']
+            photochempath = path+'PhotochemInputs/'
+            outdist = ingest_outdist(photochempath, path)
 
-        speciesndens = get_true_number_densities(outdist)
+            speciesndens = get_true_number_densities(outdist)
 
-        d['SO2-H2O']['Atm'+str(atm)] = speciesndens
+            d['SO2-H2O']['Atm'+str(atm)] = speciesndens
 
     for atm in fso2co2['AtmIDs']:
 
