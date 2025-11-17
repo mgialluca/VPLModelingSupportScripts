@@ -85,11 +85,15 @@ def get_numdens(planet):
     fj = json.loads(fj)
     fh2o = fj['H2O-O2']
     fco2 = fj['CO2']
+    fso2h2o = fj['SO2-H2O']
+    fso2co2 = fj['SO2-CO2']
     f.close()
 
     d = {}
     d['H2O-O2'] = {}
     d['CO2'] = {}
+    d['SO2-H2O'] = {}
+    d['SO2-CO2'] = {}
 
     for atm in fh2o['AtmIDs']:
 
@@ -110,6 +114,26 @@ def get_numdens(planet):
         speciesndens = get_true_number_densities(outdist)
 
         d['CO2']['Atm'+str(atm)] = speciesndens
+
+    for atm in fso2h2o['AtmIDs']:
+
+        path = fso2h2o['Atm'+str(atm)]['OriginalPath']
+        photochempath = path+'PhotochemInputs/'
+        outdist = ingest_outdist(photochempath, path)
+
+        speciesndens = get_true_number_densities(outdist)
+
+        d['SO2-H2O']['Atm'+str(atm)] = speciesndens
+
+    for atm in fso2co2['AtmIDs']:
+
+        path = fso2co2['Atm'+str(atm)]['OriginalPath']
+        photochempath = path+'PhotochemInputs/'
+        outdist = ingest_outdist(photochempath, path)
+
+        speciesndens = get_true_number_densities(outdist)
+
+        d['SO2-CO2']['Atm'+str(atm)] = speciesndens
 
     f = open('/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/'+planet+'_SpeciesNumberDensities.json', 'w')
     dh = json.dumps(d)
