@@ -40,7 +40,9 @@ def clean_one_sweep_dir(sweepdir):
 
 
 
-to_clean = ['Bzoom1']
+to_clean = ['Bco2', 'Bco2wL', 'Bco2wL2', 'Bco2wL3', 'Bz1Re', 'Bzoom2', 'Cco2', 'Cco2wL', 'Cco2wL2', 'Cinit', 'Czoom1', 'Czoom2', 'CzoomRT', 
+            'Dco2', 'Dco2rego', 'Dco2wL', 'Dco2wL2', 'Dinit', 'Dzoom1', 'Dzoom2', 'Eco2', 'Eco2lo', 'Eco2wL', 'Eco2wL2', 'Einit', 'Ezoom1', 
+            'Ezoom2', 'Ezoom3', 'Fco2', 'Fco2lo', 'Fco2wL', 'Fco2wL2', 'Gco2', 'Gco2lo', 'Gco2wL', 'Gco2wL2', 'Hco2', 'Hco2lo', 'Hco2wL']
 
 with Pool() as p:
     models = p.map(clean_one_sweep_dir, to_clean)
