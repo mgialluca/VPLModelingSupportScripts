@@ -96,15 +96,16 @@ def get_numdens(planet):
     d['SO2-H2O'] = {}
     d['SO2-CO2'] = {}
 
-    for atm in fh2o['AtmIDs']:
+    if planet not in ['T1f', 'T1g', 'T1h']:
+        for atm in fh2o['AtmIDs']:
 
-        path = fh2o['Atm'+str(atm)]['OriginalPath']
-        photochempath = path+'PhotochemInputs/'
-        outdist = ingest_outdist(photochempath, path)
+            path = fh2o['Atm'+str(atm)]['OriginalPath']
+            photochempath = path+'PhotochemInputs/'
+            outdist = ingest_outdist(photochempath, path)
 
-        speciesndens = get_true_number_densities(outdist)
+            speciesndens = get_true_number_densities(outdist)
 
-        d['H2O-O2']['Atm'+str(atm)] = speciesndens
+            d['H2O-O2']['Atm'+str(atm)] = speciesndens
 
     for atm in fco2['AtmIDs']:
 
