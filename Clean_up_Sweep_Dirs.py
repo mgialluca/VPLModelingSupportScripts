@@ -21,11 +21,11 @@ def clean_one_sweep_dir(sweepdir):
         fis_to_save = ['vpl_climate_output_'+sd+'.run', sd+'_SavingInfoOut.txt', 'PT_profile_'+sd+'.pt', 'MixingRs_'+sd+'.dat', 'photochem_run_output_'+sd+'.run',
                    'FINAL_out.dist', 'FINAL_out.out', 'FINAL_PTZ_mixingratios_out.dist', 'PT_profile_nightside_'+sd+'.pt', 'PT_profile_nightside_'+sd+'.pt',
                    'smart_run_output_'+sd+'.run', 'smart_run_output_nightside_'+sd+'.run', 'smart_run_output_dayside_'+sd+'.run', 'FINAL_out_FAILED.dist', 'FINAL_out_FAILED.out', 
-                   'FINAL_PTZ_mixingratios_out_FAILED.dist']
+                   'FINAL_PTZ_mixingratios_out_FAILED.dist', 'vpl_2col_climate_output_'+sd+'.run']
 
         for f in fishold:
             if f not in fis_to_save:
-                if len(f.split('vpl_2col_climate_output_'+sd+'_Subtry')) == 1:
+                if len(f.split('vpl_2column_')) > 1:
                     pass
                 elif len(f.split('SMART')) > 1:
                     pass
