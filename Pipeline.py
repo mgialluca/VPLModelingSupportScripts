@@ -21,7 +21,7 @@ from NewPressure_HelperFunctions import get_true_number_densities, sum_mixing_ra
 class VPLModelingPipeline:
 
     # Set Global and initialize atmosphere object:
-    def __init__(self, casename, photochemInitial, verbose, find_molecules_of_interest=False, hitran_year='2020', planet='T1c') -> None:
+    def __init__(self, casename, photochemInitial, verbose, find_molecules_of_interest=False, hitran_year='2020', planet='T1c', force_dz_adjust=False) -> None:
         # Set any and all needed paths
         self.photochemDir = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/megan_atmos/atmos/PHOTOCHEM/' #'/gscratch/vsm/gialluca/VPLModelingTools_Dev/atmos/PHOTOCHEM/' # path to PHOTOCHEM/ dir
         self.atmosDir = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/megan_atmos/atmos/'# '/gscratch/vsm/gialluca/VPLModelingTools_Dev/atmos/' # path to atmos/ dir
@@ -64,6 +64,8 @@ class VPLModelingPipeline:
         elif self.planet == 'GJ12b':
             self.planetary_mass = 0.75*u.Mearth.to(u.kg)
         
+        # Force dz adjust, added for T1b high steam atmospheres to force a larger dzgrid
+        self.force_dz_adjust = force_dz_adjust
 
         # The climate executable:
         self.vplclimate_executable = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/ClimateModel/vpl_climate_exec' # The VPL Climate executable you want to use WITH FULL PATH
@@ -628,7 +630,8 @@ class VPLModelingPipeline:
                     dat['f_net[W/m/m]'] = Fnet
                     break
 
-        self.dzg = dat['Alt[km]'][0]*u.km.to(u.cm)/200
+        if self.force_dz_adjust == False:
+            self.dzg = dat['Alt[km]'][0]*u.km.to(u.cm)/200
 
         return dat
     
@@ -2130,11 +2133,27 @@ class VPLModelingPipeline:
                 planetdat_new.write("{:.2e}".format(self.updated_atm_pressure))
                 planetdat_new.write(' = P0, surface pressure [bar] \n')
             else:
-                if self.num_climate_runs == 0: # Only change if we don't have dzg already
+                if self.num_climate_runs == 0 or self.force_dz_adjust == True: # Only change if we don't have dzg already
                     if 'DZGRID' in hold:
-                        if self.updated_atm_pressure >= 1:
+                        if self.updated_atm_pressure >= 1 and self.updated_atm_pressure < 10:
                             self.dzg = 0.75e5
                             planetdat_new.write("{:.2E}".format(self.dzg)+' = DZGRID [cm] \n')
+                        elif self.updated_atm_pressure > 10:
+                            # Only run after photochem has run at least 1x
+                            ptzcurr = ascii.read(self.photochemDir+'OUTPUT/PTZ_mixingratios_out.dist')
+                            presscurr = ptzcurr['PRESS']
+                            if presscurr[199] > 1e-4:
+                                self.dzg = self.dzg*10
+                                planetdat_new.write("{:.2E}".format(self.dzg)+' = DZGRID [cm] \n')
+                            elif presscurr[199] > 1e-5:
+                                self.dzg = self.dzg*5
+                                planetdat_new.write("{:.2E}".format(self.dzg)+' = DZGRID [cm] \n')
+                            elif presscurr[199] < 1e-10:
+                                self.dzg = self.dzg*0.2
+                                planetdat_new.write("{:.2E}".format(self.dzg)+' = DZGRID [cm] \n')
+                            else:
+                                self.dzg = self.dzg
+                                planetdat_new.write("{:.2E}".format(self.dzg)+' = DZGRID [cm] \n')
                         else:
                             self.dzg = 5e4
                             planetdat_new.write("{:.2E}".format(self.dzg)+' = DZGRID [cm] \n')
@@ -2330,8 +2349,6 @@ class VPLModelingPipeline:
         subprocess.run('rm '+self.photochem_InputsDir+'PLANET.dat', shell=True)
         subprocess.run('mv '+self.photochem_InputsDir+'New_PLANET.dat '+self.photochem_InputsDir+'PLANET.dat', shell=True)
 
-
-
     ### AUTOMATIC PIPELINE, calls all above functions sequentially defined by flow chart, updates necessary object parameters
     ##
     ## Dependent on all Attributes, no fxn-specific inputs
@@ -2396,8 +2413,11 @@ class VPLModelingPipeline:
             else:
                 if self.adjust_atmospheric_pressure == True:
                     if 'DZGRID' in hold:
-                        if self.updated_atm_pressure >= 1:
+                        if self.updated_atm_pressure >= 1 and self.updated_atm_pressure < 10:
                             self.dzg = 0.75e5
+                            planetdat_new.write("{:.2E}".format(self.dzg)+' = DZGRID [cm] \n')
+                        elif self.updated_atm_pressure >= 10:
+                            self.dzg = 5e6
                             planetdat_new.write("{:.2E}".format(self.dzg)+' = DZGRID [cm] \n')
                         else:
                             self.dzg = 5e4
@@ -2453,22 +2473,42 @@ class VPLModelingPipeline:
 
             # Need to adjust DZGrid
             if self.num_climate_runs > 0: 
-                planetdat_new = open(self.photochem_InputsDir+'New_PLANET.dat', 'w')
-                planetdat_old = open(self.photochem_InputsDir+'PLANET.dat', 'r')
 
-                planetdat_lines = planetdat_old.readlines()
-                for l in planetdat_lines:
-                    hold = l.split()
-                    if 'DZGRID' in hold:
-                        planetdat_new.write("{:.2E}".format(self.dzg)+' = DZGRID [cm] \n')
-                    else:
-                        planetdat_new.write(l)
+                if self.force_dz_adjust == False:
+                    planetdat_new = open(self.photochem_InputsDir+'New_PLANET.dat', 'w')
+                    planetdat_old = open(self.photochem_InputsDir+'PLANET.dat', 'r')
 
-                planetdat_new.close()
-                planetdat_old.close()
+                    planetdat_lines = planetdat_old.readlines()
+                    for l in planetdat_lines:
+                        hold = l.split()
+                        if 'DZGRID' in hold:
+                            planetdat_new.write("{:.2E}".format(self.dzg)+' = DZGRID [cm] \n')
+                        else:
+                            planetdat_new.write(l)
 
-                subprocess.run('rm '+self.photochem_InputsDir+'PLANET.dat', shell=True)
-                subprocess.run('mv '+self.photochem_InputsDir+'New_PLANET.dat '+self.photochem_InputsDir+'PLANET.dat', shell=True)
+                    planetdat_new.close()
+                    planetdat_old.close()
+
+                    subprocess.run('rm '+self.photochem_InputsDir+'PLANET.dat', shell=True)
+                    subprocess.run('mv '+self.photochem_InputsDir+'New_PLANET.dat '+self.photochem_InputsDir+'PLANET.dat', shell=True)
+                
+                else:
+                    planetdat_new = open(self.photochem_InputsDir+'New_PLANET.dat', 'w')
+                    planetdat_old = open(self.photochem_InputsDir+'PLANET.dat', 'r')
+
+                    planetdat_lines = planetdat_old.readlines()
+                    for l in planetdat_lines:
+                        hold = l.split()
+                        if 'DZGRID' in hold:
+                            planetdat_new.write("{:.2E}".format(self.dzg)+' = DZGRID [cm] \n')
+                        else:
+                            planetdat_new.write(l)
+
+                    planetdat_new.close()
+                    planetdat_old.close()
+
+                    subprocess.run('rm '+self.photochem_InputsDir+'PLANET.dat', shell=True)
+                    subprocess.run('mv '+self.photochem_InputsDir+'New_PLANET.dat '+self.photochem_InputsDir+'PLANET.dat', shell=True)
 
             self.num_photochem_runs += 1
             if self.verbose == True:

@@ -4,7 +4,7 @@ import subprocess
 import os
 from multiprocessing import Pool
 
-master = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/Binit/'
+master = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/RedoB/'
 #master = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/ClimTestMulti/'
 
 def set_pipeline_vars(casename, pipelineobj, master_out=master):
@@ -91,38 +91,18 @@ def set_pipeline_vars(casename, pipelineobj, master_out=master):
 
 def run_one_model(inputstring):
 
-    case = inputstring
+    copyfrom, case = inputstring
 
     #case = 'RunNumber'+str(modelid)
     #case = inputstring#+'T2'
-    master = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/Binit/'
+    copyfrom = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/'+copyfrom+'/PhotochemInputs/'
 
     pipelineobj = VPLModelingPipeline(case, 
-                                  master+case+'/PhotochemInputs/', 
+                                  copyfrom, 
                                   True, find_molecules_of_interest=False, hitran_year='2020', planet='T1b')
     
     set_pipeline_vars(case, pipelineobj)
     #edit_speciesdat(pipelineobj, h2oinput, oin, o2in, o3in, h2o2in)
-    print(master+case)
-    for sdshol, dshol, fishol in os.walk(master+case+'/'):
-        fishol = fishol
-        break
-
-    if 'FINAL_PTZ_mixingratios_out.dist' in fishol and 'vpl_2col_climate_output_'+case+'.run' in fishol:
-        print('continuing')
-        pipelineobj.global_convergence = True
-        pipelineobj.clim2col_restarting = True
-
-    
-    #elif 'FINAL_PTZ_mixingratios_out_FAILED.dist' in fishol:
-    else:
-        for fhold in fishol:
-            subprocess.run('rm '+master+case+'/'+fhold, shell=True)
-        
-        atmos_Dir = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/megan_atmos/atmos/'
-        if not os.path.exists(master+case+'/atmos/'):
-            shutil.copytree(atmos_Dir,  master+case+'/atmos/')
-        subprocess.run('rm -rf '+pipelineobj.LBLABC_AbsFilesDir+'*.abs', shell=True)
     
     # Run the Photochem-Climate-SMART pipeline
     converged = pipelineobj.run_automatic()
@@ -136,17 +116,24 @@ def run_one_model(inputstring):
 
     return pipelineobj
     
-for ds, sds, fis in os.walk(master):
-    break
+# for ds, sds, fis in os.walk(master):
+#     break
 
-restart = []
-for sd in sds:
-    if not os.path.exists(master+sd+'/'+sd+'_SMART.trnst'):
-        restart.append(sd)
+# restart = []
+# for sd in sds:
+#     if not os.path.exists(master+sd+'/'+sd+'_SMART.trnst'):
+#         restart.append(sd)
 
-print('Restarting '+str(len(restart)))
+# print('Restarting '+str(len(restart)))
+
+redo = [['Bzoom1/RunNumber17', 'RunNumber2'], 
+        ['Bzoom1/RunNumber31', 'Runnumber3'],
+        ['Bzoom2/RunNumber30', 'RunNumber11'], 
+        ['Bzoom2/RunNumber46', 'RunNumber13'],
+        ['Bzoom2/RunNumber53', 'RunNumber14'], 
+        ['Bzoom2/RunNumber59', 'RunNumber15']]
 
 with Pool() as p:
-    models = p.map(run_one_model, restart)
+    models = p.map(run_one_model, redo)
 
 
