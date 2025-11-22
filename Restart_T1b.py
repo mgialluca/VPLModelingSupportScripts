@@ -99,7 +99,7 @@ def run_one_model(inputstring):
 
     pipelineobj = VPLModelingPipeline(case, 
                                   copyfrom, 
-                                  True, find_molecules_of_interest=False, hitran_year='2020', planet='T1b')
+                                  True, find_molecules_of_interest=False, hitran_year='2020', planet='T1b', force_dz_adjust=True)
     
     set_pipeline_vars(case, pipelineobj)
     #edit_speciesdat(pipelineobj, h2oinput, oin, o2in, o3in, h2o2in)
@@ -127,7 +127,7 @@ def run_one_model(inputstring):
 # print('Restarting '+str(len(restart)))
 
 redo = [['Bzoom1/RunNumber17', 'RunNumber2'], 
-        ['Bzoom1/RunNumber31', 'Runnumber3'],
+        ['Bzoom1/RunNumber31', 'RunNumber3'],
         ['Bzoom2/RunNumber30', 'RunNumber11'], 
         ['Bzoom2/RunNumber46', 'RunNumber13'],
         ['Bzoom2/RunNumber53', 'RunNumber14'], 
