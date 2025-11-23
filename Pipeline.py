@@ -2143,13 +2143,13 @@ class VPLModelingPipeline:
                             ptzcurr = ascii.read(self.photochemDir+'OUTPUT/PTZ_mixingratios_out.dist')
                             presscurr = ptzcurr['PRESS']
                             if presscurr[199] > 1e-4:
-                                self.dzg = self.dzg*10
+                                self.dzg = self.dzg*2.5
                                 planetdat_new.write("{:.2E}".format(self.dzg)+' = DZGRID [cm] \n')
                             elif presscurr[199] > 1e-5:
-                                self.dzg = self.dzg*5
+                                self.dzg = self.dzg*2
                                 planetdat_new.write("{:.2E}".format(self.dzg)+' = DZGRID [cm] \n')
                             elif presscurr[199] < 1e-10:
-                                self.dzg = self.dzg*0.2
+                                self.dzg = self.dzg*0.5
                                 planetdat_new.write("{:.2E}".format(self.dzg)+' = DZGRID [cm] \n')
                             else:
                                 self.dzg = self.dzg
@@ -2417,7 +2417,7 @@ class VPLModelingPipeline:
                             self.dzg = 0.75e5
                             planetdat_new.write("{:.2E}".format(self.dzg)+' = DZGRID [cm] \n')
                         elif self.updated_atm_pressure >= 10:
-                            self.dzg = 5e6
+                            self.dzg = 2e5
                             planetdat_new.write("{:.2E}".format(self.dzg)+' = DZGRID [cm] \n')
                         else:
                             self.dzg = 5e4
