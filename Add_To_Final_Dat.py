@@ -97,6 +97,9 @@ def add_spectra(planet='T1b', atm_type='H2O-O2', sweep_dir=None):
                 elif atm_type == 'CO2':
                     if ptz['C'][0] > 0.05:
                         add_to_db = False
+                elif atm_type == 'SO2-H2O':
+                    if ptz['CH4'] > 0.01:
+                        add_to_db = False
 
 
             # If you need to add it to DB, do so
