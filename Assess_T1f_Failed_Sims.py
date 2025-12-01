@@ -67,7 +67,7 @@ for planet, swpdrs in zip(planets, [f_sweep_dirs, g_sweep_dirs, h_sweep_dirs]):
                         break
 
                     if l == len(lines)-25:
-                        if lines[len(lines)-1].split('runspec: True, include 2 col: False') <=1:
+                        if len(lines[len(lines)-1].split('runspec: True, include 2 col: False')) <=1:
                             timedout.append(path)
                         else:
                             unaccounted_for.append(path)
