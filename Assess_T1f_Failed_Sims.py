@@ -37,7 +37,7 @@ for planet, swpdrs in zip(planets, [f_sweep_dirs, g_sweep_dirs, h_sweep_dirs]):
                 lines = f_investigate.readlines()
                 reason_found = False
                 for l in reversed(range(len(lines))):
-                    if len(lines[l].split('Max iterations reached')) > 1 and len(lines[l].split('couldnt find new pressure, ending run')) > 1:
+                    if (len(lines[l].split('Max iterations reached')) > 1 and len(lines[l].split('couldnt find new pressure, ending run')) > 1) or (len(lines[l].split('Max Iterations reached')) > 1 and len(lines[l].split('couldnt find new pressure, ending run')) > 1):
                         if len(lines[l-3].split('New Pressure:')) > 1:
                             failed_in_finding_surfP.append(path)
                             if 'vpl_climate_output_'+sd+'.run' in fis2:
@@ -82,4 +82,4 @@ for planet, swpdrs in zip(planets, [f_sweep_dirs, g_sweep_dirs, h_sweep_dirs]):
     print('Unaccounted for: '+str(len(unaccounted_for)))
     print('\n')
 
-    
+
