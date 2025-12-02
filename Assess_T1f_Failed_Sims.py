@@ -4,9 +4,9 @@ f_sweep_dirs = ['../Fco2/', '../Fco2lo/', '../Fco2wL/', '../Fco2wL2/']
 g_sweep_dirs = ['../Gco2/', '../Gco2lo/', '../Gco2wL/', '../Gco2wL2/']
 h_sweep_dirs = ['../Hco2/', '../Hco2lo/', '../Hco2wL/']
 
-planets = ['T1f', 'T1g', 'T1h']
+planets = ['T1h', 'T1g', 'T1f']
 
-for planet, swpdrs in zip(planets, [f_sweep_dirs, g_sweep_dirs, h_sweep_dirs]):
+for planet, swpdrs in zip(planets, [h_sweep_dirs, g_sweep_dirs, f_sweep_dirs]):
     passed = []
     timedout = []
     failed_in_finding_surfP = []
