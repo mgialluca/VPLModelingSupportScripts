@@ -11,7 +11,6 @@ def get_surface_temp_one_sim(smart_runscript):
 
     return temp
 
-
 def get_surfaceTemps(planet):
 
     if planet == 'T1b' or planet == 'TRAPPIST-1b':
@@ -57,6 +56,15 @@ def get_surfaceTemps(planet):
 
             d['H2O-O2']['Atm'+str(atm)] = temp
 
+            if planet in ['T1b', 'T1c', 'T1d']:
+                daysidesmartscript = 'RunSMART_dayside_'+runnum+'.run'
+                temp = get_surface_temp_one_sim(path+daysidesmartscript)
+                d['H2O-O2']['Atm'+str(atm)+'_Day'] = temp
+
+                nightsidesmartscript = 'RunSMART_nightside_'+runnum+'.run'
+                temp = get_surface_temp_one_sim(path+nightsidesmartscript)
+                d['H2O-O2']['Atm'+str(atm)+'_Night'] = temp
+
     for atm in fco2['AtmIDs']:
 
         path = fco2['Atm'+str(atm)]['OriginalPath']
@@ -66,6 +74,15 @@ def get_surfaceTemps(planet):
         temp = get_surface_temp_one_sim(path+smartscript)
 
         d['CO2']['Atm'+str(atm)] = temp
+
+        if planet in ['T1b', 'T1c', 'T1d']:
+                daysidesmartscript = 'RunSMART_dayside_'+runnum+'.run'
+                temp = get_surface_temp_one_sim(path+daysidesmartscript)
+                d['CO2']['Atm'+str(atm)+'_Day'] = temp
+
+                nightsidesmartscript = 'RunSMART_nightside_'+runnum+'.run'
+                temp = get_surface_temp_one_sim(path+nightsidesmartscript)
+                d['CO2']['Atm'+str(atm)+'_Night'] = temp
 
     if planet not in ['T1f', 'T1g', 'T1h']:
         for atm in fso2h2o['AtmIDs']:
@@ -78,6 +95,15 @@ def get_surfaceTemps(planet):
 
             d['SO2-H2O']['Atm'+str(atm)] = temp
 
+            if planet in ['T1b', 'T1c', 'T1d']:
+                daysidesmartscript = 'RunSMART_dayside_'+runnum+'.run'
+                temp = get_surface_temp_one_sim(path+daysidesmartscript)
+                d['SO2-H2O']['Atm'+str(atm)+'_Day'] = temp
+
+                nightsidesmartscript = 'RunSMART_nightside_'+runnum+'.run'
+                temp = get_surface_temp_one_sim(path+nightsidesmartscript)
+                d['SO2-H2O']['Atm'+str(atm)+'_Night'] = temp
+
     for atm in fso2co2['AtmIDs']:
 
         path = fso2co2['Atm'+str(atm)]['OriginalPath']
@@ -87,6 +113,15 @@ def get_surfaceTemps(planet):
         temp = get_surface_temp_one_sim(path+smartscript)
 
         d['SO2-CO2']['Atm'+str(atm)] = temp
+
+        if planet in ['T1b', 'T1c', 'T1d']:
+                daysidesmartscript = 'RunSMART_dayside_'+runnum+'.run'
+                temp = get_surface_temp_one_sim(path+daysidesmartscript)
+                d['SO2-CO2']['Atm'+str(atm)+'_Day'] = temp
+
+                nightsidesmartscript = 'RunSMART_nightside_'+runnum+'.run'
+                temp = get_surface_temp_one_sim(path+nightsidesmartscript)
+                d['SO2-CO2']['Atm'+str(atm)+'_Night'] = temp
 
     
     f = open('/gscratch/vsm/gialluca/VPLModelingTools_Dev/VPLModelingSupportScripts/'+planet+'_SurfaceTemps.json', 'w')
