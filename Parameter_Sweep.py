@@ -81,19 +81,24 @@ class Generate_Atmosphere_Parameter_Sweep:
 
         #########  Parameters to set if you want to do a grid sweep  #########
 
-        self.outgass_species_gridsweep = ['H2O'] # Species to vary outgassing rates of
+        self.outgass_species_gridsweep = ['H2O', 'CO2', 'SO2'] # Species to vary outgassing rates of
+        self.outgass_species_sourcetype = ['Flx', 'Flx', 'FixMR'] # Flux at surface (Flx) or Fixed mixing ratio (FixMR)
         self.outgass_species_molarmass = {} # Molar masses in g/mol
         self.outgass_species_molarmass['H2O'] = [18.015]*(u.g/u.mol)# Molar masses in g/mol
-        self.escape_species_gridsweep = ['O', 'O2', 'O3', 'H2O2'] # Species to vary escape rates of
-        self.escape_species_losstype = ['Veff', 'Veff', 'Vdep', 'Vdep'] # Vdep (depositional velocity at surface) or TOA (flux at top of atmosphere)
+        self.outgass_species_molarmass['CO2'] = [44.01]*(u.g/u.mol)
+        self.outgass_species_molarmass['SO2'] = [64.066]*(u.g/u.mol)
+        self.escape_species_gridsweep = ['O', 'O2', 'O3', 'H2O2', 'CO2', 'CO'] # Species to vary escape rates of
+        self.escape_species_losstype = ['Veff', 'Veff', 'Vdep', 'Vdep', 'Veff', 'Vdep'] # Vdep (depositional velocity at surface) or TOA (flux at top of atmosphere)
         self.escape_species_molarmass = {}
         self.escape_species_molarmass['O'] = [15.999]*(u.g/u.mol) 
         self.escape_species_molarmass['O2'] = [31.998]*(u.g/u.mol) 
         self.escape_species_molarmass['O3'] = [47.997]*(u.g/u.mol) 
         self.escape_species_molarmass['H2O2'] = [34.014]*(u.g/u.mol) 
+        self.escape_species_molarmass['CO2'] = [44.01]*(u.g/u.mol) 
+        self.escape_species_molarmass['CO'] = [28.01]*(u.g/u.mol) 
 
-        self.outgass_sample_type_gridsweep = ['Log'] # How to sample outgassed molecules: 'Linear', 'Log', or 'UserDef' 
-        self.escape_sample_type_gridsweep = ['UserDef', 'UserDef', 'UserDef', 'UserDef'] #['UserDef', 'UserDef', 'UserDef', 'UserDef']
+        self.outgass_sample_type_gridsweep = ['Log', 'UserDef', 'UserDef'] # How to sample outgassed molecules: 'Linear', 'Log', or 'UserDef' 
+        self.escape_sample_type_gridsweep = ['UserDef', 'UserDef', 'UserDef', 'UserDef', 'UserDef', 'UserDef'] #['UserDef', 'UserDef', 'UserDef', 'UserDef']
         # Linear - sample every flux on a linear grid (np.linspace) with some defined resolution
         # Log - sample every flux on a log grid (np.logspace) with some defined resolution
         # UserDef - User defined arrays of samples for every flux to vary 
@@ -101,6 +106,8 @@ class Generate_Atmosphere_Parameter_Sweep:
         # Need to set Min / Max ranges for each molecule to vary in the form of a dictionary if using Linear or Log sampling
         self.outgass_species_MinMax_gridsweep = {}
         self.outgass_species_MinMax_gridsweep['H2O'] = [44552887.2545331, 9.47899801e11]
+        self.outgass_species_MinMax_gridsweep['CO2'] = []
+        self.outgass_species_MinMax_gridsweep['SO2'] = []
         #[1.00028455e+11, 1.00089313e+11]
         #[9.97550516e+10, 9.99980399e+10]
         #[9.96337789e+10, 1.00608103e+11]
@@ -113,27 +120,33 @@ class Generate_Atmosphere_Parameter_Sweep:
         self.escape_species_MinMax_gridsweep['O2'] = []
         self.escape_species_MinMax_gridsweep['O3'] = []
         self.escape_species_MinMax_gridsweep['H2O2'] = []
+        self.escape_species_MinMax_gridsweep['CO2'] = []
+        self.escape_species_MinMax_gridsweep['CO'] = []
+        
 
         # Sample resolution if using Linear / Log sampling 
-        self.outgass_sample_resolution_gridsweep = [8] # number of samples for each outgassed species
+        self.outgass_sample_resolution_gridsweep = [8, 0, 0] # number of samples for each outgassed species
         self.escape_sample_resolution_gridsweep = []
 
         # Need to pass samples for user defined option
         self.outgass_samples_gridsweep = {}
-        #self.outgass_samples_gridsweep['H2O'] = [78000000000.0]
+        self.outgass_samples_gridsweep['CO2'] = [0]
+        self.outgass_samples_gridsweep['SO2'] = [0.0001] #100 ppm
 
         self.escape_samples_gridsweep = {}
         self.escape_samples_gridsweep['O'] = [0.1, 0.5]#[0, 1e27, 1e29]#[0, 1e27, 1e28, 1e29] #[1e28, 1e29, 1e30] #[0, 1e26, 1e27] #[0, 1e23, 5e23, 1e24, 5e24, 1e25, 5e25, 1e26]
         self.escape_samples_gridsweep['O2'] = [0.05, 0.1]#[1e26, 5e26, 1e27]
         self.escape_samples_gridsweep['O3'] = [0.02, 0.4] 
         self.escape_samples_gridsweep['H2O2'] = [0.02]
+        self.escape_samples_gridsweep['CO2'] = [0.02]
+        self.escape_samples_gridsweep['CO'] = [0.001]
         
 
 
         # Units for either Min/Max values, or the user defined samples 
         self.outgass_species_units_gridsweep = 1 / (u.cm**2 * u.s) # molecules / cm2*s (can convert from mass/time with molar mass or mol/time)
         #self.escape_species_units_gridsweep = 1 / u.s # Molecules per second
-        self.escape_species_units_gridsweep = [u.cm/u.s, u.cm/u.s, u.cm/u.s, u.cm/u.s] # Molecules per second
+        self.escape_species_units_gridsweep = [u.cm/u.s, u.cm/u.s, u.cm/u.s, u.cm/u.s, u.cm/u.s, u.cm/u.s] # Molecules per second
 
         #######################################################################
 
@@ -261,9 +274,9 @@ class Generate_Atmosphere_Parameter_Sweep:
     ## var - variable to convert
     ## species - the species the variable corresponds to (to use molar mass properly)
     ## fluxtype - 'escape' or 'outgass' 
-    def fix_flux_units(self, var, species, fluxtype, loss_type='TOA'):
+    def fix_flux_units(self, var, species, fluxtype, loss_type='TOA', source_type='Flx'):
 
-        if (fluxtype == 'escape' and loss_type == 'TOA') or fluxtype == 'outgass':
+        if (fluxtype == 'escape' and loss_type == 'TOA') or (fluxtype == 'outgass' and source_type == 'Flx'):
             try:
                 var = var.to(1 / (u.cm**2 * u.s))
             except:
@@ -299,6 +312,9 @@ class Generate_Atmosphere_Parameter_Sweep:
                 var = var.to(u.cm/u.s)
             except:
                 raise IOError('Could not properly convert depositional or effusion velocity units to cm/s for '+species+' ('+fluxtype+')')
+            
+        elif fluxtype == 'outgass' and source_type == 'FixMR':
+            pass
         
         return var
     
@@ -346,21 +362,45 @@ class Generate_Atmosphere_Parameter_Sweep:
                     # If the outgassing flux is changing, we can explicitly set this now at LBOUND
                     if currgas in self.outgass_species_gridsweep:
 
-                        # get the index of the new value in fluxes array
-                        fluxind = np.where(np.array(all_affected_species) == currgas)[0][0] # outgassing would always come first so you can use ind of 0 
+                        speciesind = self.outgass_species_gridsweep.index(currgas)
+                        source_type = self.outgass_species_sourcetype[speciesind]
 
-                        # since we're outgassing, LBOUND will be '2' and VDEP0 and FIXEDMR will be '0.' with fixed amount of spaces
-                        nsp_new.write('2     0.      0.      ')
+                        if source_type == 'Flx':
 
-                        # Now SGFLUX is set to be the new flux value 
-                        newsgval = "{:.4E}".format(fluxes[fluxind])
-                        nsp_new.write(newsgval)
-                        add_spaces = 1#10-len(newsgval)
-                        for space in range(add_spaces):
-                            nsp_new.write(' ')
+                            # get the index of the new value in fluxes array
+                            fluxind = np.where(np.array(all_affected_species) == currgas)[0][0] # outgassing would always come first so you can use ind of 0 
+
+                            # since we're outgassing, LBOUND will be '2' and VDEP0 and FIXEDMR will be '0.' with fixed amount of spaces
+                            nsp_new.write('2     0.      0.      ')
+
+                            # Now SGFLUX is set to be the new flux value 
+                            newsgval = "{:.4E}".format(fluxes[fluxind])
+                            nsp_new.write(newsgval)
+                            add_spaces = 1#10-len(newsgval)
+                            for space in range(add_spaces):
+                                nsp_new.write(' ')
+                            
+                            # Now DISTH is set to '0.' with fixed spaces
+                            nsp_new.write('0.      ')
                         
-                        # Now DISTH is set to '0.' with fixed spaces
-                        nsp_new.write('0.      ')
+                        elif source_type == 'FixMR':
+
+                            # get the index of the new value in fluxes array
+                            fluxind = np.where(np.array(all_affected_species) == currgas)[0][0] # outgassing would always come first so you can use ind of 0 
+
+                            # since we're outgassing, LBOUND will be '2' and VDEP0 will be '0.' with fixed amount of spaces
+                            nsp_new.write('1     0.      ')
+
+                            # Now FIXEDMR is set to be the new fixed mixing ratio value 
+                            newsgval = "{:.4E}".format(fluxes[fluxind])
+                            nsp_new.write(newsgval)
+                            add_spaces = 1#10-len(newsgval)
+                            for space in range(add_spaces):
+                                nsp_new.write(' ')
+                            
+                            # Now SGFLUX and DISTH are set to '0.' with fixed spaces
+                            nsp_new.write('0.      0.      ')
+
 
                     else: 
 
@@ -583,7 +623,7 @@ class Generate_Atmosphere_Parameter_Sweep:
         if type(self.Restart_Run) == str:
             if self.Starting_Point == 'Exact':
                 currmodel = VPLModelingPipeline('RunNumber'+str(modelID),  '/gscratch/vsm/gialluca/VPLModelingTools_Dev/'+self.Restart_Run+'/RunNumber'+str(modelID)+'/PhotochemInputs/', 
-                                                verbose, find_molecules_of_interest=False, hitran_year=self.hitran_year)
+                                                verbose, find_molecules_of_interest=False, hitran_year=self.hitran_year, planet=self.planet)
             else:
 
                 # Read in the csv file that compiled the rates used in the previous run
@@ -593,7 +633,7 @@ class Generate_Atmosphere_Parameter_Sweep:
                 use_starting_point = self.find_closest_prev_model(input_options, fluxes)
 
                 currmodel = VPLModelingPipeline('RunNumber'+str(modelID),  '/gscratch/vsm/gialluca/VPLModelingTools_Dev/'+use_starting_point+'/PhotochemInputs/', 
-                                                verbose, find_molecules_of_interest=False, hitran_year=self.hitran_year)
+                                                verbose, find_molecules_of_interest=False, hitran_year=self.hitran_year, planet=self.planet)
                 
                 if self.multinest_fit_data == True:
                     currmodel.multinest_climate_copycase = use_starting_point
@@ -637,7 +677,7 @@ class Generate_Atmosphere_Parameter_Sweep:
 
                 # Ensure Min / Max flux units are correct
                 self.outgass_species_MinMax_gridsweep[curr_species] = self.fix_flux_units(self.outgass_species_MinMax_gridsweep[curr_species]*self.outgass_species_units_gridsweep, 
-                                                                                          curr_species, 'outgass').value
+                                                                                          curr_species, 'outgass', source_type=self.outgass_species_sourcetype[curr_samp]).value
 
                 # Linear sampling at user requested resolution
                 self.outgass_samples_gridsweep[curr_species] = np.linspace(self.outgass_species_MinMax_gridsweep[curr_species][0], 
@@ -649,7 +689,7 @@ class Generate_Atmosphere_Parameter_Sweep:
 
                 # Ensure Min / Max flux units are correct
                 self.outgass_species_MinMax_gridsweep[curr_species] = self.fix_flux_units(self.outgass_species_MinMax_gridsweep[curr_species]*self.outgass_species_units_gridsweep, 
-                                                                                          curr_species, 'outgass').value
+                                                                                          curr_species, 'outgass', source_type=self.outgass_species_sourcetype[curr_samp]).value
 
                 # Log sampling at user requested resolution
                 self.outgass_samples_gridsweep[curr_species] = np.logspace(np.log10(self.outgass_species_MinMax_gridsweep[curr_species][0]), 
@@ -661,7 +701,7 @@ class Generate_Atmosphere_Parameter_Sweep:
 
                 # Fix flux units
                 self.outgass_samples_gridsweep[curr_species] = self.fix_flux_units(self.outgass_samples_gridsweep[curr_species]*self.outgass_species_units_gridsweep, 
-                                                                                          curr_species, 'outgass').value
+                                                                                          curr_species, 'outgass', source_type=self.outgass_species_sourcetype[curr_samp]).value
                 
         ### For escaping species:
         for curr_samp in range(len(self.escape_sample_type_gridsweep)):
@@ -1348,6 +1388,7 @@ class Generate_Atmosphere_Parameter_Sweep:
 
 
     # Priors to use for PyMultiNest
+    # PyMultiNest always sets a prior value to 0 - 1 and this will modify to be within flat prior
     def multinest_prior(self, cube, ndim, nparams):
 
         # H2O outgassing rate prior
@@ -1355,19 +1396,25 @@ class Generate_Atmosphere_Parameter_Sweep:
         wat_hilim = 9.47899801e11
         cube[0] = (cube[0]*(wat_hilim - wat_lowlim)) + wat_lowlim
 
+        # CO2 Flux prior
+        co2_lowlim = 0
+        co2_hilim = 5.49528534e10 # Upper 97.5 percentile value from Trent
+        cube[1] = cube[1]*co2_hilim
+
+        # SO2 Fixed MR prior
+        cube[2] = cube[2]*4
+        
         # O effusion velocity prior
-        cube[1] = cube[1]*4
+        cube[3] = cube[3]*4
         
         # O2 effusion velocity prior
-        cube[2] = cube[2]*0.04
+        cube[4] = cube[4]*0.04
 
-        # O3 deposition velocity prior
-        cube[3] = cube[3]*0.5
+        # CO2 effusion velocity prior
+        cube[5] = cube[5]*0.5
 
-        # H2O2 deposition velocty prior
-        #cube[4] = cube[4] # Go from 0 to 1 
-
-        # Could add CO2 here?
+        # CO deposition velocty prior
+        cube[6] = cube[6] # Go from 0 to 1 
 
         return cube
     
@@ -1494,13 +1541,24 @@ class Generate_Atmosphere_Parameter_Sweep:
             except FileExistsError:
                 made = False
 
-        watflx = cube[0]
-        oflx = cube[1]
-        o2flx = cube[2]
-        o3flx = cube[3]
-        h2o2flx = cube[4]
+        # watflx = cube[0]
+        # oflx = cube[1]
+        # o2flx = cube[2]
+        # o3flx = cube[3]
+        # h2o2flx = cube[4]
 
-        inputfluxes = [watflx, oflx, o2flx, o3flx, h2o2flx, modelID]
+        watflx = cube[0]
+        co2flx = cube[1]
+        so2fixmr = cube[2]
+        oveff = cube[3]
+        o2veff = cube[4]
+        co2veff = cube[5]
+        covdep = cube[6]
+
+        #inputfluxes = [watflx, oflx, o2flx, o3flx, h2o2flx, modelID]
+        
+        # Updated version which fixes h2o2 and O3 vdep at 0.02, and allows co2 flux/escape and co vdep to be fitted
+        inputfluxes = [watflx, co2flx, so2fixmr, oveff, o2veff, 0.02, 0.02, co2veff, covdep]
 
         # Run the model
         model = self.run_one_model(inputfluxes, verbose=True)
@@ -1550,10 +1608,12 @@ class Generate_Atmosphere_Parameter_Sweep:
             outstr = outstr+' '+"{:.4E}".format(measd)
             outstr = outstr+' '+"{:.4E}".format(measn)
             outstr = outstr+' '+"{:.4E}".format(watflx)
-            outstr = outstr+' '+"{:.4E}".format(oflx)
-            outstr = outstr+' '+"{:.4E}".format(o2flx)
-            outstr = outstr+' '+"{:.3E}".format(o3flx)
-            outstr = outstr+' '+"{:.3E}".format(h2o2flx)
+            outstr = outstr+' '+"{:.4E}".format(co2flx)
+            outstr = outstr+' '+"{:.4E}".format(so2fixmr)
+            outstr = outstr+' '+"{:.4E}".format(oveff)
+            outstr = outstr+' '+"{:.4E}".format(o2veff)
+            outstr = outstr+' '+"{:.4E}".format(co2veff)
+            outstr = outstr+' '+"{:.3E}".format(covdep)
             outstr = outstr+'\n'
 
             fsimoutputs = open(self.master_out+'EmceeSimulationOutputs.txt', 'a')
@@ -1580,13 +1640,13 @@ class Generate_Atmosphere_Parameter_Sweep:
         if self.rank == 0:
             if not os.path.exists(self.master_out+'EmceeSimulationOutputs.txt'):
                 fsimoutputs = open(self.master_out+'EmceeSimulationOutputs.txt', 'w')
-                fsimoutputs.write('ID Converged Copyfrom Psurf Likeli DayEm NightEm H2O O O2 O3 H2O2\n')
+                fsimoutputs.write('ID Converged Copyfrom Psurf Likeli DayEm NightEm H2Oflx CO2flx SO2fixMR Oveff O2veff CO2veff COvdep\n')
                 fsimoutputs.close()
 
         # Need to take the closest matching climate and 2 col climate profiles
         self.Starting_Point = 'Euclidean'
 
-        parameters = ['H2OFlx', 'OVeff', 'O2Veff', 'O3Vdep', 'H2O2Vdep']
+        parameters = ['H2OFlx', 'CO2Flx', 'SO2FixMR', 'OVeff', 'O2Veff', 'CO2Veff', 'COVdep'] # CHANGED to not select O3 or H2O2 vdep, instead selecting CO2 / CO params 
         nparams = len(parameters)
 
         #lnlike = partial(self.multinest_loglike)
@@ -1594,7 +1654,7 @@ class Generate_Atmosphere_Parameter_Sweep:
         #prior = partial(self.multinest_prior)
         prior = lambda cube, ndim, nparams: self.multinest_prior(cube, ndim, nparams)
 
-        pymultinest.run(lnlike, prior, nparams, outputfiles_basename='chain/EmisMatch2_', resume=True, verbose=True, evidence_tolerance=10, n_live_points=800)
+        pymultinest.run(lnlike, prior, nparams, outputfiles_basename='chain/T1cEmiss_', resume=True, verbose=True, evidence_tolerance=10, n_live_points=800)
 
 
 
