@@ -78,6 +78,8 @@ class Generate_Atmosphere_Parameter_Sweep:
 
         self.mcmc_pressure_only = False
         self.multinest_fit_data = False
+        self.multinest_input_options_photochem = restart_run # Gives the input options for photochem files for each simulation in a multinest suite
+        self.multinest_input_options_climate = 'Cinit' # Gives the input options for climate profiles which may have differing species, indist etc 
 
         #########  Parameters to set if you want to do a grid sweep  #########
 
@@ -220,31 +222,34 @@ class Generate_Atmosphere_Parameter_Sweep:
             pipelineobj.run_spectra = False            
 
         if self.multinest_fit_data == True:
-            copycase = pipelineobj.multinest_climate_copycase.split('/')[1]
-            pipelineobj.dayside_starting_PT = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/'+pipelineobj.multinest_climate_copycase+'/PT_profile_dayside_'+copycase+'.pt'
-            pipelineobj.nightside_starting_PT = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/'+pipelineobj.multinest_climate_copycase+'/PT_profile_nightside_'+copycase+'.pt'
 
-            ## Set the day/night surface temps
-            climoutcopy = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/'+pipelineobj.multinest_climate_copycase+'/vpl_2col_climate_output_'+copycase+'.run'
-            fi = open(climoutcopy, 'r')
-            lines = fi.readlines()
-            fi.close()
+            # THIS will now be done within the pipeline, after photochem has converged to truly select the correct profile
+            #
+            # copycase = pipelineobj.multinest_climate_copycase.split('/')[1]
+            # pipelineobj.dayside_starting_PT = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/'+pipelineobj.multinest_climate_copycase+'/PT_profile_dayside_'+copycase+'.pt'
+            # pipelineobj.nightside_starting_PT = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/'+pipelineobj.multinest_climate_copycase+'/PT_profile_nightside_'+copycase+'.pt'
 
-            # Want to get the last output trop heating rate and avg flux, should be last two lines
-            # so loop in reversed order, break loop after to conserve efficiency
+            # ## Set the day/night surface temps
+            # climoutcopy = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/'+pipelineobj.multinest_climate_copycase+'/vpl_2col_climate_output_'+copycase+'.run'
+            # fi = open(climoutcopy, 'r')
+            # lines = fi.readlines()
+            # fi.close()
 
-            nightside_found = False
-            for i in reversed(range(len(lines))):
-                hold = lines[i].split()
-                if len(hold) > 2:
-                    if hold[0] == 'surface:':
-                        if nightside_found == False:
-                            pipelineobj.surface_temp_nightside = float(hold[8])
-                            nightside_found = True
-                        else:
-                            pipelineobj.surface_temp_dayside = float(hold[8])
-                            # After retrieving surface temp for nightside, will have all values, break
-                            break
+            # # Want to get the last output trop heating rate and avg flux, should be last two lines
+            # # so loop in reversed order, break loop after to conserve efficiency
+
+            # nightside_found = False
+            # for i in reversed(range(len(lines))):
+            #     hold = lines[i].split()
+            #     if len(hold) > 2:
+            #         if hold[0] == 'surface:':
+            #             if nightside_found == False:
+            #                 pipelineobj.surface_temp_nightside = float(hold[8])
+            #                 nightside_found = True
+            #             else:
+            #                 pipelineobj.surface_temp_dayside = float(hold[8])
+            #                 # After retrieving surface temp for nightside, will have all values, break
+            #                 break
 
             pipelineobj.run_spectra = True
 
@@ -543,6 +548,45 @@ class Generate_Atmosphere_Parameter_Sweep:
         subprocess.run('rm '+pipelineobj.photochem_InputsDir+'species.dat', shell=True)
         subprocess.run('mv '+pipelineobj.photochem_InputsDir+'species_new.dat '+pipelineobj.photochem_InputsDir+'species.dat', shell=True)
 
+    # To be used after 'replace_fluxes', basically if SO2 or CO2 is being added in, certain daughter products containing S and/or C ...
+    # ... may have leftover deposition velocities set that need to be changed to 0 to allow daughter products to build up appropriately
+    def change_deposition_daughter_species(self, pipelineobj):
+
+        nsp = open(pipelineobj.photochem_InputsDir+'species.dat', 'r')
+        nsp_new = open(pipelineobj.photochem_InputsDir+'species_new.dat', 'w')
+
+        lines = nsp.readlines()
+        for l in lines:
+            hold = l.split()
+            if len(hold) > 0:
+                if 'S' in hold[0] or 'C' in hold[0]: 
+                    # You have a S bearing species that isn't SO2 or a C species that isn't CO2 or C
+                    if hold[0] not in ['SO2', 'CO2', 'CO']:
+                        nsp_new.write(hold[0])
+                        add_spaces = 11-len(hold[0])
+                        for space in range(add_spaces):
+                            nsp_new.write(' ')
+                        nsp_new.write(hold[1]+'  ') # will be 'LL' and then 2 spaces
+                        # Now writing the 'O H C S N CL' block, each has a space after with 4 spaces after CL to get to LBOUND
+                        nsp_new.write(hold[2]+' '+hold[3]+' '+hold[4]+' '+hold[5]+' '+hold[6]+' '+hold[7]+'    ')
+                        nsp_new.write('0     0.      0.      0.        0.      0      0.      0.     \n') # zeros across
+
+                    else:
+                        nsp_new.write(l)
+
+                else: # Anything else stays the same
+                    nsp_new.write(l)
+
+            else:
+                nsp_new.write(l)
+
+        nsp_new.close()
+        nsp.close()
+
+        # Delete old species and rename fixed version to be species.dat
+        subprocess.run('rm '+pipelineobj.photochem_InputsDir+'species.dat', shell=True)
+        subprocess.run('mv '+pipelineobj.photochem_InputsDir+'species_new.dat '+pipelineobj.photochem_InputsDir+'species.dat', shell=True)
+
     # Euclidean distance metric to find out which previous run is closest to the current one
     def euclidean_distance(self, a, b):
         return np.sqrt(np.sum((a - b) ** 2))
@@ -604,6 +648,110 @@ class Generate_Atmosphere_Parameter_Sweep:
         #print('Closest Model: '+closestmodel)
 
         return closestmodel
+    
+    # If you are running multinest and the climate copycase is different than the photochemical one
+    # will need to change the T and EDD columns of in.dist
+    def update_indist_T_EDD_Profiles(self, pipelineobj, climatecopycase):
+
+        # WARNING: this may be hard coded if folks don't write their parameters.inc file the same way as templates etc
+        # I don't think it will be a problem but just noting in case
+        # This retrieves the NQ and NZ from parameters.inc
+        #
+        # This is for the current path to the photochemical copy case (will have MORE NQ than the climate one)
+        NQFile = open(pipelineobj.photochem_InputsDir+'parameters.inc', 'r')
+        NQFileLines = NQFile.readlines()
+        for l in NQFileLines:
+            if len(l.split('NQ=')) > 1:
+                NQ = l.split('NQ=')[1]
+                NQ = int(NQ.split(',')[0])
+                NZ = l.split('NZ=')[1]
+                NZ = int(NZ.split(',')[0])
+                break
+
+        # Find number of blocks of mixing ratios until T/EDD columns
+        NQblocks = np.ceil(NQ/10)
+
+        ## Now do the same thing with the climate copy case to retrieve the T/EDD columns
+        climateprofile_path = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/'+climatecopycase+'/PhotochemInputs/'
+        NQFile_clim = open(climateprofile_path+'parameters.inc', 'r')
+        NQFileLines_clim = NQFile_clim.readlines()
+        for l in NQFileLines_clim:
+            if len(l.split('NQ=')) > 1:
+                NQ_clim = l.split('NQ=')[1]
+                NQ_clim = int(NQ_clim.split(',')[0])
+                NZ_clim = l.split('NZ=')[1]
+                NZ_clim = int(NZ_clim.split(',')[0])
+                break
+
+        # Find number of blocks of mixing ratios until T/EDD columns
+        NQblocks_clim = np.ceil(NQ_clim/10)
+
+        ###################
+        # Now find the T and EDD profile we want to use from the climatecopycase
+        # Keep track of the lines that are starting and ending the current block in the in.dist file
+        blockstart_clim = 0
+        blockend_clim = NZ_clim
+
+        # this should handle all the mixing ratio blocks
+        for i in range(int(NQblocks_clim)):
+            blockstart_clim = blockend_clim
+            blockend_clim = blockend_clim+NZ_clim
+
+        # now the T/EDD/DEN/O3/CO2 block
+        T_edd_block_clim = ascii.read(climateprofile_path+'in.dist', data_start=blockstart_clim, data_end=blockend_clim)
+        blockstart_clim = blockend_clim
+        new_T = T_edd_block_clim['col1']
+        new_edd = T_edd_block_clim['col2']
+
+        #########################
+        ### Now to create new in.dist
+
+        fnew = open(pipelineobj.photochem_InputsDir+'NEWin.dist', 'w')
+
+        # Keep track of the lines that are starting and ending the current block in the in.dist file
+        blockstart = 0
+        blockend = NZ
+
+        # this should handle all the mixing ratio blocks
+        for i in range(int(NQblocks)):
+            curr_nq_block = ascii.read(pipelineobj.photochem_InputsDir+'in.dist', data_start=blockstart, data_end=blockend)
+            blockstart = blockend
+            blockend = blockend+NZ
+
+            # Actually decided not to change H2O
+            #if i == block_w_h2o:
+            #    curr_nq_block['col'+str(H2OCol_inblock)] = new_h2o
+
+            for line in range(len(curr_nq_block)):
+                fnew.write('   ')
+                for col in curr_nq_block.columns:
+                    fnew.write("{:.8E}".format(curr_nq_block[col][line])+'   ')
+                fnew.write('\n')
+
+        # now the T/EDD/DEN/O3/CO2 block
+        T_edd_block = ascii.read(pipelineobj.photochem_InputsDir+'in.dist', data_start=blockstart, data_end=blockend)
+        blockstart = blockend
+        T_edd_block['col1'] = new_T
+        T_edd_block['col2'] = new_edd # Need to convert from m**2/ to cm**2/s; climate model will be between 1/2 and 1000, photochem will be 1e4-1e6 ish
+
+        for line in range(len(T_edd_block)):
+            fnew.write('   ')
+            for col in T_edd_block.columns:
+                fnew.write("{:.8E}".format(T_edd_block[col][line])+'   ')
+            fnew.write('\n')
+
+        # now the rest of in.dist
+        olddist_txt = open(pipelineobj.photochem_InputsDir+'in.dist', 'r')
+        alllines = olddist_txt.readlines()
+        olddist_txt.close()
+        for line in range(len(alllines)):
+            if line >= blockstart:
+                fnew.write(alllines[line])
+
+        fnew.close()
+
+        subprocess.run('rm '+pipelineobj.photochem_InputsDir+'in.dist', shell=True)
+        subprocess.run('mv '+pipelineobj.photochem_InputsDir+'NEWin.dist '+pipelineobj.photochem_InputsDir+'in.dist', shell=True)
 
 
 
@@ -636,13 +784,22 @@ class Generate_Atmosphere_Parameter_Sweep:
                                                 verbose, find_molecules_of_interest=False, hitran_year=self.hitran_year, planet=self.planet)
                 
                 if self.multinest_fit_data == True:
-                    currmodel.multinest_climate_copycase = use_starting_point
+                    input_options_climate = pd.read_csv('/gscratch/vsm/gialluca/VPLModelingTools_Dev/'+self.multinest_input_options_climate+'/RatesInSweep_ForFutureInputOptions.dat', delimiter=' ', index_col=['ModelNumber'])
+                    climate_starting_point = self.find_closest_prev_model(input_options_climate, fluxes)
+
+                    # If the climate profile is DIFFERENT than the closest matching photochemical files, need to change the T column of in.dist AFTER pipeline vars are set
+                    currmodel.multinest_climate_copycase = climate_starting_point
 
         else:
             currmodel = VPLModelingPipeline('RunNumber'+str(modelID), self.photochemInitial, verbose, find_molecules_of_interest=False, hitran_year=self.hitran_year, planet=self.planet)
 
         # Set relevant values of object 
         self.set_pipeline_vars('RunNumber'+str(modelID), currmodel)
+
+        if self.multinest_fit_data == True and climate_starting_point != use_starting_point:
+            # Change T column of in.dist
+            self.update_indist_T_EDD_Profiles(currmodel, climate_starting_point)
+
 
         # Save fluxes for later
         currmodel.fluxes_used_in_sweep = fluxes
@@ -651,6 +808,10 @@ class Generate_Atmosphere_Parameter_Sweep:
         # A pipeline object will copy new files if currmodel.photochem_InputsDir is not equal to currmodel.photochemInitialInput
         # set them equal after setting up the current models files before running automatic pipeline (this is handled in replace_fluxes function)
         self.replace_fluxes(currmodel, fluxes)
+
+        # If this is multinest, probably need to make sure S and C daughter species dont have deposition velocities default set 
+        if self.multinest_fit_data == True:
+            self.change_deposition_daughter_species(currmodel)
         
         # Run the Photochem-Climate-SMART pipeline
         converged = currmodel.run_automatic()
@@ -1402,7 +1563,7 @@ class Generate_Atmosphere_Parameter_Sweep:
         cube[1] = cube[1]*co2_hilim
 
         # SO2 Fixed MR prior
-        cube[2] = cube[2]*4
+        cube[2] = cube[2]*0.01 # SO2 cannot exceed 1% fixed MR at the bottom layer
         
         # O effusion velocity prior
         cube[3] = cube[3]*4
