@@ -796,11 +796,6 @@ class Generate_Atmosphere_Parameter_Sweep:
         # Set relevant values of object 
         self.set_pipeline_vars('RunNumber'+str(modelID), currmodel)
 
-        if self.multinest_fit_data == True and climate_starting_point != use_starting_point:
-            # Change T column of in.dist
-            self.update_indist_T_EDD_Profiles(currmodel, climate_starting_point)
-
-
         # Save fluxes for later
         currmodel.fluxes_used_in_sweep = fluxes
 
@@ -808,6 +803,10 @@ class Generate_Atmosphere_Parameter_Sweep:
         # A pipeline object will copy new files if currmodel.photochem_InputsDir is not equal to currmodel.photochemInitialInput
         # set them equal after setting up the current models files before running automatic pipeline (this is handled in replace_fluxes function)
         self.replace_fluxes(currmodel, fluxes)
+
+        if self.multinest_fit_data == True and climate_starting_point != use_starting_point:
+            # Change T column of in.dist
+            self.update_indist_T_EDD_Profiles(currmodel, climate_starting_point)
 
         # If this is multinest, probably need to make sure S and C daughter species dont have deposition velocities default set 
         if self.multinest_fit_data == True:
@@ -1332,11 +1331,14 @@ class Generate_Atmosphere_Parameter_Sweep:
 
                 for species in range(len(self.outgass_species_gridsweep)):
                     gas_hold = self.outgass_species_gridsweep[species]
+                    sourcetypehold = self.outgass_species_sourcetype[species]
                     for l in lines:
                         if l.split()[0][0] != '*':
                             if l.split()[0] == gas_hold:
-                                outgass_rates[species].append(float(l.split()[11]))
-
+                                if sourcetypehold == 'Flx':
+                                    outgass_rates[species].append(float(l.split()[11]))
+                                elif sourcetypehold == 'FixMR':
+                                    outgass_rates[species].append(float(l.split()[10]))
                                 break
 
                 for species in range(len(self.escape_species_gridsweep)):
