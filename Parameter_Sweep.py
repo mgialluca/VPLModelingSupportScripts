@@ -1432,7 +1432,7 @@ class Generate_Atmosphere_Parameter_Sweep:
                 # Now retrieve the VMRS
                 ptz = ascii.read(path_hold+'FINAL_PTZ_mixingratios_out.dist')
                 for s in range(len(species_cols)):
-                    species_vmrs[s].append(ptz[species_cols[s][0]])
+                    species_vmrs[s].append(ptz[species_cols[s]][0])
 
                 # Now get surface pressure
                 pdat = open(path_hold+'PhotochemInputs/PLANET.dat', 'r')
