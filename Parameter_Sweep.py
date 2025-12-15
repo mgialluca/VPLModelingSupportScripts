@@ -223,6 +223,9 @@ class Generate_Atmosphere_Parameter_Sweep:
 
         if self.multinest_fit_data == True:
 
+            pipelineobj.run_spectra = True
+            pipelineobj.multinest_climcopy_dbOptions = 'Cinit'
+
             # THIS will now be done within the pipeline, after photochem has converged to truly select the correct profile
             #
             # copycase = pipelineobj.multinest_climate_copycase.split('/')[1]
@@ -251,7 +254,7 @@ class Generate_Atmosphere_Parameter_Sweep:
             #                 # After retrieving surface temp for nightside, will have all values, break
             #                 break
 
-            pipelineobj.run_spectra = True
+            
 
         # Testing if climate executable needs to be copied
         if self.supernode == True:
@@ -260,7 +263,7 @@ class Generate_Atmosphere_Parameter_Sweep:
         # Molecules for the type of atmosphere we're interested in 
 
         pipelineobj.molecule_dict = {} # key-value pairs of molecules of interest (keys, str) and their hitran codes (value, int)
-        gas_names = ['O2', 'H2O', 'O3', 'CO2', 'CO']
+        gas_names = ['O2', 'H2O', 'O3', 'CO2', 'CO', 'SO2']
         pipelineobj.molecule_dict['Gas_names'] = gas_names
         for m in range(len(gas_names)):
             pipelineobj.molecule_dict[gas_names[m]] = pipelineobj.hitran_lookup.loc[gas_names[m]]['HitranNumber']
@@ -806,8 +809,11 @@ class Generate_Atmosphere_Parameter_Sweep:
         self.replace_fluxes(currmodel, fluxes)
 
         if self.multinest_fit_data == True and climate_starting_point != use_starting_point:
+            print('Model '+str(modelID)+' used different climate starting point ('+climate_starting_point+'), photochem from '+use_starting_point)
             # Change T column of in.dist
             self.update_indist_T_EDD_Profiles(currmodel, climate_starting_point)
+        else:
+            print('Model '+str(modelID)+' has the same climate and photochem starting points ('+climate_starting_point+')')
 
         # If this is multinest, probably need to make sure S and C daughter species dont have deposition velocities default set 
         if self.multinest_fit_data == True:
@@ -1831,7 +1837,7 @@ class Generate_Atmosphere_Parameter_Sweep:
         #inputfluxes = [watflx, oflx, o2flx, o3flx, h2o2flx, modelID]
         
         # Updated version which fixes h2o2 and O3 vdep at 0.02, and allows co2 flux/escape and co vdep to be fitted
-        inputfluxes = [watflx, co2flx, so2fixmr, oveff, o2veff, 0.02, 0.02, co2veff, covdep]
+        inputfluxes = [watflx, co2flx, so2fixmr, oveff, o2veff, 0.02, 0.02, co2veff, covdep, modelID]
 
         # Run the model
         model = self.run_one_model(inputfluxes, verbose=True)

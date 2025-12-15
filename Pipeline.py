@@ -105,6 +105,8 @@ class VPLModelingPipeline:
         self.fixsgbsl = False # If true, try to fix sgbsl error
         self.MCMC_pressure_only = False # If true, remove everything after photochem for an MCMC pressure fitting walker
         self.MultiNest_DataFit = False # If true, skip any climate runs, parallelize over smart calls and LBLABC
+        self.multinest_climate_copycase = None # Will be set by Parameter_Sweep.py if needed for multinest 
+        self.multinest_climcopy_dbOptions = None # Will be set by Parameter_Sweep.py if needed for multinest 
         self.clim2col_restarting = False # If true, restarting a run that was in the middle of running 2 column
 
         self.adjust_N2_amount = False # If true, adjust inert N2 to a specific pressure given by self.N2_fixed_pressure
@@ -2135,28 +2137,28 @@ class VPLModelingPipeline:
             else:
                 if self.num_climate_runs == 0 or self.force_dz_adjust == True: # Only change if we don't have dzg already
                     if 'DZGRID' in hold:
-                        if self.updated_atm_pressure >= 1 and self.updated_atm_pressure < 10:
-                            self.dzg = 0.75e5
+                        # if self.updated_atm_pressure >= 1 and self.updated_atm_pressure < 10:
+                        #     self.dzg = 0.75e5
+                        #     planetdat_new.write("{:.2E}".format(self.dzg)+' = DZGRID [cm] \n')
+                        # elif self.updated_atm_pressure > 10:
+                        # Only run after photochem has run at least 1x
+                        ptzcurr = ascii.read(self.photochemDir+'OUTPUT/PTZ_mixingratios_out.dist')
+                        presscurr = ptzcurr['PRESS']
+                        if presscurr[199] > 1e-4:
+                            self.dzg = self.dzg*2.5
                             planetdat_new.write("{:.2E}".format(self.dzg)+' = DZGRID [cm] \n')
-                        elif self.updated_atm_pressure > 10:
-                            # Only run after photochem has run at least 1x
-                            ptzcurr = ascii.read(self.photochemDir+'OUTPUT/PTZ_mixingratios_out.dist')
-                            presscurr = ptzcurr['PRESS']
-                            if presscurr[199] > 1e-4:
-                                self.dzg = self.dzg*2.5
-                                planetdat_new.write("{:.2E}".format(self.dzg)+' = DZGRID [cm] \n')
-                            elif presscurr[199] > 1e-5:
-                                self.dzg = self.dzg*2
-                                planetdat_new.write("{:.2E}".format(self.dzg)+' = DZGRID [cm] \n')
-                            elif presscurr[199] < 1e-10:
-                                self.dzg = self.dzg*0.5
-                                planetdat_new.write("{:.2E}".format(self.dzg)+' = DZGRID [cm] \n')
-                            else:
-                                self.dzg = self.dzg
-                                planetdat_new.write("{:.2E}".format(self.dzg)+' = DZGRID [cm] \n')
+                        elif presscurr[199] > 1e-5:
+                            self.dzg = self.dzg*2
+                            planetdat_new.write("{:.2E}".format(self.dzg)+' = DZGRID [cm] \n')
+                        elif presscurr[199] < 1e-10:
+                            self.dzg = self.dzg*0.5
+                            planetdat_new.write("{:.2E}".format(self.dzg)+' = DZGRID [cm] \n')
                         else:
-                            self.dzg = 5e4
+                            self.dzg = self.dzg
                             planetdat_new.write("{:.2E}".format(self.dzg)+' = DZGRID [cm] \n')
+                        # else:
+                        #     self.dzg = 5e4
+                        #     planetdat_new.write("{:.2E}".format(self.dzg)+' = DZGRID [cm] \n')
                     else:
                         planetdat_new.write(l)
                 else:
@@ -2349,6 +2351,144 @@ class VPLModelingPipeline:
         subprocess.run('rm '+self.photochem_InputsDir+'PLANET.dat', shell=True)
         subprocess.run('mv '+self.photochem_InputsDir+'New_PLANET.dat '+self.photochem_InputsDir+'PLANET.dat', shell=True)
 
+
+    # Euclidean distance metric to find out which previous run is closest to the current one
+    def euclidean_distance(self, a, b):
+        return np.sqrt(np.sum((a - b) ** 2))
+    
+    ### Use Euclidean distance calculation to determine what the best fitting climate template profile should be
+    # For use with multinest
+    ##
+    def pick_climate_prof_best_match(self, inputopsDB):
+
+        # First, read in current ptz file:
+        ptz = ascii.read(self.photochemDir+'OUTPUT/PTZ_mixingratios_out.dist')
+
+        # compile current vmrs for relevant species
+        curr_run_vals = [self.updated_atm_pressure] # Building up array to compare with 
+        sps = [x for x in inputopsDB.columns if x != 'SurfPress']
+        for s in sps:
+            curr_run_vals.append(ptz[s][0])
+
+        # Find the shortest Euclidean distance: 
+        closestmodel = None
+        closestdist = np.inf
+        for i in inputopsDB.index:
+            curr_option = np.array(inputopsDB.loc[i])
+            curr_dist = self.euclidean_distance(np.array(curr_run_vals), curr_option)
+            if curr_dist < closestdist:
+                closestmodel = i
+                closestdist = curr_dist
+
+        return closestmodel
+    
+
+    # If you are running multinest and the climate copycase is different than the photochemical one
+    # will need to change the T and EDD columns of in.dist
+    def change_indist_T_EDD_MultinestClimateCase(self, climatecopycase):
+
+        # WARNING: this may be hard coded if folks don't write their parameters.inc file the same way as templates etc
+        # I don't think it will be a problem but just noting in case
+        # This retrieves the NQ and NZ from parameters.inc
+        #
+        # This is for the current path to the photochemical copy case (could have MORE NQ than the climate one)
+        NQFile = open(self.photochem_InputsDir+'parameters.inc', 'r')
+        NQFileLines = NQFile.readlines()
+        for l in NQFileLines:
+            if len(l.split('NQ=')) > 1:
+                NQ = l.split('NQ=')[1]
+                NQ = int(NQ.split(',')[0])
+                NZ = l.split('NZ=')[1]
+                NZ = int(NZ.split(',')[0])
+                break
+
+        # Find number of blocks of mixing ratios until T/EDD columns
+        NQblocks = np.ceil(NQ/10)
+
+        ## Now do the same thing with the climate copy case to retrieve the T/EDD columns
+        climateprofile_path = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/'+climatecopycase+'/PhotochemInputs/'
+        NQFile_clim = open(climateprofile_path+'parameters.inc', 'r')
+        NQFileLines_clim = NQFile_clim.readlines()
+        for l in NQFileLines_clim:
+            if len(l.split('NQ=')) > 1:
+                NQ_clim = l.split('NQ=')[1]
+                NQ_clim = int(NQ_clim.split(',')[0])
+                NZ_clim = l.split('NZ=')[1]
+                NZ_clim = int(NZ_clim.split(',')[0])
+                break
+
+        # Find number of blocks of mixing ratios until T/EDD columns
+        NQblocks_clim = np.ceil(NQ_clim/10)
+
+        ###################
+        # Now find the T and EDD profile we want to use from the climatecopycase
+        # Keep track of the lines that are starting and ending the current block in the in.dist file
+        blockstart_clim = 0
+        blockend_clim = NZ_clim
+
+        # this should handle all the mixing ratio blocks
+        for i in range(int(NQblocks_clim)):
+            blockstart_clim = blockend_clim
+            blockend_clim = blockend_clim+NZ_clim
+
+        # now the T/EDD/DEN/O3/CO2 block
+        T_edd_block_clim = ascii.read(climateprofile_path+'in.dist', data_start=blockstart_clim, data_end=blockend_clim)
+        blockstart_clim = blockend_clim
+        new_T = T_edd_block_clim['col1']
+        new_edd = T_edd_block_clim['col2']
+
+        #########################
+        ### Now to create new in.dist
+
+        fnew = open(self.photochem_InputsDir+'NEWin.dist', 'w')
+
+        # Keep track of the lines that are starting and ending the current block in the in.dist file
+        blockstart = 0
+        blockend = NZ
+
+        # this should handle all the mixing ratio blocks
+        for i in range(int(NQblocks)):
+            curr_nq_block = ascii.read(self.photochem_InputsDir+'in.dist', data_start=blockstart, data_end=blockend)
+            blockstart = blockend
+            blockend = blockend+NZ
+
+            # Actually decided not to change H2O
+            #if i == block_w_h2o:
+            #    curr_nq_block['col'+str(H2OCol_inblock)] = new_h2o
+
+            for line in range(len(curr_nq_block)):
+                fnew.write('   ')
+                for col in curr_nq_block.columns:
+                    fnew.write("{:.8E}".format(curr_nq_block[col][line])+'   ')
+                fnew.write('\n')
+
+        # now the T/EDD/DEN/O3/CO2 block
+        T_edd_block = ascii.read(self.photochem_InputsDir+'in.dist', data_start=blockstart, data_end=blockend)
+        blockstart = blockend
+        T_edd_block['col1'] = new_T
+        T_edd_block['col2'] = new_edd # Need to convert from m**2/ to cm**2/s; climate model will be between 1/2 and 1000, photochem will be 1e4-1e6 ish
+
+        for line in range(len(T_edd_block)):
+            fnew.write('   ')
+            for col in T_edd_block.columns:
+                fnew.write("{:.8E}".format(T_edd_block[col][line])+'   ')
+            fnew.write('\n')
+
+        # now the rest of in.dist
+        olddist_txt = open(self.photochem_InputsDir+'in.dist', 'r')
+        alllines = olddist_txt.readlines()
+        olddist_txt.close()
+        for line in range(len(alllines)):
+            if line >= blockstart:
+                fnew.write(alllines[line])
+
+        fnew.close()
+
+        subprocess.run('rm '+self.photochem_InputsDir+'in.dist', shell=True)
+        subprocess.run('mv '+self.photochem_InputsDir+'NEWin.dist '+self.photochem_InputsDir+'in.dist', shell=True)
+
+
+    
     ### AUTOMATIC PIPELINE, calls all above functions sequentially defined by flow chart, updates necessary object parameters
     ##
     ## Dependent on all Attributes, no fxn-specific inputs
@@ -2411,7 +2551,7 @@ class VPLModelingPipeline:
                 if self.adjust_atmospheric_pressure == True:
                     planetdat_new.write(l)
             else:
-                if self.adjust_atmospheric_pressure == True:
+                if self.adjust_atmospheric_pressure == True and self.MultiNest_DataFit == False:
                     if 'DZGRID' in hold:
                         if self.updated_atm_pressure >= 1 and self.updated_atm_pressure < 10:
                             self.dzg = 0.75e5
@@ -2424,6 +2564,9 @@ class VPLModelingPipeline:
                             planetdat_new.write("{:.2E}".format(self.dzg)+' = DZGRID [cm] \n')
                     else:
                         planetdat_new.write(l)
+                
+                elif self.adjust_atmospheric_pressure == True and self.MultiNest_DataFit == True:
+                    planetdat_new.write(l) # don't change DZGrid if this is multinest
 
         if self.adjust_atmospheric_pressure == True:
             planetdat_new.close()
@@ -2463,6 +2606,13 @@ class VPLModelingPipeline:
 
         if self.verbose == True:
             ftestingoutput.write('Starting pressure: '+str(self.updated_atm_pressure)+' bars\n')
+
+        if self.MultiNest_DataFit == True:
+            retest_climate_profile_tries = 0 # Number of times the climate profile has been replaced and the simulation rerun 
+            # Read in the pandas df:
+            multinest_climate_input_options = pd.read_csv('/gscratch/vsm/gialluca/VPLModelingTools_Dev/'+self.multinest_climcopy_dbOptions+'/VMRSSurfP_RatesInSweep_ForFutureInputOptions.dat', delimiter=' ', index_col=['ModelNumber'])
+            # Force DZGrid adjustment:
+            self.force_dz_adjust = True
 
         climate_subtries = 0
 
@@ -2511,6 +2661,7 @@ class VPLModelingPipeline:
                     subprocess.run('mv '+self.photochem_InputsDir+'New_PLANET.dat '+self.photochem_InputsDir+'PLANET.dat', shell=True)
 
             self.num_photochem_runs += 1
+
             if self.verbose == True:
                 #print('----> Beginning photochem run Try number '+str(self.num_photochem_runs))
                 ftestingoutput.write('----> Beginning photochem run Try number '+str(self.num_photochem_runs)+'\n')
@@ -2929,13 +3080,51 @@ class VPLModelingPipeline:
                 #self.global_convergence = True
 
             # If MCMC is only looking for a pressure convergence (for computational efficiency), just find convergence here
-            if self.MCMC_pressure_only == True:
-                if sgbslerror == False:
+            if self.MCMC_pressure_only == True or self.MultiNest_DataFit == True:
+                # Need to check that the best fitting climate profile has not changed, or else rerun everything
+                if sgbslerror == True:
+                    self.global_convergence = False
+                    break
+
+                elif self.MultiNest_DataFit == True and sgbslerror == False:
+                    ## Find the 'best matching' template climate profile 
+                    curr_best_climate_prof = self.pick_climate_prof_best_match(multinest_climate_input_options)
+                    if curr_best_climate_prof == self.multinest_climate_copycase:
+                        if self.verbose == True:
+                            ftestingoutput.write('Copied Climate profile is best matching ('+str(self.multinest_climate_copycase)+'), simulation complete \n')
+                        subprocess.run('cp '+self.photochemDir+'OUTPUT/out.dist '+self.DataOutPath+'FINAL_out.dist', shell=True)
+                        subprocess.run('cp '+self.photochemDir+'OUTPUT/out.out '+self.DataOutPath+'FINAL_out.out', shell=True)
+                        subprocess.run('cp '+self.photochemDir+'OUTPUT/PTZ_mixingratios_out.dist '+self.DataOutPath+'FINAL_PTZ_mixingratios_out.dist', shell=True)
+                        self.global_convergence = True
+                        break
+
+                    else:
+                        if self.verbose == True:
+                            ftestingoutput.write('Old copied climate profile ('+str(self.multinest_climate_copycase)+') does NOT match current best fit ('+str(curr_best_climate_prof)+') \n')
+                        
+                        if retest_climate_profile_tries > 5:
+                            self.global_convergence == False
+                            if self.verbose == True:
+                                ftestingoutput.write('Climate has been retested >5 times, ending simulations \n')
+                            break
+                        
+                        else: # Time to retest and restart
+                            retest_climate_profile_tries += 1
+                            if self.verbose == True:
+                                ftestingoutput.write('Changing to best fitting climate profile and rerunning (retest '+str(retest_climate_profile_tries)+') \n')
+
+                            # Change climate profile:
+                            self.change_indist_T_EDD_MultinestClimateCase(curr_best_climate_prof)
+                            self.multinest_climate_copycase = curr_best_climate_prof
+
+                            continue
+
+                elif sgbslerror == False and self.MCMC_pressure_only == True:
                     subprocess.run('cp '+self.photochemDir+'OUTPUT/out.dist '+self.DataOutPath+'FINAL_out.dist', shell=True)
                     subprocess.run('cp '+self.photochemDir+'OUTPUT/out.out '+self.DataOutPath+'FINAL_out.out', shell=True)
                     subprocess.run('cp '+self.photochemDir+'OUTPUT/PTZ_mixingratios_out.dist '+self.DataOutPath+'FINAL_PTZ_mixingratios_out.dist', shell=True)
                     self.global_convergence = True
-                break
+                    break
 
             ### Run photochem section end --------------------------
 
@@ -3379,13 +3568,51 @@ class VPLModelingPipeline:
             elif self.run_spectra == True and self.global_convergence == True and self.MultiNest_DataFit == True:
 
                 #############
-                ##
-                ## INSERT ROUTINE TO SELECT THE BEST CLIMATE PROFILE HERE
-                ##
+                ## Need to retrieve 2 col climate profile from the best fitting case
+                copycase_runnum = self.multinest_climate_copycase.split('/')
+                copycase_runnum = copycase_runnum[len(copycase_runnum)-1]
+
+                self.dayside_starting_PT = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/'+self.multinest_climate_copycase+'/PT_profile_dayside_'+copycase_runnum+'.pt'
+                self.nightside_starting_PT = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/'+self.multinest_climate_copycase+'/PT_profile_nightside_'+copycase_runnum+'.pt'
+
+                ## Set the day/night surface temps
+                climoutcopy = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/'+self.multinest_climate_copycase+'/vpl_2col_climate_output_'+copycase_runnum+'.run'
+                fi = open(climoutcopy, 'r')
+                lines = fi.readlines()
+                fi.close()
+
+                # Want to get the last output trop heating rate and avg flux, should be last two lines
+                # so loop in reversed order, break loop after to conserve efficiency
+
+                nightside_found = False
+                for i in reversed(range(len(lines))):
+                    hold = lines[i].split()
+                    if len(hold) > 2:
+                        if hold[0] == 'surface:':
+                            if nightside_found == False:
+                                self.surface_temp_nightside = float(hold[8])
+                                nightside_found = True
+                            else:
+                                self.surface_temp_dayside = float(hold[8])
+                                # After retrieving surface temp for nightside, will have all values, break
+                                break
+
                 #############
 
                 shutil.copyfile(self.dayside_starting_PT, self.AtmProfPath+'PT_profile_dayside_'+self.casename+'.pt')
                 shutil.copyfile(self.nightside_starting_PT, self.AtmProfPath+'PT_profile_nightside_'+self.casename+'.pt')
+
+                # Replace the pressure column with the correct one:
+                regpt = ascii.read(self.AtmProfPath+'PT_profile_'+self.casename+'.pt')
+
+                daysidept = ascii.read(self.AtmProfPath+'PT_profile_dayside_'+self.casename+'.pt')
+                daysidept['Press'] = regpt['Press']
+                ascii.write(daysidept, self.AtmProfPath+'PT_profile_dayside_'+self.casename+'.pt', overwrite=True)
+
+                nightsidept = ascii.read(self.AtmProfPath+'PT_profile_nightside_'+self.casename+'.pt')
+                nightsidept['Press'] = regpt['Press']
+                ascii.write(nightsidept, self.AtmProfPath+'PT_profile_nightside_'+self.casename+'.pt', overwrite=True)
+                ########################
 
                 self.make_lblabc_runscripts(whichcol='dayside')
                 self.make_lblabc_runscripts(whichcol='nightside')
