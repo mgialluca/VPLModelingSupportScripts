@@ -1398,7 +1398,7 @@ class Generate_Atmosphere_Parameter_Sweep:
         for species in self.escape_species_gridsweep:
             species_cols.append(species)
         
-        species_cols = set(species_cols)
+        species_cols = list(set(species_cols))
         species_vmrs = [[] for s in range(len(species_cols))]
 
         for dirs, sdirs, fs in os.walk(self.master_out):
