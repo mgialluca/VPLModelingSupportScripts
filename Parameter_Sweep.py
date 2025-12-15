@@ -1281,7 +1281,7 @@ class Generate_Atmosphere_Parameter_Sweep:
     # Specifically used if you want to start a new run using the final state of a previous sweep but not the exact same sweep 
     ## Input:
     # Num_of_Models - the number of models in the master out, this just makes code easier
-    def compile_restart_input_options(self, Num_of_Models=80, add_to_file=False, include_2col=True):
+    def compile_restart_input_options(self, add_to_file=False, include_2col=True, atm_type=None):
 
 
         model_ID = []
@@ -1323,39 +1323,53 @@ class Generate_Atmosphere_Parameter_Sweep:
 
             if 'FINAL_out.dist' in fis and conv2col == True:
 
-                model_ID.append(self.sweepname+'/'+model_ID_hold)
+                ptz = ascii.read(path_hold+'FINAL_PTZ_mixingratios_out.dist')
 
-                # Now retrieve the outgassing and escape rates
-                f = open(path_hold+'PhotochemInputs/species.dat', 'r')
-                lines = f.readlines()
-                f.close()
+                add_to_db = True
+                if atm_type == 'H2O-O2':
+                    if (ptz['O'][0] + ptz['O2'][0] + ptz['H2O'][0] + ptz['O3'][0]) < 0.9:
+                        add_to_db = False
+                elif atm_type == 'CO2':
+                    if ptz['C'][0] > 0.05:
+                        add_to_db = False
+                elif atm_type == 'SO2-H2O':
+                    if ptz['CH4'][0] > 0.01:
+                        add_to_db = False
 
-                for species in range(len(self.outgass_species_gridsweep)):
-                    gas_hold = self.outgass_species_gridsweep[species]
-                    sourcetypehold = self.outgass_species_sourcetype[species]
-                    for l in lines:
-                        if l.split()[0][0] != '*':
-                            if l.split()[0] == gas_hold:
-                                if sourcetypehold == 'Flx':
-                                    outgass_rates[species].append(float(l.split()[11]))
-                                elif sourcetypehold == 'FixMR':
-                                    outgass_rates[species].append(float(l.split()[10]))
-                                break
+                if add_to_db == True:
+                    model_ID.append(self.sweepname+'/'+model_ID_hold)
 
-                for species in range(len(self.escape_species_gridsweep)):
-                    gas_hold = self.escape_species_gridsweep[species]
-                    esctypehold = self.escape_species_losstype[species]
-                    for l in lines:
-                        if l.split()[0][0] != '*':
-                            if l.split()[0] == gas_hold:
-                                if esctypehold == 'TOA' or esctypehold == 'toa':
-                                    escape_rates[species].append(float(l.split()[14]))
-                                elif esctypehold == 'Vdep' or esctypehold == 'vdep':
-                                    escape_rates[species].append(float(l.split()[9]))
-                                elif esctypehold == 'Veff' or esctypehold == 'veff':
-                                    escape_rates[species].append(float(l.split()[15]))
+                    # Now retrieve the outgassing and escape rates
+                    f = open(path_hold+'PhotochemInputs/species.dat', 'r')
+                    lines = f.readlines()
+                    f.close()
 
-                                break
+                    for species in range(len(self.outgass_species_gridsweep)):
+                        gas_hold = self.outgass_species_gridsweep[species]
+                        sourcetypehold = self.outgass_species_sourcetype[species]
+                        for l in lines:
+                            if l.split()[0][0] != '*':
+                                if l.split()[0] == gas_hold:
+                                    if sourcetypehold == 'Flx':
+                                        outgass_rates[species].append(float(l.split()[11]))
+                                    elif sourcetypehold == 'FixMR':
+                                        outgass_rates[species].append(float(l.split()[10]))
+                                    break
+
+                    for species in range(len(self.escape_species_gridsweep)):
+                        gas_hold = self.escape_species_gridsweep[species]
+                        esctypehold = self.escape_species_losstype[species]
+                        for l in lines:
+                            if l.split()[0][0] != '*':
+                                if l.split()[0] == gas_hold:
+                                    if esctypehold == 'TOA' or esctypehold == 'toa':
+                                        escape_rates[species].append(float(l.split()[14]))
+                                    elif esctypehold == 'Vdep' or esctypehold == 'vdep':
+                                        escape_rates[species].append(float(l.split()[9]))
+                                    elif esctypehold == 'Veff' or esctypehold == 'veff':
+                                        escape_rates[species].append(float(l.split()[15]))
+
+                                    break
 
         # Compile the information
         dat = [model_ID]
@@ -1385,7 +1399,7 @@ class Generate_Atmosphere_Parameter_Sweep:
 
 
     # Same as the above but compiles bulk compositions 
-    def compile_BulkComp_T_restart_input_options(self, add_to_file=False, include_2col=True):
+    def compile_BulkComp_T_restart_input_options(self, add_to_file=False, include_2col=True, atm_type='H2O-O2'):
 
 
         model_ID = []
@@ -1427,21 +1441,34 @@ class Generate_Atmosphere_Parameter_Sweep:
 
             if 'FINAL_out.dist' in fis and conv2col == True:
 
-                model_ID.append(self.sweepname+'/'+model_ID_hold)
-
                 # Now retrieve the VMRS
                 ptz = ascii.read(path_hold+'FINAL_PTZ_mixingratios_out.dist')
-                for s in range(len(species_cols)):
-                    species_vmrs[s].append(ptz[species_cols[s]][0])
 
-                # Now get surface pressure
-                pdat = open(path_hold+'PhotochemInputs/PLANET.dat', 'r')
-                lines = pdat.readlines()
-                for l in lines:
-                    if len(l.split('surface pressure')) > 1:
-                        p = float(l.split()[0])
-                        break
-                surfpressure.append(p)
+                add_to_db = True
+                if atm_type == 'H2O-O2':
+                    if (ptz['O'][0] + ptz['O2'][0] + ptz['H2O'][0] + ptz['O3'][0]) < 0.9:
+                        add_to_db = False
+                elif atm_type == 'CO2':
+                    if ptz['C'][0] > 0.05:
+                        add_to_db = False
+                elif atm_type == 'SO2-H2O':
+                    if ptz['CH4'][0] > 0.01:
+                        add_to_db = False
+
+                if add_to_db == True:
+                    model_ID.append(self.sweepname+'/'+model_ID_hold)
+
+                    for s in range(len(species_cols)):
+                        species_vmrs[s].append(ptz[species_cols[s]][0])
+
+                    # Now get surface pressure
+                    pdat = open(path_hold+'PhotochemInputs/PLANET.dat', 'r')
+                    lines = pdat.readlines()
+                    for l in lines:
+                        if len(l.split('surface pressure')) > 1:
+                            p = float(l.split()[0])
+                            break
+                    surfpressure.append(p)
 
         # Compile the information
         dat = [model_ID, surfpressure]
