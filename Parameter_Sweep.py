@@ -588,8 +588,9 @@ class Generate_Atmosphere_Parameter_Sweep:
         subprocess.run('mv '+pipelineobj.photochem_InputsDir+'species_new.dat '+pipelineobj.photochem_InputsDir+'species.dat', shell=True)
 
     # Euclidean distance metric to find out which previous run is closest to the current one
+    # Changed to a percent change 
     def euclidean_distance(self, a, b):
-        return np.sqrt(np.sum((a - b) ** 2))
+        return np.sqrt(np.sum((np.log1p(a) - np.log1p(b)) ** 2))
     
     # Find the closest model from a previous sweep to use as a starting point
     # Compare to the newfluxes for the current model that overlap with the previous sweep
@@ -1370,6 +1371,88 @@ class Generate_Atmosphere_Parameter_Sweep:
         if add_to_file == False:
             tab = Table(dat, names=col_names)
             ascii.write(tab, self.master_out+'RatesInSweep_ForFutureInputOptions.dat', delimiter=' ')
+        
+        else:
+            prevfile = ascii.read(add_to_file, delimiter=' ')
+
+            for d in range(len(dat[0])):
+                newrow = []
+                for name in dat:
+                    newrow.append(name[d])
+                prevfile.add_row(newrow)
+            
+            ascii.write(prevfile, add_to_file, delimiter=' ', overwrite=True)
+
+
+    # Same as the above but compiles bulk compositions 
+    def compile_BulkComp_T_restart_input_options(self, add_to_file=False, include_2col=True):
+
+
+        model_ID = []
+        surfpressure = []
+        
+        # Set up data calls for outgassing & escape rates
+        species_cols = []
+        for species in self.outgass_species_gridsweep:
+            species_cols.append(species)
+        for species in self.escape_species_gridsweep:
+            species_cols.append(species)
+        
+        species_cols = set(species_cols)
+        species_vmrs = [[] for s in range(len(species_cols))]
+
+        for dirs, sdirs, fs in os.walk(self.master_out):
+            break
+
+        for model_ID_hold in sdirs:
+
+            # Get the model ID ('RunNumber#')
+            #model_ID_hold = 'Run'+str(i)
+            path_hold = self.master_out+model_ID_hold+'/'
+
+            # Check for convergence
+            for dirs, subdirs, fis in os.walk(path_hold):
+                break
+
+            conv2col = True
+            if include_2col == True:
+                conv2col = False
+                fio = open(path_hold+'/'+model_ID_hold+'_SavingInfoOut.txt', 'r')
+                lines = fio.readlines()
+                fio.close()
+                for l in reversed(lines):
+                    hold = l.split('2 column Climate convergence found')
+                    if len(hold) > 1:
+                        conv2col = True
+
+            if 'FINAL_out.dist' in fis and conv2col == True:
+
+                model_ID.append(self.sweepname+'/'+model_ID_hold)
+
+                # Now retrieve the VMRS
+                ptz = ascii.read('FINAL_PTZ_mixingratios_out.dist')
+                for s in range(len(species_cols)):
+                    species_vmrs[s].append(ptz[species_cols[s][0]])
+
+                # Now get surface pressure
+                pdat = open(path_hold+'PhotochemInputs/PLANET.dat', 'r')
+                lines = pdat.readlines()
+                for l in lines:
+                    if len(l.split('surface pressure')) > 1:
+                        p = float(l.split()[0])
+                        break
+                surfpressure.append(p)
+
+        # Compile the information
+        dat = [model_ID, surfpressure]
+        col_names = ['ModelNumber', 'SurfPress']
+        for s in range(len(species_cols)):
+            col_names.append(species_cols[s])
+            dat.append(species_vmrs[s])
+
+        if add_to_file == False:
+            tab = Table(dat, names=col_names)
+            ascii.write(tab, self.master_out+'VMRSSurfP_RatesInSweep_ForFutureInputOptions.dat', delimiter=' ')
         
         else:
             prevfile = ascii.read(add_to_file, delimiter=' ')

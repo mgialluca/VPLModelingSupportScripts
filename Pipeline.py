@@ -3145,19 +3145,20 @@ class VPLModelingPipeline:
                         self.MMW = float(l.split()[0])
                         break
 
+            # At the moment, I don't need a globally averaged smart run for multinest right now ... 
 
-            self.make_lblabc_runscripts()
+            # if self.MultiNest_DataFit == True: # To run LBLABC gases in parallel
 
-            if self.MultiNest_DataFit == True: # To run LBLABC gases in parallel
-
-                lblabc_input = []
-                for gas in self.molecule_dict['Gas_names']:
-                    lblabc_input.append([self.lblabc_RunScriptDir+'RunLBLABC_'+gas+'_'+self.casename+'.script', gas, 'Avg'])
+            #     lblabc_input = []
+            #     for gas in self.molecule_dict['Gas_names']:
+            #         lblabc_input.append([self.lblabc_RunScriptDir+'RunLBLABC_'+gas+'_'+self.casename+'.script', gas, 'Avg'])
                 
-                with Pool() as p:
-                    lblruns = p.map(self.run_lblabc_1instance_Parallel, lblabc_input)
+            #     with Pool() as p:
+            #         lblruns = p.map(self.run_lblabc_1instance_Parallel, lblabc_input)
             
-            else:
+            # else:
+            if self.MultiNest_DataFit == False:
+                self.make_lblabc_runscripts()
 
                 # Now Run LBLABC for all the gases of interest
                 for gas in self.molecule_dict['Gas_names']:
@@ -3376,6 +3377,12 @@ class VPLModelingPipeline:
                         self.run_multinest_smart_parallel(sminp)
                     
             elif self.run_spectra == True and self.global_convergence == True and self.MultiNest_DataFit == True:
+
+                #############
+                ##
+                ## INSERT ROUTINE TO SELECT THE BEST CLIMATE PROFILE HERE
+                ##
+                #############
 
                 shutil.copyfile(self.dayside_starting_PT, self.AtmProfPath+'PT_profile_dayside_'+self.casename+'.pt')
                 shutil.copyfile(self.nightside_starting_PT, self.AtmProfPath+'PT_profile_nightside_'+self.casename+'.pt')
