@@ -758,6 +758,93 @@ class Generate_Atmosphere_Parameter_Sweep:
         subprocess.run('mv '+pipelineobj.photochem_InputsDir+'NEWin.dist '+pipelineobj.photochem_InputsDir+'in.dist', shell=True)
 
 
+    # expand the in dist for more species
+    def expand_indist(self, pipelineobj, climatecopycase, NZ=200):
+
+        # Read in old species.dat file
+        climateprofile_path = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/'+climatecopycase+'/PhotochemInputs/'
+        nsp = open(climateprofile_path+'species.dat', 'r')
+
+        done = False
+        oldgases = []
+        for l in nsp.readlines():
+            if l.split()[0][0] == '*':
+                if done == True:
+                    break
+            else:
+                oldgases.append(l.split()[0])
+                done = True
+
+        # Read in new species.dat file
+        nsp = open(pipelineobj.photochem_InputsDir+'species.dat', 'r')
+
+        done = False
+        newgases = []
+        for l in nsp.readlines():
+            if l.split()[0][0] == '*':
+                if done == True:
+                    break
+            else:
+                newgases.append(l.split()[0])
+                done = True
+
+        NQold = len(oldgases)
+        NQnew = len(newgases)
+
+        # Make sure this is right
+        assert NQnew > NQold
+
+        NQblocksold = np.ceil(NQold/10) # Number of blocks in old indist
+        NQblocksnew = np.ceil(NQnew/10) # Number of blocks to have in new indist 
+
+        fnew = open(pipelineobj.photochem_InputsDir+'NEWin.dist', 'w')
+
+        oldgasmixings = {}
+        # Keep track of the lines that are starting and ending the current block in the in.dist file
+        blockstart = 0
+        blockend = NZ
+        spec_counter = 0
+        for i in range(int(NQblocksold)):
+            curr_nq_block = ascii.read(pipelineobj.photochem_InputsDir+'in.dist', data_start=blockstart, data_end=blockend)
+            blockstart = blockend
+            blockend = blockend+NZ
+
+            for c in curr_nq_block.colnames:
+                oldgasmixings[oldgases[spec_counter]] = curr_nq_block[c]
+                spec_counter += 1
+
+        zeroscol = oldgasmixings['HCO'] # need a column with 1e-99s 
+
+        for i in range(int(NQblocksnew)):
+            gases_to_add = newgases[i*10:i*10+10]
+            write_table = Table()
+            for gind, gas in enumerate(gases_to_add):
+                if gas in oldgases:
+                    write_table.add_column(oldgasmixings[gas], name='col'+str(gind))
+                else:
+                    write_table.add_column(zeroscol, name='col'+str(gind))
+
+            for line in range(len(write_table)):
+                    fnew.write('   ')
+                    for col in write_table.columns:
+                        if write_table[col][line] < 9e-99:
+                            val = 9e-99
+                        else:
+                            val = write_table[col][line]
+                        fnew.write("{:.8E}".format(val)+'   ')
+                    fnew.write('\n')
+            
+        olddist_txt = open(pipelineobj.photochem_InputsDir+'in.dist', 'r')
+        alllines = olddist_txt.readlines()
+        olddist_txt.close()
+        for line in range(len(alllines)):
+            if line >= blockstart:
+                fnew.write(alllines[line])
+
+        fnew.close()
+        subprocess.run('rm '+pipelineobj.photochem_InputsDir+'in.dist', shell=True)
+        subprocess.run('mv '+pipelineobj.photochem_InputsDir+'NEWin.dist '+pipelineobj.photochem_InputsDir+'in.dist', shell=True)
+
 
     # For a given suite of inputs, run the photochem/climate pipeline 
     # InputFlux - list of input fluxes for both outgassing and escaping species built up in a run function 
@@ -810,8 +897,16 @@ class Generate_Atmosphere_Parameter_Sweep:
 
         if self.multinest_fit_data == True and climate_starting_point != use_starting_point:
             print('Model '+str(modelID)+' used different climate starting point ('+climate_starting_point+'), photochem from '+use_starting_point)
-            # Change T column of in.dist
-            self.update_indist_T_EDD_Profiles(currmodel, climate_starting_point)
+            
+            # Need to change the in.dist and PLANET.dat files COMPLETELY
+            subprocess.run('rm '+currmodel.photochem_InputsDir+'in.dist', shell=True)
+            subprocess.run('rm '+currmodel.photochem_InputsDir+'PLANET.dat', shell=True)
+            shutil.copyfile('/gscratch/vsm/gialluca/VPLModelingTools_Dev/'+climate_starting_point+'/PhotochemInputs/in.dist', currmodel.photochem_InputsDir+'in.dist')
+            shutil.copyfile('/gscratch/vsm/gialluca/VPLModelingTools_Dev/'+climate_starting_point+'/PhotochemInputs/PLANET.dat', currmodel.photochem_InputsDir+'PLANET.dat')
+
+            # Expand indist
+            self.expand_indist(currmodel, climate_starting_point)
+            #self.update_indist_T_EDD_Profiles(currmodel, climate_starting_point)
         else:
             print('Model '+str(modelID)+' has the same climate and photochem starting points ('+climate_starting_point+')')
 
@@ -1684,16 +1779,20 @@ class Generate_Atmosphere_Parameter_Sweep:
         cube[2] = cube[2]*0.01 # SO2 cannot exceed 1% fixed MR at the bottom layer
         
         # O effusion velocity prior
-        cube[3] = cube[3]*4
+        o_lowlim = 0.001
+        o_hilim = 1
+        cube[3] = (cube[3]*(o_hilim - o_lowlim)) + o_lowlim
         
         # O2 effusion velocity prior
+        o2_lowlim = 0.001
+        o2_hilim = 0.1
         cube[4] = cube[4]*0.04
 
         # CO2 effusion velocity prior
-        cube[5] = cube[5]*0.5
+        cube[5] = cube[5]*0.1
 
         # CO deposition velocty prior
-        cube[6] = cube[6] # Go from 0 to 1 
+        cube[6] = cube[6]*0.03  
 
         return cube
     
@@ -1750,12 +1849,14 @@ class Generate_Atmosphere_Parameter_Sweep:
         measn = self.get_JWST_measurement(night)[0]
 
         # Measurements Zieba et al 2023, MG #1, ED #1, TJB #3, ZH Sin
-        Fc_D = np.array([421, 392, 405, 410, 333.9])
-        Fc_D_err = np.array([[94, 63, 71, 110, 78.3],[94, 75, 71, 110, 78.8]]) 
+        Fc_D = np.array([421, 392])#, 405, 410, 333.9])
+        #Fc_D_err = np.array([[94, 63, 71, 110, 78.3],[94, 75, 71, 110, 78.8]]) 
+        Fc_D_err = np.array([[94, 63],[94, 75]]) 
 
         # Night measurements # MG #1, ED #1, TJB #3, ZH Sin
-        Fc_N = np.array([62, 125, 89, 170])
-        Fc_N_err = np.array([[43, 90, 91, 92],[60, 90, 91, 31]])
+        Fc_N = np.array([62])#, 125, 89, 170])
+        #Fc_N_err = np.array([[43, 90, 91, 92],[60, 90, 91, 31]])
+        Fc_N_err = np.array([[43],[60]])
 
         '''
         if model.updated_atm_pressure > 0.1:

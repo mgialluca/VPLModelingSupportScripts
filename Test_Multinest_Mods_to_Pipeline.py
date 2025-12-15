@@ -2,7 +2,7 @@ from Parameter_Sweep import *
 from multiprocessing import Pool
 
 
-test_object = Generate_Atmosphere_Parameter_Sweep('TestMultinestMods', 
+test_object = Generate_Atmosphere_Parameter_Sweep('MultinestModsT2', 
                                 'Na', 
                                 restart_run= 'Cco2', 
                                 starting_point='Euclidean',
