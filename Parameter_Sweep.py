@@ -1430,7 +1430,7 @@ class Generate_Atmosphere_Parameter_Sweep:
                 model_ID.append(self.sweepname+'/'+model_ID_hold)
 
                 # Now retrieve the VMRS
-                ptz = ascii.read('FINAL_PTZ_mixingratios_out.dist')
+                ptz = ascii.read(path_hold+'FINAL_PTZ_mixingratios_out.dist')
                 for s in range(len(species_cols)):
                     species_vmrs[s].append(ptz[species_cols[s][0]])
 
