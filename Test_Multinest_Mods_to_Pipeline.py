@@ -2,7 +2,7 @@ from Parameter_Sweep import *
 from multiprocessing import Pool
 
 
-test_object = Generate_Atmosphere_Parameter_Sweep('MultinestModsT2', 
+test_object = Generate_Atmosphere_Parameter_Sweep('MultinestModsT3', 
                                 'Na', 
                                 restart_run= 'Cco2', 
                                 starting_point='Euclidean',
@@ -18,7 +18,10 @@ input_fluxes = [[759600000000.0, 0, 0, 0.01, 0.01, 0.02, 0.02, 0, 0.03, 1], # Eq
                 [947900000000.0, 88539.0, 0, 0.01, 0.01, 0.02, 0.02, 0.01, 0, 2], # Equal inputs to Cco2wL/RunNumber3
                 [947900000000.0, 88539.0, 0.001, 0.05, 0.05, 0.02, 0.02, 0.0, 0.0, 3], # Equal inputs to AdjSO2/Cco2/RunNumber17
                 [759600000000.0, 0.0, 0.0001, 0.01, 0.01, 0.02, 0.02, 0, 0.03, 4], # Equal inputs to AdjSO2/Czoom1/RunNumber19 
-                [947900000000.0, 1000.0, 1e-6, 0.01, 0.00678, 0.02, 0.02, 0.001, 0.0000001, 5]] # Randomized inputs, low CO2 / SO2
+                [947900000000.0, 1000.0, 1e-6, 0.01, 0.00678, 0.02, 0.02, 0.001, 0.0000001, 5], # Randomized inputs, low CO2 / SO2
+                [947900000000.0, 0.0, 0.0, 0.01, 0.1, 0.4, 0.02, 0.0, 0.03, 6], # Equal inputs to Cinit/RunNumber27
+                [608710000000.0, 0.0, 0.0, 0.001, 0.05, 0.02, 0.02, 0.0, 0.03, 7] # Equal inputs to Czoom2/RunNumber45
+                ] 
 
 test_object.mcmc_pressure_only = True
 test_object.multinest_fit_data = True
