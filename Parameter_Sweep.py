@@ -1984,6 +1984,7 @@ class Generate_Atmosphere_Parameter_Sweep:
             outstr = outstr+' '+str(model.global_convergence)
             outstr = outstr+' '+str(model.multinest_climate_copycase)
             outstr = outstr+' '+str(model.updated_atm_pressure)
+            outstr = outstr+' '+"{:.4E}".format(model.last_gross_err)
             outstr = outstr+' '+"{:.4E}".format(L)
             outstr = outstr+' '+"{:.4E}".format(measd)
             outstr = outstr+' '+"{:.4E}".format(measn)
@@ -2020,7 +2021,7 @@ class Generate_Atmosphere_Parameter_Sweep:
         if self.rank == 0:
             if not os.path.exists(self.master_out+'EmceeSimulationOutputs.txt'):
                 fsimoutputs = open(self.master_out+'EmceeSimulationOutputs.txt', 'w')
-                fsimoutputs.write('ID Converged Copyfrom Psurf Likeli DayEm NightEm H2Oflx CO2flx SO2fixMR Oveff O2veff CO2veff COvdep\n')
+                fsimoutputs.write('ID Converged Copyfrom Psurf GrossErr Likeli DayEm NightEm H2Oflx CO2flx SO2fixMR Oveff O2veff CO2veff COvdep\n')
                 fsimoutputs.close()
 
         # Need to take the closest matching climate and 2 col climate profiles

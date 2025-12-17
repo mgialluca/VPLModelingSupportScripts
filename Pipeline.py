@@ -723,7 +723,7 @@ class VPLModelingPipeline:
     #          tolerance to be converged
     # TimeTolerance - Convergence check, time of last step must be >= this tolerance to be converged
     ##
-    def check_photochem_conv(self, trynum=1, NormGrossTolerance=1, L2Tolerance=np.inf, TimeTolerance=1e17, subtries=0, prevtime=0):
+    def check_photochem_conv(self, trynum=1, NormGrossTolerance=np.inf, L2Tolerance=np.inf, TimeTolerance=1e17, subtries=0, prevtime=0):
         # Set the output flag of converged or not (boolean)
         # Guilty until proven innocent
         HasItConverged = False
@@ -768,19 +768,22 @@ class VPLModelingPipeline:
                     break
 
         # Do convergence checking:
-        if subtries < 10:
-            if NormGrosserr <= NormGrossTolerance:
-                NormGrossConverged = True
 
-        # Greater than 30 subtries, might be converged with high error
-        else:
-            if NormGrosserr < 100:
-                if prevtime >= TimeTolerance and FinalTime >= TimeTolerance:
-                    NormGrossConverged = True
-                else:
-                    NormGrossConverged = False
-            else:
-                NormGrossConverged = False
+        if NormGrosserr <= NormGrossTolerance:
+            NormGrossConverged = True
+        # if subtries < 10:
+        #     if NormGrosserr <= NormGrossTolerance:
+        #         NormGrossConverged = True
+
+        # # Greater than 30 subtries, might be converged with high error
+        # else:
+        #     if NormGrosserr < 100:
+        #         if prevtime >= TimeTolerance and FinalTime >= TimeTolerance:
+        #             NormGrossConverged = True
+        #         else:
+        #             NormGrossConverged = False
+        #     else:
+        #         NormGrossConverged = False
 
         if L2err <= L2Tolerance:
             L2Converged = True
@@ -803,6 +806,7 @@ class VPLModelingPipeline:
             print('L2 Error: '+str(L2err))
             print('Time of final timestep: '+str(FinalTime))
         '''
+        self.last_gross_err = NormGrosserr
 
         return HasItConverged, NormGrosserr, L2err, FinalTime, Nstep_photochemrun, sgbslerror
     # usage should be 'convergence, grosserr, l2err, finaltime, nstepsphoto, sgbslerror = check_photochem_conv()
@@ -2914,7 +2918,8 @@ class VPLModelingPipeline:
                     ftestingoutput = open(self.OutPath+self.casename+'_SavingInfoOut.txt', 'a')
 
                 if pressure_converged == False:
-
+                    
+                    reset_inner_tries = True
                     while pressure_converged == False:
 
                         if photochem_newPsurf_subtries > self.max_iterations_master:
@@ -2925,7 +2930,8 @@ class VPLModelingPipeline:
                         photochem_newPsurf_subtries += 1
                         # Currently, the trynum will only refer to the converged case (should we save every single try no matter what?)
                         local_photochem_conv, grosserr, l2err, finaltime, nsteps_photo, sgbslerror = self.check_photochem_conv(trynum=self.num_photochem_runs)
-                        photochem_newPsurf_inner_subtries = 1
+                        if reset_inner_tries == True:
+                            photochem_newPsurf_inner_subtries = 1
 
                         # If SGBSL Error occured, just set local conv to True so it skips the next bit and tries to find a different pressure 
                         if sgbslerror == True:
@@ -2935,6 +2941,7 @@ class VPLModelingPipeline:
                             if self.fixsgbsl == True:
                                 local_photochem_conv = True
 
+                        reset_inner_tries = True # reset to True
                         # If photochem did not converge, try try again
                         while local_photochem_conv == False:
                             if photochem_newPsurf_inner_subtries > self.max_iterations_master:
@@ -2964,6 +2971,16 @@ class VPLModelingPipeline:
                                     ftestingoutput.write('Breaking loop to pick new pressure\n')
                                 if self.fixsgbsl == True:
                                     break
+
+                            # If inner convergence isn't found quickly, break to retry pressure if it's out of whack:
+                            if photochem_newPsurf_inner_subtries in [10, 20, 30, 40]:
+                                ptzhold = ascii.read(self.photochemDir+'OUTPUT/PTZ_mixingratios_out.dist')
+                                totmixinghold = sum([ptzhold[v][0] for v in ptzhold.colnames if v not in ['PRESS', 'TEMP', 'ALT']])
+
+                                if totmixinghold >= 10 or totmixinghold < 0.5:
+                                    reset_inner_tries = False
+                                    break
+
 
                         if self.num_photochem_runs == 1:
                             subprocess.run('cp '+self.OutPath+'photochem_run_output_'+self.casename+'.run '+self.OutPath+'photochem_run_output_'+self.casename+'_Psurfsubtry'+str(photochem_newPsurf_subtries)+'_Innertry_'+str(photochem_newPsurf_inner_subtries)+'.run', shell=True)
@@ -3071,7 +3088,7 @@ class VPLModelingPipeline:
                 self.global_convergence = True
                 if self.verbose == True:
                     #print('Global Convergence achieved')
-                    ftestingoutput.write('Global Convergence achieved')
+                    ftestingoutput.write('Global Convergence achieved \n')
                 subprocess.run('cp '+self.photochemDir+'OUTPUT/out.dist '+self.DataOutPath+'FINAL_out.dist', shell=True)
                 subprocess.run('cp '+self.photochemDir+'OUTPUT/out.out '+self.DataOutPath+'FINAL_out.out', shell=True)
                 subprocess.run('cp '+self.photochemDir+'OUTPUT/PTZ_mixingratios_out.dist '+self.DataOutPath+'FINAL_PTZ_mixingratios_out.dist', shell=True)
@@ -3092,6 +3109,8 @@ class VPLModelingPipeline:
 
             # If MCMC is only looking for a pressure convergence (for computational efficiency), just find convergence here
             if self.MCMC_pressure_only == True or self.MultiNest_DataFit == True:
+
+                ftestingoutput.write('Last Gross Err was; '+str(self.last_gross_err)+'\n')
                 # Need to check that the best fitting climate profile has not changed, or else rerun everything
                 if sgbslerror == True:
                     self.global_convergence = False
