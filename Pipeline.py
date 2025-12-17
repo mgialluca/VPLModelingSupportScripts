@@ -2779,24 +2779,27 @@ class VPLModelingPipeline:
                         ftestingoutput.write('Photochem subtry '+str(photochem_subtries)+' NOT converged\n\n')
 
                 # If local convergence cant be found, might need to try adjusting the pressure early (could just be << 100% and running into issues)
-                if photochem_subtries in [50, 100, 150] and self.adjust_atmospheric_pressure == True:
-                    if self.num_photochem_runs == 1:
-                        fi = open(self.OutPath+'photochem_run_output_'+self.casename+'.run', 'r')
-                    else:
-                        fi = open(self.OutPath+'photochem_run_output_'+self.casename+'_Try'+str(self.num_photochem_runs)+'.run', 'r')
-                    lines = fi.readlines()
-                    fi.close()
-                    for i in lines:
-                        if len(i.split('Molecular weight of atmosphere')) > 1:
-                            self.MMW = float(i.split()[len(i.split())-1])
-                            break
-                    pressure_converged, maxchange, holdnewsurfp = self.change_atmospheric_pressure()
+                if photochem_subtries in [10, 20, 30, 40] and self.adjust_atmospheric_pressure == True:
+                    ptzhold = ascii.read(self.photochemDir+'OUTPUT/PTZ_mixingratios_out.dist')
+                    totmixinghold = sum([ptzhold[v][0] for v in ptzhold.colnames if v not in ['PRESS', 'TEMP', 'ALT']])
+                    if totmixinghold >= 10 or totmixinghold < 0.5: # want it to only update if the mixing ratios are out of whack 
+                        if self.num_photochem_runs == 1:
+                            fi = open(self.OutPath+'photochem_run_output_'+self.casename+'.run', 'r')
+                        else:
+                            fi = open(self.OutPath+'photochem_run_output_'+self.casename+'_Try'+str(self.num_photochem_runs)+'.run', 'r')
+                        lines = fi.readlines()
+                        fi.close()
+                        for i in lines:
+                            if len(i.split('Molecular weight of atmosphere')) > 1:
+                                self.MMW = float(i.split()[len(i.split())-1])
+                                break
+                        pressure_converged, maxchange, holdnewsurfp = self.change_atmospheric_pressure()
 
-                    if self.verbose == True:
-                        ftestingoutput.write('Subtries reached '+str(photochem_subtries)+', attempting to adjust pressure \n')
-                        ftestingoutput.write('New Pressure: '+str(holdnewsurfp)+', using '+str(self.updated_atm_pressure)+' Bars \n\n')
-                        ftestingoutput.close()
-                        ftestingoutput = open(self.OutPath+self.casename+'_SavingInfoOut.txt', 'a')
+                        if self.verbose == True:
+                            ftestingoutput.write('Subtries reached '+str(photochem_subtries)+', attempting to adjust pressure \n')
+                            ftestingoutput.write('New Pressure: '+str(holdnewsurfp)+', using '+str(self.updated_atm_pressure)+' Bars \n\n')
+                            ftestingoutput.close()
+                            ftestingoutput = open(self.OutPath+self.casename+'_SavingInfoOut.txt', 'a')
 
 
                 if self.fixsgbsl == True and sgbslerror == True and self.adjust_atmospheric_pressure == True:

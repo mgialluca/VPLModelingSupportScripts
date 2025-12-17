@@ -2,7 +2,7 @@ from Parameter_Sweep import *
 from multiprocessing import Pool
 
 
-test_object = Generate_Atmosphere_Parameter_Sweep('MultinestModsT3', 
+test_object = Generate_Atmosphere_Parameter_Sweep('MultinestModsT4', 
                                 'Na', 
                                 restart_run= 'Cco2', 
                                 starting_point='Euclidean',
@@ -11,6 +11,7 @@ test_object = Generate_Atmosphere_Parameter_Sweep('MultinestModsT3',
                                 spectra=True,
                                 planet='T1c')
 
+# last test pretty good - Runs 2, 3, 6, 7 converged; runs 1, 4, 5 did not
 
 # Five Tests
 # watflx, co2flx, so2fixmr, oveff, o2veff, o3vdep, h2o2vdep, co2veff, covdep
