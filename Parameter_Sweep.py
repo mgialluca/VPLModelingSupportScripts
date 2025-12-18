@@ -80,6 +80,7 @@ class Generate_Atmosphere_Parameter_Sweep:
         self.multinest_fit_data = False
         self.multinest_input_options_photochem = restart_run # Gives the input options for photochem files for each simulation in a multinest suite
         self.multinest_input_options_climate = 'Cinit' # Gives the input options for climate profiles which may have differing species, indist etc 
+        self.multinest_use_12um = False
 
         #########  Parameters to set if you want to do a grid sweep  #########
 
@@ -1843,15 +1844,22 @@ class Generate_Atmosphere_Parameter_Sweep:
 
         return measurement.value, starfac, fac
     
-    def emission_likeli(self, day, night, modid):
+    def emission_likeli(self, day, night, modid, include_12um=False):
 
         measd = self.get_JWST_measurement(day)[0]
         measn = self.get_JWST_measurement(night)[0]
+
+        if include_12um == True:
+            measd_12um = self.get_JWST_measurement(day, bandpass=12.8)
 
         # Measurements Zieba et al 2023, MG #1, ED #1, TJB #3, ZH Sin
         Fc_D = np.array([421, 392])#, 405, 410, 333.9])
         #Fc_D_err = np.array([[94, 63, 71, 110, 78.3],[94, 75, 71, 110, 78.8]]) 
         Fc_D_err = np.array([[94, 63],[94, 75]]) 
+
+        if include_12um == True:
+            Fc_D_12um = np.array([553])
+            Fc_D_err_12um = np.array([[62],[72]])
 
         # Night measurements # MG #1, ED #1, TJB #3, ZH Sin
         Fc_N = np.array([62])#, 125, 89, 170])
@@ -1896,8 +1904,44 @@ class Generate_Atmosphere_Parameter_Sweep:
 
             L = L + li
 
+        if include_12um == True:
+            for dm in range(len(Fc_D_12um)):
+
+                if measd_12um < Fc_D_12um[dm]:
+                    sigma = Fc_D_err_12um[0][dm]
+                else:
+                    sigma = Fc_D_err_12um[1][dm]
+
+                try:
+                    li = ((measd_12um - Fc_D_12um[dm])**2)/(sigma**2)
+                
+                except UnboundLocalError:
+                    print('UNBOUND ERROR: ID number '+str(modid)+', 12.8 um Dayside: '+str(measd_12um))
+                    li = 1e10
+
+                L = L + li
+
         L = -0.5*L
         return L, measd, measn
+    
+    # Delete files that aren't needed:
+    def clean_up_single_run_dir(self, rundir, runnum):
+
+        for ds, sds, fis in os.walk(rundir):
+            break
+
+        fis_to_save = ['FINAL_out.dist', 'FINAL_out.out', 'FINAL_PTZ_mixingratios_out.dist', 'FINAL_photochem_run_output.run',
+                       'FINAL_out_FAILED.dist', 'FINAL_out_FAILED.out', 'FINAL_PTZ_mixingratios_out_FAILED.dist', 'FINAL_photochem_run_output_FAILED.run',
+                       'MixingRs_'+runnum+'.dat', 'PT_profile_dayside_'+runnum+'.pt', 'PT_profile_nightside_'+runnum+'.pt', 'PT_profile_'+runnum+'.pt', 
+                       runnum+'_SavingInfoOut.txt', 'RunLBLABC_d_H2O_'+runnum+'.script']
+        
+        for f in fis:
+            if f not in fis_to_save:
+                if len(f.split('SMART')) > 1:
+                    pass
+                else:
+                    os.remove(rundir+'/'+f)
+
     
     # log likelihood for PyMultiNest
     def multinest_loglike(self, cube, ndim, nparams):
@@ -1970,7 +2014,7 @@ class Generate_Atmosphere_Parameter_Sweep:
                 nightside_emiss = ascii.read(self.master_out+'RunNumber'+str(modelID)+'/RunNumber'+str(modelID)+'_nightside_SMART_toa.rad')
                 #transmiss = ascii.read(self.master_out+'RunNumber'+str(modelID)+'/RunNumber'+str(modelID)+'_SMART.trnst')
 
-                L, measd, measn = self.emission_likeli(dayside_emiss, nightside_emiss, modelID)
+                L, measd, measn = self.emission_likeli(dayside_emiss, nightside_emiss, modelID, include_12um=self.multinest_use_12um)
             
             except:
                 print('ASCII COULDNT READ IN SPECTRA ERROR, '+str(modelID))
@@ -2006,6 +2050,10 @@ class Generate_Atmosphere_Parameter_Sweep:
         if L > 0 and L < 1e-200:
             L = 0
 
+        ### File clean up
+        # self.master_out+'RunNumber'+str(modelID)+'/'
+        self.clean_up_single_run_dir(self.master_out+'RunNumber'+str(modelID), 'RunNumber'+str(modelID))
+
         return L
 
 
@@ -2035,7 +2083,7 @@ class Generate_Atmosphere_Parameter_Sweep:
         #prior = partial(self.multinest_prior)
         prior = lambda cube, ndim, nparams: self.multinest_prior(cube, ndim, nparams)
 
-        pymultinest.run(lnlike, prior, nparams, outputfiles_basename='chain/T1cEmiss_', resume=True, verbose=True, evidence_tolerance=10, n_live_points=800)
+        pymultinest.run(lnlike, prior, nparams, outputfiles_basename='chain/T1cMN_', resume=True, verbose=True, evidence_tolerance=10, n_live_points=800)
 
 
 

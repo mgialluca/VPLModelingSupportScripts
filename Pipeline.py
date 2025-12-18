@@ -97,7 +97,7 @@ class VPLModelingPipeline:
         self.photochem_global_converge = False
         self.climate_global_converge = False
         self.global_convergence = False
-        self.max_iterations_master = 50 # Never do anything more than 100x
+        self.max_iterations_master = 40 # Never do anything more than 100x
         self.max_iterations_climate = 200 # Never run climate more than 15x
         self.suppress_IOerrors = False # if convergence fails, raise IO errors if False, or just break running function if True
         self.run_spectra = True # If true, finished a converged run with smart 
@@ -1055,7 +1055,11 @@ class VPLModelingPipeline:
             if self.planet == 'Earth':
                 f.write('50.,100000.                               min, max wavenumber\n')
             #elif self.planet == 'GJ12b':
-            #    f.write('1000.,20000.                              min, max wavenumber\n')   
+            #    f.write('1000.,20000.                              min, max wavenumber\n') 
+
+            elif self.MultiNest_DataFit == True:
+                f.write('555.,1000.                               min, max wavenumber\n')
+
             else:
                 f.write('330.,20000.                               min, max wavenumber\n')
             f.write('200.                                    maximum line width\n')
@@ -1367,6 +1371,8 @@ class VPLModelingPipeline:
             self.s_MinMax_wavenumber = '50.,100000.'
         #elif self.planet == 'GJ12b':
         #    self.s_MinMax_wavenumber = '1000.,20000.' 
+        elif self.MultiNest_DataFit == True:
+            self.s_MinMax_wavenumber = '555.,1000.'
         else:
             self.s_MinMax_wavenumber = '330.,20000.' #'50.,100000.'
         self.s_GridType = 2 # 2 - slit
@@ -2855,11 +2861,19 @@ class VPLModelingPipeline:
                 subprocess.run('cp '+self.photochemDir+'OUTPUT/out.dist '+self.DataOutPath+'FINAL_out_FAILED.dist', shell=True)
                 subprocess.run('cp '+self.photochemDir+'OUTPUT/out.out '+self.DataOutPath+'FINAL_out_FAILED.out', shell=True)
                 subprocess.run('cp '+self.photochemDir+'OUTPUT/PTZ_mixingratios_out.dist '+self.DataOutPath+'FINAL_PTZ_mixingratios_out_FAILED.dist', shell=True)
+                if self.num_photochem_runs == 1:
+                    shutil.copyfile(self.OutPath+'photochem_run_output_'+self.casename+'.run', self.DataOutPath+'FINAL_photochem_run_output_FAILED.run')
+                else:
+                    shutil.copyfile(self.OutPath+'photochem_run_output_'+self.casename+'_Try'+str(self.num_photochem_runs)+'.run', self.DataOutPath+'FINAL_photochem_run_output_FAILED.run')
                 raise IOError('Photochem ran >'+str(self.max_iterations_master)+' times with no convergence. On photochem run number '+str(self.num_photochem_runs))
             elif local_photochem_conv == False and self.suppress_IOerrors == True:
                 subprocess.run('cp '+self.photochemDir+'OUTPUT/out.dist '+self.DataOutPath+'FINAL_out_FAILED.dist', shell=True)
                 subprocess.run('cp '+self.photochemDir+'OUTPUT/out.out '+self.DataOutPath+'FINAL_out_FAILED.out', shell=True)
                 subprocess.run('cp '+self.photochemDir+'OUTPUT/PTZ_mixingratios_out.dist '+self.DataOutPath+'FINAL_PTZ_mixingratios_out_FAILED.dist', shell=True)
+                if self.num_photochem_runs == 1:
+                    shutil.copyfile(self.OutPath+'photochem_run_output_'+self.casename+'.run', self.DataOutPath+'FINAL_photochem_run_output_FAILED.run')
+                else:
+                    shutil.copyfile(self.OutPath+'photochem_run_output_'+self.casename+'_Try'+str(self.num_photochem_runs)+'.run', self.DataOutPath+'FINAL_photochem_run_output_FAILED.run')
                 if self.verbose == True:
                     ftestingoutput.write('Max Iterations reached ('+str(self.max_iterations_master)+'), couldnt find new pressure, ending run\n')
                     #print('Max Iterations reached ('+str(self.max_iterations_master)+'), couldnt find new pressure, ending run')
@@ -3048,11 +3062,19 @@ class VPLModelingPipeline:
                         subprocess.run('cp '+self.photochemDir+'OUTPUT/out.dist '+self.DataOutPath+'FINAL_out_FAILED.dist', shell=True)
                         subprocess.run('cp '+self.photochemDir+'OUTPUT/out.out '+self.DataOutPath+'FINAL_out_FAILED.out', shell=True)
                         subprocess.run('cp '+self.photochemDir+'OUTPUT/PTZ_mixingratios_out.dist '+self.DataOutPath+'FINAL_PTZ_mixingratios_out_FAILED.dist', shell=True)
+                        if self.num_photochem_runs == 1:
+                            shutil.copyfile(self.OutPath+'photochem_run_output_'+self.casename+'.run', self.DataOutPath+'FINAL_photochem_run_output_FAILED.run')
+                        else:
+                            shutil.copyfile(self.OutPath+'photochem_run_output_'+self.casename+'_Try'+str(self.num_photochem_runs)+'.run', self.DataOutPath+'FINAL_photochem_run_output_FAILED.run')
                         raise IOError('Photochem attempted to use new pressure >'+str(self.max_iterations_master)+' times with no inner convergence. On photochem run number '+str(self.num_photochem_runs))
                     elif photochem_newPsurf_inner_subtries > self.max_iterations_master and self.suppress_IOerrors == True:
                         subprocess.run('cp '+self.photochemDir+'OUTPUT/out.dist '+self.DataOutPath+'FINAL_out_FAILED.dist', shell=True)
                         subprocess.run('cp '+self.photochemDir+'OUTPUT/out.out '+self.DataOutPath+'FINAL_out_FAILED.out', shell=True)
                         subprocess.run('cp '+self.photochemDir+'OUTPUT/PTZ_mixingratios_out.dist '+self.DataOutPath+'FINAL_PTZ_mixingratios_out_FAILED.dist', shell=True)
+                        if self.num_photochem_runs == 1:
+                            shutil.copyfile(self.OutPath+'photochem_run_output_'+self.casename+'.run', self.DataOutPath+'FINAL_photochem_run_output_FAILED.run')
+                        else:
+                            shutil.copyfile(self.OutPath+'photochem_run_output_'+self.casename+'_Try'+str(self.num_photochem_runs)+'.run', self.DataOutPath+'FINAL_photochem_run_output_FAILED.run')
                         if self.verbose == True:
                             #print('Max iterations reached ('+str(self.max_iterations_master)+'), using new pressure without finding inner convergence, ending run')
                             ftestingoutput.write('Max iterations reached ('+str(self.max_iterations_master)+'), using new pressure without finding inner convergence, ending run\n')
@@ -3062,11 +3084,19 @@ class VPLModelingPipeline:
                         subprocess.run('cp '+self.photochemDir+'OUTPUT/out.dist '+self.DataOutPath+'FINAL_out_FAILED.dist', shell=True)
                         subprocess.run('cp '+self.photochemDir+'OUTPUT/out.out '+self.DataOutPath+'FINAL_out_FAILED.out', shell=True)
                         subprocess.run('cp '+self.photochemDir+'OUTPUT/PTZ_mixingratios_out.dist '+self.DataOutPath+'FINAL_PTZ_mixingratios_out_FAILED.dist', shell=True)
+                        if self.num_photochem_runs == 1:
+                            shutil.copyfile(self.OutPath+'photochem_run_output_'+self.casename+'.run', self.DataOutPath+'FINAL_photochem_run_output_FAILED.run')
+                        else:
+                            shutil.copyfile(self.OutPath+'photochem_run_output_'+self.casename+'_Try'+str(self.num_photochem_runs)+'.run', self.DataOutPath+'FINAL_photochem_run_output_FAILED.run')
                         raise IOError('Photochem attempted to find new pressure >'+str(self.max_iterations_master)+' times with no pressure convergence. On photochem run number '+str(self.num_photochem_runs))
                     elif pressure_converged == False and self.suppress_IOerrors == True:
                         subprocess.run('cp '+self.photochemDir+'OUTPUT/out.dist '+self.DataOutPath+'FINAL_out_FAILED.dist', shell=True)
                         subprocess.run('cp '+self.photochemDir+'OUTPUT/out.out '+self.DataOutPath+'FINAL_out_FAILED.out', shell=True)
                         subprocess.run('cp '+self.photochemDir+'OUTPUT/PTZ_mixingratios_out.dist '+self.DataOutPath+'FINAL_PTZ_mixingratios_out_FAILED.dist', shell=True)
+                        if self.num_photochem_runs == 1:
+                            shutil.copyfile(self.OutPath+'photochem_run_output_'+self.casename+'.run', self.DataOutPath+'FINAL_photochem_run_output_FAILED.run')
+                        else:
+                            shutil.copyfile(self.OutPath+'photochem_run_output_'+self.casename+'_Try'+str(self.num_photochem_runs)+'.run', self.DataOutPath+'FINAL_photochem_run_output_FAILED.run')
                         if self.verbose == True:
                             #print('Max iterations reached ('+str(self.max_iterations_master)+'), couldnt find new pressure, ending run')
                             ftestingoutput.write('Max iterations reached ('+str(self.max_iterations_master)+'), couldnt find new pressure, ending run\n')
@@ -3095,6 +3125,10 @@ class VPLModelingPipeline:
                 subprocess.run('cp '+self.photochemDir+'OUTPUT/out.dist '+self.DataOutPath+'FINAL_out.dist', shell=True)
                 subprocess.run('cp '+self.photochemDir+'OUTPUT/out.out '+self.DataOutPath+'FINAL_out.out', shell=True)
                 subprocess.run('cp '+self.photochemDir+'OUTPUT/PTZ_mixingratios_out.dist '+self.DataOutPath+'FINAL_PTZ_mixingratios_out.dist', shell=True)
+                if self.num_photochem_runs == 1:
+                    shutil.copyfile(self.OutPath+'photochem_run_output_'+self.casename+'.run', self.DataOutPath+'FINAL_photochem_run_output.run')
+                else:
+                    shutil.copyfile(self.OutPath+'photochem_run_output_'+self.casename+'_Try'+str(self.num_photochem_runs)+'.run', self.DataOutPath+'FINAL_photochem_run_output.run')
                 break
             else:
                 self.global_convergence = False
@@ -3102,6 +3136,10 @@ class VPLModelingPipeline:
                     subprocess.run('cp '+self.photochemDir+'OUTPUT/out.dist '+self.DataOutPath+'FINAL_out_FAILED.dist', shell=True)
                     subprocess.run('cp '+self.photochemDir+'OUTPUT/out.out '+self.DataOutPath+'FINAL_out_FAILED.out', shell=True)
                     subprocess.run('cp '+self.photochemDir+'OUTPUT/PTZ_mixingratios_out.dist '+self.DataOutPath+'FINAL_PTZ_mixingratios_out_FAILED.dist', shell=True)
+                    if self.num_photochem_runs == 1:
+                        shutil.copyfile(self.OutPath+'photochem_run_output_'+self.casename+'.run', self.DataOutPath+'FINAL_photochem_run_output_FAILED.run')
+                    else:
+                        shutil.copyfile(self.OutPath+'photochem_run_output_'+self.casename+'_Try'+str(self.num_photochem_runs)+'.run', self.DataOutPath+'FINAL_photochem_run_output_FAILED.run')
 
                     if self.suppress_IOerrors == False:
                         raise IOError('Photochem+Climate have run together >'+str(self.max_iterations_master)+' without finding global convergence, run failed.')
@@ -3128,6 +3166,10 @@ class VPLModelingPipeline:
                         subprocess.run('cp '+self.photochemDir+'OUTPUT/out.dist '+self.DataOutPath+'FINAL_out.dist', shell=True)
                         subprocess.run('cp '+self.photochemDir+'OUTPUT/out.out '+self.DataOutPath+'FINAL_out.out', shell=True)
                         subprocess.run('cp '+self.photochemDir+'OUTPUT/PTZ_mixingratios_out.dist '+self.DataOutPath+'FINAL_PTZ_mixingratios_out.dist', shell=True)
+                        if self.num_photochem_runs == 1:
+                            shutil.copyfile(self.OutPath+'photochem_run_output_'+self.casename+'.run', self.DataOutPath+'FINAL_photochem_run_output.run')
+                        else:
+                            shutil.copyfile(self.OutPath+'photochem_run_output_'+self.casename+'_Try'+str(self.num_photochem_runs)+'.run', self.DataOutPath+'FINAL_photochem_run_output.run')
                         self.global_convergence = True
                         break
 
@@ -3139,6 +3181,13 @@ class VPLModelingPipeline:
                             self.global_convergence == False
                             if self.verbose == True:
                                 ftestingoutput.write('Climate has been retested >5 times, ending simulations \n')
+                            subprocess.run('cp '+self.photochemDir+'OUTPUT/out.dist '+self.DataOutPath+'FINAL_out_FAILED.dist', shell=True)
+                            subprocess.run('cp '+self.photochemDir+'OUTPUT/out.out '+self.DataOutPath+'FINAL_out_FAILED.out', shell=True)
+                            subprocess.run('cp '+self.photochemDir+'OUTPUT/PTZ_mixingratios_out.dist '+self.DataOutPath+'FINAL_PTZ_mixingratios_out_FAILED.dist', shell=True)
+                            if self.num_photochem_runs == 1:
+                                shutil.copyfile(self.OutPath+'photochem_run_output_'+self.casename+'.run', self.DataOutPath+'FINAL_photochem_run_output_FAILED.run')
+                            else:
+                                shutil.copyfile(self.OutPath+'photochem_run_output_'+self.casename+'_Try'+str(self.num_photochem_runs)+'.run', self.DataOutPath+'FINAL_photochem_run_output_FAILED.run')
                             break
                         
                         else: # Time to retest and restart
@@ -3156,6 +3205,10 @@ class VPLModelingPipeline:
                     subprocess.run('cp '+self.photochemDir+'OUTPUT/out.dist '+self.DataOutPath+'FINAL_out.dist', shell=True)
                     subprocess.run('cp '+self.photochemDir+'OUTPUT/out.out '+self.DataOutPath+'FINAL_out.out', shell=True)
                     subprocess.run('cp '+self.photochemDir+'OUTPUT/PTZ_mixingratios_out.dist '+self.DataOutPath+'FINAL_PTZ_mixingratios_out.dist', shell=True)
+                    if self.num_photochem_runs == 1:
+                        shutil.copyfile(self.OutPath+'photochem_run_output_'+self.casename+'.run', self.DataOutPath+'FINAL_photochem_run_output.run')
+                    else:
+                        shutil.copyfile(self.OutPath+'photochem_run_output_'+self.casename+'_Try'+str(self.num_photochem_runs)+'.run', self.DataOutPath+'FINAL_photochem_run_output.run')
                     self.global_convergence = True
                     break
 
@@ -3279,11 +3332,19 @@ class VPLModelingPipeline:
                 subprocess.run('cp '+self.photochemDir+'OUTPUT/out.dist '+self.DataOutPath+'FINAL_out_FAILED.dist', shell=True)
                 subprocess.run('cp '+self.photochemDir+'OUTPUT/out.out '+self.DataOutPath+'FINAL_out_FAILED.out', shell=True)
                 subprocess.run('cp '+self.photochemDir+'OUTPUT/PTZ_mixingratios_out.dist '+self.DataOutPath+'FINAL_PTZ_mixingratios_out_FAILED.dist', shell=True)
+                if self.num_photochem_runs == 1:
+                    shutil.copyfile(self.OutPath+'photochem_run_output_'+self.casename+'.run', self.DataOutPath+'FINAL_photochem_run_output_FAILED.run')
+                else:
+                    shutil.copyfile(self.OutPath+'photochem_run_output_'+self.casename+'_Try'+str(self.num_photochem_runs)+'.run', self.DataOutPath+'FINAL_photochem_run_output_FAILED.run')
                 raise IOError('Climate could not converge in >'+str(self.max_iterations_master)+' tries. For climate run number '+str(self.num_climate_runs))
             elif local_climate_convergence == False and self.suppress_IOerrors == True:
                 subprocess.run('cp '+self.photochemDir+'OUTPUT/out.dist '+self.DataOutPath+'FINAL_out_FAILED.dist', shell=True)
                 subprocess.run('cp '+self.photochemDir+'OUTPUT/out.out '+self.DataOutPath+'FINAL_out_FAILED.out', shell=True)
                 subprocess.run('cp '+self.photochemDir+'OUTPUT/PTZ_mixingratios_out.dist '+self.DataOutPath+'FINAL_PTZ_mixingratios_out_FAILED.dist', shell=True)
+                if self.num_photochem_runs == 1:
+                    shutil.copyfile(self.OutPath+'photochem_run_output_'+self.casename+'.run', self.DataOutPath+'FINAL_photochem_run_output_FAILED.run')
+                else:
+                    shutil.copyfile(self.OutPath+'photochem_run_output_'+self.casename+'_Try'+str(self.num_photochem_runs)+'.run', self.DataOutPath+'FINAL_photochem_run_output_FAILED.run')
                 break
 
             ### Run VPL Climate section end ------------------------------
