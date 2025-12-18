@@ -30,9 +30,9 @@ from scipy.optimize import minimize
 # - Load the ompi module
 # - Add the multinest path to LD_LIBRARY_PATH
 
-#import pymultinest
-#import mpi4py
-#from mpi4py import MPI
+import pymultinest
+import mpi4py
+from mpi4py import MPI
 
 
 # Need to figure out how parameter sweeps are running:
