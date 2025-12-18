@@ -2357,8 +2357,11 @@ class VPLModelingPipeline:
 
 
     # Euclidean distance metric to find out which previous run is closest to the current one
+    # a AND b MUST BE NUMPY ARRAYS
     def euclidean_distance(self, a, b):
-        return np.sqrt(np.sum((a - b) ** 2))
+        a[a==0] = 1e-99 # make sure there's no zeros just in case
+        b[b==0] = 1e-99
+        return np.sqrt(np.sum((np.log10(a) - np.log10(b)) ** 2))
     
     ### Use Euclidean distance calculation to determine what the best fitting climate template profile should be
     # For use with multinest
