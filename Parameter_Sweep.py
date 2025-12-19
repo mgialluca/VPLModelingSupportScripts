@@ -1767,14 +1767,14 @@ class Generate_Atmosphere_Parameter_Sweep:
     def multinest_prior(self, cube, ndim, nparams):
 
         # H2O outgassing rate prior
-        wat_lowlim = 44552887.2545331
-        wat_hilim = 9.47899801e11
+        wat_lowlim = 9.06061757e+09 # The 50th perc val of Trents dist #44552887.2545331
+        wat_hilim = 9.47899801e11 # The 97.5th perc val
         cube[0] = (cube[0]*(wat_hilim - wat_lowlim)) + wat_lowlim
 
-        # CO2 Flux prior
-        co2_lowlim = 0
-        co2_hilim = 5.49528534e10 # Upper 97.5 percentile value from Trent
-        cube[1] = cube[1]*co2_hilim
+        # CO2 Flux prior - sampled on a log cont, can't use 0 at the bottom but '1' as a flux is practically nothing
+        co2_lowlim = np.log10(1)
+        co2_hilim = np.log10(650000000.0) # Max stable CO2 rate in Paper 2
+        cube[1] = 10**((cube[1]*(co2_hilim-co2_lowlim)) + co2_lowlim)
 
         # SO2 Fixed MR prior
         cube[2] = cube[2]*0.01 # SO2 cannot exceed 1% fixed MR at the bottom layer
