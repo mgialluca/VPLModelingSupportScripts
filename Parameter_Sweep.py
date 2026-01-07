@@ -1777,7 +1777,9 @@ class Generate_Atmosphere_Parameter_Sweep:
         cube[1] = 10**((cube[1]*(co2_hilim-co2_lowlim)) + co2_lowlim)
 
         # SO2 Fixed MR prior
-        cube[2] = cube[2]*0.01 # SO2 cannot exceed 1% fixed MR at the bottom layer
+        so2_lowlim = np.log10(1e-30)
+        so2_hilim = np.log10(0.01)
+        cube[2] = 10**((cube[2]*(so2_hilim - so2_lowlim)) +so2_lowlim) # SO2 cannot exceed 1% fixed MR at the bottom layer
         
         # O effusion velocity prior
         o_lowlim = 0.001

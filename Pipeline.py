@@ -2795,7 +2795,7 @@ class VPLModelingPipeline:
                 if photochem_subtries in [10, 20, 30, 40] and self.adjust_atmospheric_pressure == True:
                     ptzhold = ascii.read(self.photochemDir+'OUTPUT/PTZ_mixingratios_out.dist')
                     totmixinghold = sum([ptzhold[v][0] for v in ptzhold.colnames if v not in ['PRESS', 'TEMP', 'ALT']])
-                    if totmixinghold >= 10 or totmixinghold < 0.5: # want it to only update if the mixing ratios are out of whack 
+                    if totmixinghold >= 6 or totmixinghold < 0.6: # want it to only update if the mixing ratios are out of whack 
                         if self.num_photochem_runs == 1:
                             fi = open(self.OutPath+'photochem_run_output_'+self.casename+'.run', 'r')
                         else:
