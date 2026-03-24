@@ -12,10 +12,10 @@ def set_pipeline_vars(casename, pipelineobj, master_out=master):
     # Paths are the main thing to set, because they will be massive amounts of running/files, want to keep each sweep colocated in one master dir
     atmos_Dir = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/megan_atmos/atmos/'
     # Create casename dir
-    #if not os.path.exists(master_out+casename+'/'):
-    #    os.mkdir(master_out+casename+'/')
+    if not os.path.exists(master_out+casename+'/'):
+       os.mkdir(master_out+casename+'/')
     
-    #shutil.copytree(atmos_Dir,  master_out + casename + '/atmos/')
+    shutil.copytree(atmos_Dir,  master_out + casename + '/atmos/')
 
     pipelineobj.photochemDir = master_out+casename+'/atmos/PHOTOCHEM/' # path to PHOTOCHEM/ dir
     pipelineobj.atmosDir = master_out+casename+'/atmos/' # path to atmos/ dir
