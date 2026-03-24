@@ -124,7 +124,7 @@ def edit_speciesdat(pipelineobj, h2oin, oin, o2in, o3in, h2o2in, co2in, co2esc, 
             elif hold[0] == 'CO':
                 nsp_new.write('CO         LL  1 0 1 0 0 0    0     0.      0.      0.        0.      0      0.      '+"{:.3E}".format(coin)+'\n')
             elif hold[0] == 'SO2':
-                nsp_new.write('SO2        LL  1 0 0 2 0 0    1     0.      '+"{:.4E}".format(so2fix)+'  0.        0.      0      0.      0. \n')
+                nsp_new.write('SO2        LL  2 0 0 1 0 0    1     0.      '+"{:.4E}".format(so2fix)+'  0.        0.      0      0.      0. \n')
             else:
                 nsp_new.write(l)
         else:
