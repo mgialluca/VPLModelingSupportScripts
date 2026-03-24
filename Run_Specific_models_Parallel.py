@@ -4,7 +4,7 @@ import subprocess
 import os
 from multiprocessing import Pool
 
-master = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/ClimMN/'
+master = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/GMMSolutionsClim/'
 #master = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/ClimTestMulti/'
 
 def set_pipeline_vars(casename, pipelineobj, master_out=master):
@@ -87,13 +87,13 @@ def set_pipeline_vars(casename, pipelineobj, master_out=master):
     # Molecules for the type of atmosphere we're interested in 
 
     pipelineobj.molecule_dict = {} # key-value pairs of molecules of interest (keys, str) and their hitran codes (value, int)
-    gas_names = ['O2', 'H2O', 'O3']
+    gas_names = ['O2', 'H2O', 'O3', 'CO2', 'CO', 'SO2']
     pipelineobj.molecule_dict['Gas_names'] = gas_names
     for m in range(len(gas_names)):
         pipelineobj.molecule_dict[gas_names[m]] = pipelineobj.hitran_lookup.loc[gas_names[m]]['HitranNumber']
         pipelineobj.molecule_dict[gas_names[m]+'_RmixCol'] = m+2
 
-def edit_speciesdat(pipelineobj, h2oin, oin, o2in, o3in, h2o2in):
+def edit_speciesdat(pipelineobj, h2oin, oin, o2in, o3in, h2o2in, co2in, co2esc, coin, so2fix):
 
     # First need to create the inputs directory and copy the initial master files to change
     # Pipeline already has a function that does this:
@@ -119,6 +119,12 @@ def edit_speciesdat(pipelineobj, h2oin, oin, o2in, o3in, h2o2in):
                 nsp_new.write('O3         LL  3 0 0 0 0 0    0     '+"{:.3E}".format(o3in)+'  0.      0.        0.      0      0.      0. \n')
             elif hold[0] == 'H2O2':
                 nsp_new.write('H2O2       LL  2 2 0 0 0 0    0     '+"{:.3E}".format(h2o2in)+' 0.      0.        0.      0      0.      0. \n')
+            elif hold[0] == 'CO2':
+                nsp_new.write('CO2        LL  2 0 1 0 0 0    2     0.      0.      '+"{:.4E}".format(co2in)+'  0.      0      0.      '+"{:.3E}".format(co2esc)+'\n')
+            elif hold[0] == 'CO':
+                nsp_new.write('CO         LL  1 0 1 0 0 0    0     0.      0.      0.        0.      0      0.      '+"{:.3E}".format(coin)+'\n')
+            elif hold[0] == 'SO2':
+                nsp_new.write('SO2        LL  1 0 0 2 0 0    1     0.      '+"{:.4E}".format(so2fix)+'  0.        0.      0      0.      0. \n')
             else:
                 nsp_new.write(l)
         else:
@@ -134,7 +140,7 @@ def edit_speciesdat(pipelineobj, h2oin, oin, o2in, o3in, h2o2in):
 
 def run_one_model(inputstring):
 
-    h2oinput, oin, o2in, o3in, h2o2in, modelid = inputstring
+    h2oinput, oin, o2in, o3in, h2o2in, co2in, co2esc, coin, so2fix, copyfrompath, modelid = inputstring
 
     '''
     co2_label = str(int(np.ceil(co2input*1e6)))+'ppm'
@@ -145,33 +151,34 @@ def run_one_model(inputstring):
     '''
     case = 'RunNumber'+str(modelid)
     #case = inputstring#+'T2'
-    master = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/ClimMN/'
+    master = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/GMMSolutionsClim/'
 
     pipelineobj = VPLModelingPipeline(case, 
-                                  master+case+'/PhotochemInputs/', 
+                                  copyfrompath, 
                                   True, find_molecules_of_interest=False, hitran_year='2020')
     
     set_pipeline_vars(case, pipelineobj)
+    edit_speciesdat(pipelineobj, h2oinput, oin, o2in, o3in, h2o2in, co2in, co2esc, coin, so2fix)
     #edit_speciesdat(pipelineobj, h2oinput, oin, o2in, o3in, h2o2in)
     print(master+case)
-    for sdshol, dshol, fishol in os.walk(master+case+'/'):
-        fishol = fishol
-        break
+    # for sdshol, dshol, fishol in os.walk(master+case+'/'):
+    #     fishol = fishol
+    #     break
 
-    if 'FINAL_PTZ_mixingratios_out.dist' in fishol and 'vpl_2col_climate_output_'+case+'.run' in fishol:
-        print('continuing')
-        pipelineobj.global_convergence = True
-        pipelineobj.clim2col_restarting = True
+    # if 'FINAL_PTZ_mixingratios_out.dist' in fishol and 'vpl_2col_climate_output_'+case+'.run' in fishol:
+    #     print('continuing')
+    #     pipelineobj.global_convergence = True
+    #     pipelineobj.clim2col_restarting = True
 
     
-    elif 'FINAL_PTZ_mixingratios_out_FAILED.dist' in fis:
-        for fhold in fishol:
-            subprocess.run('rm '+master+case+'/'+fhold, shell=True)
+    # elif 'FINAL_PTZ_mixingratios_out_FAILED.dist' in fis:
+    #     for fhold in fishol:
+    #         subprocess.run('rm '+master+case+'/'+fhold, shell=True)
         
-        atmos_Dir = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/megan_atmos/atmos/'
-        if not os.path.exists(master+case+'/atmos/'):
-            shutil.copytree(atmos_Dir,  master+case+'/atmos/')
-        subprocess.run('rm -rf '+pipelineobj.LBLABC_AbsFilesDir+'*.abs', shell=True)
+    #     atmos_Dir = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/megan_atmos/atmos/'
+    #     if not os.path.exists(master+case+'/atmos/'):
+    #         shutil.copytree(atmos_Dir,  master+case+'/atmos/')
+    #     subprocess.run('rm -rf '+pipelineobj.LBLABC_AbsFilesDir+'*.abs', shell=True)
 
 
     
@@ -180,6 +187,10 @@ def run_one_model(inputstring):
     pipelineobj.o2input = o2in
     pipelineobj.o3input = o3in
     pipelineobj.h2o2input = h2o2in
+    pipelineobj.co2input = co2in
+    pipelineobj.co2escape = co2esc
+    pipelineobj.coinput = coin
+    pipelineobj.so2input = so2fix
     
     
     # Run the Photochem-Climate-SMART pipeline
@@ -343,33 +354,141 @@ ascii.write(tab, master+'ParameterSweep_RunStats.dat', delimiter=' ', format='fi
 
 #testmodel = run_one_model([3.4339E+11, 3.146E-02, 2.359E-02, 1.854E-01, 4.376E-01, 99])
 
-sims = ascii.read('/gscratch/vsm/gialluca/VPLModelingTools_Dev/MNEmiss2/EmceeSimulationOutputs.txt')
-likeli = sims['Likeli']
-likelinonan = likeli[np.where(np.isnan(likeli) != True)]
+# sims = ascii.read('/gscratch/vsm/gialluca/VPLModelingTools_Dev/MNEmiss2/EmceeSimulationOutputs.txt')
+# likeli = sims['Likeli']
+# likelinonan = likeli[np.where(np.isnan(likeli) != True)]
 
-inds = []
-#for i in np.sort(likelinonan)[-40:]:
-#    inds.append(list(likeli).index(i))
-for sds, ds, fis in os.walk('/gscratch/vsm/gialluca/VPLModelingTools_Dev/ClimMN'):
-    break
+# inds = []
+# #for i in np.sort(likelinonan)[-40:]:
+# #    inds.append(list(likeli).index(i))
+# for sds, ds, fis in os.walk('/gscratch/vsm/gialluca/VPLModelingTools_Dev/ClimMN'):
+#     break
 
-dsnum = [int(run.split('RunNumber')[1]) for run in ds]
-for i in dsnum:
-    inds.append(list(sims['ID']).index(i))
+# dsnum = [int(run.split('RunNumber')[1]) for run in ds]
+# for i in dsnum:
+#     inds.append(list(sims['ID']).index(i))
 
-inds = set(inds)
+# inds = set(inds)
+
+# Each Solution:
+def h2o_convert_units_back(sample):
+    Rp   = 1.097 * u.Rearth
+    MM   = 18.015 * (u.g / u.mol)
+    flux = sample * (u.kg / u.yr)
+    flux = flux / MM
+    flux = flux.to(u.mol / u.s)
+    flux = flux * ((4 * np.pi * (Rp**2))**-1)
+    flux = (flux * const.N_A)
+    flux = flux.to(1 / (u.cm**2 * u.s))
+    return flux.value
+
+def co2_convert_units_back(sample):
+    Rp   = 1.097 * u.Rearth
+    MM   = 44.01 * (u.g / u.mol)
+    flux = sample * (u.kg / u.yr)
+    flux = flux / MM
+    flux = flux.to(u.mol / u.s)
+    flux = flux * ((4 * np.pi * (Rp**2))**-1)
+    flux = (flux * const.N_A)
+    flux = flux.to(1 / (u.cm**2 * u.s))
+    return flux.value
+
+def find_closest_sample_path(sol_num, sol_data):
+    """Read SimRows for the given solution, find the sample whose input parameters
+    are closest (in log10 space) to the GMM median, and return its run path."""
+    #sim_file = ('/home/mgialluca/Nextcloud/VPL_Modeling/MultinestOutput/'
+    #            f'GMM_Solutions/Solution_Sets/Solution_{sol_num}_SimRows.txt')
+    sim_file = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/MultiNest_Output_Analysis/Solution_'+str(sol_num)+'_SimRows.txt'
+    with open(sim_file, 'r') as f:
+        header = f.readline().split()
+        rows = [dict(zip(header, line.split())) for line in f]
+
+    # Target values in the same units as SimRows columns
+    target = {
+        'H2Oflx':  h2o_convert_units_back(sol_data['H2OFlx']),
+        'CO2flx':  co2_convert_units_back(sol_data['CO2Flx']),
+        'SO2fixMR': sol_data['SO2FixMR'],
+        'Oveff':   sol_data['OVeff'],
+        'O2veff':  sol_data['O2Veff'],
+        'CO2veff': sol_data['CO2Veff'],
+        'COvdep':  sol_data['COVdep'],
+    }
+
+    best_id, best_dist = None, float('inf')
+    for row in rows:
+        dist = sum(
+            (np.log10(float(row[col])) - np.log10(tval))**2
+            for col, tval in target.items()
+            if tval > 0 and float(row[col]) > 0
+        )
+        if dist < best_dist:
+            best_dist = dist
+            best_id = row['ID']
+
+    return f'/gscratch/vsm/gialluca/VPLModelingTools_Dev/T1cMN/RunNumber{best_id}'+'/PhotochemInputs/'
+
+
+#gmm_file = '/home/mgialluca/Nextcloud/VPL_Modeling/MultinestOutput/GMM_Solutions/BestGMM_289_SolutionSet_Solutions.txt'
+gmm_file = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/MultiNest_Output_Analysis/BestGMM_289_SolutionSet_Solutions.txt'
+with open(gmm_file, 'r') as f:
+    lines = f.readlines()
+
 inputs = []
-for i in inds:
-    if sims['ID'][i] != 17825:
-        string = []
-        string.append(sims['H2O'][i])
-        string.append(sims['O'][i])
-        string.append(sims['O2'][i])
-        string.append(sims['O3'][i])
-        string.append(sims['H2O2'][i])
-        string.append(sims['ID'][i])
+current_sol = None
+sol_data = {}
+for line in lines:
+    stripped = line.strip()
+    if stripped.startswith('Solution'):
+        # Finalize the previous solution before starting a new one
+        if current_sol is not None and current_sol <= 8 and len(sol_data) == 7:
+            inputs.append([
+                h2o_convert_units_back(sol_data['H2OFlx']),  # h2o outgassing rate
+                sol_data['OVeff'],                            # o effusion velocity
+                sol_data['O2Veff'],                           # o2 effusion velocity
+                0.02,                                         # o3 deposition velocity (unconstrained)
+                0.02,                                         # h2o2 deposition velocity (unconstrained)
+                co2_convert_units_back(sol_data['CO2Flx']),  # co2 outgassing rate
+                sol_data['CO2Veff'],                          # co2 effusion velocity
+                sol_data['COVdep'],                           # co deposition rate
+                sol_data['SO2FixMR'],                         # so2 fixed mixing ratio
+                find_closest_sample_path(current_sol, sol_data),  # path to closest sample
+                current_sol                                   # solution number
+            ])
+        current_sol = int(stripped.split()[1])
+        sol_data = {}
+    elif current_sol is not None and current_sol <= 8:
+        parts = stripped.split()
+        if len(parts) >= 2 and parts[0] in ['H2OFlx', 'CO2Flx', 'SO2FixMR', 'OVeff', 'O2Veff', 'CO2Veff', 'COVdep']:
+            sol_data[parts[0]] = float(parts[1])
 
-        inputs.append(string)
+# Finalize solution 8 (last one before solution 9)
+if current_sol is not None and current_sol <= 8 and len(sol_data) == 7:
+    inputs.append([
+        h2o_convert_units_back(sol_data['H2OFlx']),
+        sol_data['OVeff'],
+        sol_data['O2Veff'],
+        0.02,
+        0.02,
+        co2_convert_units_back(sol_data['CO2Flx']),
+        sol_data['CO2Veff'],
+        sol_data['COVdep'],
+        sol_data['SO2FixMR'],
+        find_closest_sample_path(current_sol, sol_data),
+        current_sol
+    ])
+
+# old_inputs = []
+# for i in inds:
+#     if sims['ID'][i] != 17825:
+#         string = []
+#         string.append(sims['H2O'][i])
+#         string.append(sims['O'][i])
+#         string.append(sims['O2'][i])
+#         string.append(sims['O3'][i])
+#         string.append(sims['H2O2'][i])
+#         string.append(sims['ID'][i])
+
+#         old_inputs.append(string)
 
 with Pool() as p:
     models = p.map(run_one_model, inputs)
@@ -381,10 +500,14 @@ oins = [m.oinput for m in models]
 o2s = [m.o2input for m in models]
 o3s = [m.o3input for m in models]
 h2o2s = [m.h2o2input for m in models]
+co2s = [m.co2input for m in models]
+co2escs = [m.co2escape for m in models]
+cos = [m.coinput for m in models]
+so2s = [m.so2input for m in models]
 psurf = [m.updated_atm_pressure for m in models]
 
-data_for_table = [run_names, convergence, psurf, h2os, oins, o2s, o3s, h2o2s]
-output_col_names = ['RunName', 'Converged', 'Psurf', 'H2OInput', 'OInput', 'O2Input', 'O3Input', 'H2O2Input']
+data_for_table = [run_names, convergence, psurf, h2os, oins, o2s, o3s, h2o2s, co2s, co2escs, cos, so2s]
+output_col_names = ['RunName', 'Converged', 'Psurf', 'H2OInput', 'OInput', 'O2Input', 'O3Input', 'H2O2Input', 'CO2Input', 'CO2EscInput', 'COInput', 'SO2Input']
 
 tab = Table(data_for_table, names=output_col_names)
 
