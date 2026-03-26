@@ -2,7 +2,79 @@ from Pipeline import *
 import shutil
 from multiprocessing import Pool
 
-pipelineobj = VPLModelingPipeline('MEarth', 
+def Change_Tindist_to_isothermal(pipelineobj):
+
+    # WARNING: this may be hard coded if folks don't write their parameters.inc file the same way as templates etc
+    # I don't think it will be a problem but just noting in case
+    # This retrieves the NQ and NZ from parameters.inc
+    NQFile = open(pipelineobj.photochem_InputsDir+'parameters.inc', 'r')
+    NQFileLines = NQFile.readlines()
+    for l in NQFileLines:
+        if len(l.split('NQ=')) > 1:
+            NQ = l.split('NQ=')[1]
+            NQ = int(NQ.split(',')[0])
+            NZ = l.split('NZ=')[1]
+            NZ = int(NZ.split(',')[0])
+            break
+
+    # Find number of blocks of mixing ratios until T/EDD columns
+    NQblocks = np.ceil(NQ/10)
+
+    new_T = np.ones(200)*288.4
+
+    ### Now to create new in.dist
+
+    fnew = open(pipelineobj.photochem_InputsDir+'NEWin.dist', 'w')
+
+    # Keep track of the lines that are starting and ending the current block in the in.dist file
+    blockstart = 0
+    blockend = NZ
+
+    # this should handle all the mixing ratio blocks
+    for i in range(int(NQblocks)):
+        curr_nq_block = ascii.read(pipelineobj.photochem_InputsDir+'in.dist', data_start=blockstart, data_end=blockend)
+        blockstart = blockend
+        blockend = blockend+NZ
+
+        # Actually decided not to change H2O
+        #if i == block_w_h2o:
+        #    curr_nq_block['col'+str(H2OCol_inblock)] = new_h2o
+
+        for line in range(len(curr_nq_block)):
+            fnew.write('   ')
+            for col in curr_nq_block.columns:
+                fnew.write("{:.8E}".format(curr_nq_block[col][line])+'   ')
+            fnew.write('\n')
+
+    # now the T/EDD/DEN/O3/CO2 block
+    T_edd_block = ascii.read(pipelineobj.photochem_InputsDir+'in.dist', data_start=blockstart, data_end=blockend)
+    blockstart = blockend
+    print('LENGTH OF ORIGINAL BLOCK: '+str(len(T_edd_block)))
+    print('LENGTH OF NEW BLOCK: '+str(len(new_T)) )
+    T_edd_block['col1'] = new_T
+
+    for line in range(len(T_edd_block)):
+        fnew.write('   ')
+        for col in T_edd_block.columns:
+            fnew.write("{:.8E}".format(T_edd_block[col][line])+'   ')
+        fnew.write('\n')
+
+    # now the rest of in.dist
+    olddist_txt = open(pipelineobj.photochem_InputsDir+'in.dist', 'r')
+    alllines = olddist_txt.readlines()
+    olddist_txt.close()
+    for line in range(len(alllines)):
+        if line >= blockstart:
+            fnew.write(alllines[line])
+
+    fnew.close()
+
+    subprocess.run('rm '+pipelineobj.photochem_InputsDir+'in.dist', shell=True)
+    subprocess.run('mv '+pipelineobj.photochem_InputsDir+'NEWin.dist '+pipelineobj.photochem_InputsDir+'in.dist', shell=True)
+
+
+
+pipelineobj = VPLModelingPipeline('IsoEarth', 
                                   '/gscratch/vsm/gialluca/VPLModelingTools_Dev/atmos/PHOTOCHEM/INPUTFILES/TEMPLATES/ModernEarth/', 
                                   True, find_molecules_of_interest=False, hitran_year='2020', planet='Earth')
 
@@ -68,6 +140,9 @@ if not os.path.exists(pipelineobj.SMART_RunScriptDir):
 # Prepare the Hyak environment
 
 pipelineobj.run_photochem_1instance(CleanMake=True, InputCopy=pipelineobj.photochem_InputsDir, trynum=1)
+
+# Change to ISOTHERMAL:
+Change_Tindist_to_isothermal(pipelineobj)
 
 # Get the radius and gravity:
 
