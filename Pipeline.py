@@ -1053,7 +1053,7 @@ class VPLModelingPipeline:
             f.write(str(self.planetary_radius)+'                               planet radius\n') # planet radius
             f.write(str(self.MMW)+'                      mol. wgt. of atmosphere (kg/kmole)\n')
             if self.planet == 'Earth':
-                f.write('50.,100000.                               min, max wavenumber\n')
+                f.write('500.,100000.                               min, max wavenumber\n')
             #elif self.planet == 'GJ12b':
             #    f.write('1000.,20000.                              min, max wavenumber\n') 
 
@@ -1368,7 +1368,7 @@ class VPLModelingPipeline:
         self.s_OutputLevels = 1 # 1 - Top of atmosphere only
         self.s_OutputUnits = 2 # 2 - [W/m**2/sr/um]
         if self.planet == 'Earth':
-            self.s_MinMax_wavenumber = '50.,100000.'
+            self.s_MinMax_wavenumber = '500.,100000.'
         #elif self.planet == 'GJ12b':
         #    self.s_MinMax_wavenumber = '1000.,20000.' 
         elif self.MultiNest_DataFit == True:
