@@ -139,10 +139,10 @@ if not os.path.exists(pipelineobj.SMART_RunScriptDir):
     os.mkdir(pipelineobj.SMART_RunScriptDir)
 # Prepare the Hyak environment
 
-pipelineobj.run_photochem_1instance(CleanMake=True, InputCopy=pipelineobj.photochem_InputsDir, trynum=1)
-
 # Change to ISOTHERMAL:
 Change_Tindist_to_isothermal(pipelineobj)
+
+pipelineobj.run_photochem_1instance(CleanMake=True, InputCopy=pipelineobj.photochem_InputsDir, trynum=1)
 
 # Get the radius and gravity:
 
