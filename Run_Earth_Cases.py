@@ -74,8 +74,8 @@ def Change_Tindist_to_isothermal(pipelineobj):
 
 
 
-pipelineobj = VPLModelingPipeline('IsoEarth', 
-                                  '/gscratch/vsm/gialluca/VPLModelingTools_Dev/atmos/PHOTOCHEM/INPUTFILES/TEMPLATES/ModernEarth/', 
+pipelineobj = VPLModelingPipeline('ArchEarth', 
+                                  '/gscratch/vsm/gialluca/VPLModelingTools_Dev/atmos/PHOTOCHEM/INPUTFILES/TEMPLATES/Archean/', 
                                   True, find_molecules_of_interest=False, hitran_year='2020', planet='Earth')
 
 master_out = '/gscratch/vsm/gialluca/PostDocPropose/Earth_Isotherm_Test/'
@@ -140,7 +140,7 @@ if not os.path.exists(pipelineobj.SMART_RunScriptDir):
 # Prepare the Hyak environment
 
 # Change to ISOTHERMAL:
-Change_Tindist_to_isothermal(pipelineobj)
+#Change_Tindist_to_isothermal(pipelineobj)
 
 pipelineobj.run_photochem_1instance(CleanMake=True, InputCopy=pipelineobj.photochem_InputsDir, trynum=1)
 
