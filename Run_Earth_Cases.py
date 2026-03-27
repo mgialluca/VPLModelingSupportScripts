@@ -74,7 +74,7 @@ def Change_Tindist_to_isothermal(pipelineobj):
 
 
 
-pipelineobj = VPLModelingPipeline('IsoArch', 
+pipelineobj = VPLModelingPipeline('IsoArch2', 
                                   '/gscratch/vsm/gialluca/VPLModelingTools_Dev/atmos/PHOTOCHEM/INPUTFILES/TEMPLATES/Archean+haze/', 
                                   True, find_molecules_of_interest=False, hitran_year='2020', planet='Earth')
 
