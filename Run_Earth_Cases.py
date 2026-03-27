@@ -20,7 +20,7 @@ def Change_Tindist_to_isothermal(pipelineobj):
     # Find number of blocks of mixing ratios until T/EDD columns
     NQblocks = np.ceil(NQ/10)
 
-    new_T = np.ones(200)*278.6
+    new_T = np.ones(200)*288.4
 
     ### Now to create new in.dist
 
@@ -74,8 +74,8 @@ def Change_Tindist_to_isothermal(pipelineobj):
 
 
 
-pipelineobj = VPLModelingPipeline('IsoArch2', 
-                                  '/gscratch/vsm/gialluca/VPLModelingTools_Dev/atmos/PHOTOCHEM/INPUTFILES/TEMPLATES/Archean+haze/', 
+pipelineobj = VPLModelingPipeline('IsoEarth2', 
+                                  '/gscratch/vsm/gialluca/VPLModelingTools_Dev/atmos/PHOTOCHEM/INPUTFILES/TEMPLATES/ModernEarth/', 
                                   True, find_molecules_of_interest=False, hitran_year='2020', planet='Earth')
 
 master_out = '/gscratch/vsm/gialluca/PostDocPropose/Earth_Isotherm_Test/'
