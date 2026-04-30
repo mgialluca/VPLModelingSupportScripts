@@ -34,6 +34,8 @@ for sdat, p in zip(suites, planets):
         for i in range(len(tab)):
             if tab[i]['FinalState'] != 'Converged':
                 rn = tab[i]['ModelNumber']
+                if rn[0] == 'u':
+                    rn = 'R'+rn
                 for ds, sds, fs in os.walk(path+s+'/'+rn):
                     break
 
