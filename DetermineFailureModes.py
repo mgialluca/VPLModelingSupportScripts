@@ -26,7 +26,10 @@ for sdat, p in zip(suites, planets):
     output[p]['Unknown'] = 0
 
     for s in sdat:
-        tab = ascii.read(path+s+'/'+tablefile, delimiter=' ', format='fixed_width')
+        try:
+            tab = ascii.read(path+s+'/'+tablefile)
+        except:
+            tab = ascii.read(path+s+'/'+tablefile, delimiter=' ', format='fixed_width')
         
         for i in range(len(tab)):
             if tab[i]['FinalState'] != 'Converged':
