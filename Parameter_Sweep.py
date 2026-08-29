@@ -74,6 +74,11 @@ class Generate_Atmosphere_Parameter_Sweep:
         elif self.planet == 'T1h':
             self.R_p = 0.755*u.Rearth
 
+        elif self.planet == 'GJ12b_Brady':
+            self.R_p = 0.96*u.Rearth
+        elif self.planet == 'GJ12b_Turner':
+            self.R_p = 0.93*u.Rearth
+
         self.atmos_Dir = '/gscratch/vsm/gialluca/VPLModelingTools_Dev/atmos/' # Path to dir containing atmos, will be copied for runs 
 
         self.mcmc_pressure_only = False
@@ -264,7 +269,7 @@ class Generate_Atmosphere_Parameter_Sweep:
         # Molecules for the type of atmosphere we're interested in 
 
         pipelineobj.molecule_dict = {} # key-value pairs of molecules of interest (keys, str) and their hitran codes (value, int)
-        gas_names = ['O2', 'H2O', 'O3', 'CO2', 'CO', 'SO2']
+        gas_names = ['O2', 'H2O', 'O3']
         pipelineobj.molecule_dict['Gas_names'] = gas_names
         for m in range(len(gas_names)):
             pipelineobj.molecule_dict[gas_names[m]] = pipelineobj.hitran_lookup.loc[gas_names[m]]['HitranNumber']

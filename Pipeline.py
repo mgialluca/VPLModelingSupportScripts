@@ -61,8 +61,10 @@ class VPLModelingPipeline:
         elif self.planet == 'Earth':
             self.planetary_mass = 1*u.Mearth.to(u.kg)
 
-        elif self.planet == 'GJ12b':
-            self.planetary_mass = 0.75*u.Mearth.to(u.kg)
+        elif self.planet == 'GJ12b_Brady':
+            self.planetary_mass = 0.7*u.Mearth.to(u.kg)
+        elif self.planet == 'GJ12b_Turner':
+            self.planetary_mass = 0.95*u.Mearth.to(u.kg)
         
         # Force dz adjust, added for T1b high steam atmospheres to force a larger dzgrid
         self.force_dz_adjust = force_dz_adjust
@@ -1054,8 +1056,8 @@ class VPLModelingPipeline:
             f.write(str(self.MMW)+'                      mol. wgt. of atmosphere (kg/kmole)\n')
             if self.planet == 'Earth':
                 f.write('500.,100000.                               min, max wavenumber\n')
-            #elif self.planet == 'GJ12b':
-            #    f.write('1000.,20000.                              min, max wavenumber\n') 
+            elif self.planet == 'GJ12b_Brady' or self.planet == 'GJ12b_Turner':
+                f.write('1000.,20000.                              min, max wavenumber\n') 
 
             elif self.MultiNest_DataFit == True:
                 f.write('555.,1000.                               min, max wavenumber\n')
@@ -1139,7 +1141,7 @@ class VPLModelingPipeline:
         self.c_HRTSources = 3 # 1 - Solar, 2 - Thermal, 3 - Both
 
         # Host Star Specs
-        if self.planet == 'GJ12b':
+        if self.planet == 'GJ12b_Brady' or self.planet == 'GJ12b_Turner':
             self.c_StellarSpectrum = '/gscratch/vsm/gialluca/StellarSpectra/gj12.dat'
             self.c_StellarSpect_SkipLines = 5
         else:
@@ -1218,7 +1220,7 @@ class VPLModelingPipeline:
             self.c_Convert_Stellar_microns = 1.0 # Conversion factor to microns
             self.c_StellarSpect_wnflux_col = '1,2'
 
-        elif self.planet == 'GJ12b':
+        elif self.planet == 'GJ12b_Brady' or self.planet == 'GJ12b_Turner':
             self.c_DayLength = 1102586.429 # [s], 12.76 days 
             self.c_SemiMajorAxis = 0.06681 # [AU]
 
@@ -1332,8 +1334,8 @@ class VPLModelingPipeline:
         self.s_SemiMajorAxis = self.c_SemiMajorAxis # account for planet specific
         if self.planet == 'Earth':
             self.s_StellarRadius = 1
-        elif self.planet == 'GJ12b':
-            self.s_StellarRadius = 0.2617 # [Rsun]
+        elif self.planet == 'GJ12b_Brady' or self.planet == 'GJ12b_Turner':
+            self.s_StellarRadius = 0.265 # [Rsun]
         else:
             self.s_StellarRadius = 0.1192 # [Rsun]
 
@@ -1369,8 +1371,8 @@ class VPLModelingPipeline:
         self.s_OutputUnits = 2 # 2 - [W/m**2/sr/um]
         if self.planet == 'Earth':
             self.s_MinMax_wavenumber = '500.,100000.'
-        #elif self.planet == 'GJ12b':
-        #    self.s_MinMax_wavenumber = '1000.,20000.' 
+        elif self.planet == 'GJ12b_Brady' or self.planet == 'GJ12b_Turner':
+            self.s_MinMax_wavenumber = '1000.,20000.' 
         elif self.MultiNest_DataFit == True:
             self.s_MinMax_wavenumber = '555.,1000.'
         else:
