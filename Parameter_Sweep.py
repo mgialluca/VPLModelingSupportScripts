@@ -113,9 +113,10 @@ class Generate_Atmosphere_Parameter_Sweep:
 
         # Need to set Min / Max ranges for each molecule to vary in the form of a dictionary if using Linear or Log sampling
         self.outgass_species_MinMax_gridsweep = {}
-        self.outgass_species_MinMax_gridsweep['H2O'] = [44552887.2545331, 9.47899801e11]
-        self.outgass_species_MinMax_gridsweep['CO2'] = []
-        self.outgass_species_MinMax_gridsweep['SO2'] = []
+        #self.outgass_species_MinMax_gridsweep['H2O'] = [44552887.2545331, 9.47899801e11]
+        #self.outgass_species_MinMax_gridsweep['CO2'] = []
+        #self.outgass_species_MinMax_gridsweep['SO2'] = []
+        
         #[1.00028455e+11, 1.00089313e+11]
         #[9.97550516e+10, 9.99980399e+10]
         #[9.96337789e+10, 1.00608103e+11]
@@ -128,7 +129,7 @@ class Generate_Atmosphere_Parameter_Sweep:
         self.escape_species_MinMax_gridsweep['O2'] = []
         self.escape_species_MinMax_gridsweep['O3'] = []
         self.escape_species_MinMax_gridsweep['H2O2'] = []
-        self.escape_species_MinMax_gridsweep['CO2'] = []
+        #self.escape_species_MinMax_gridsweep['CO2'] = []
         self.escape_species_MinMax_gridsweep['CO'] = []
         
 
@@ -138,16 +139,16 @@ class Generate_Atmosphere_Parameter_Sweep:
 
         # Need to pass samples for user defined option
         self.outgass_samples_gridsweep = {}
-        self.outgass_samples_gridsweep['CO2'] = [0]
-        self.outgass_samples_gridsweep['SO2'] = [0.0001] #100 ppm
+        #self.outgass_samples_gridsweep['CO2'] = [0]
+        #self.outgass_samples_gridsweep['SO2'] = [0.0001] #100 ppm
 
         self.escape_samples_gridsweep = {}
-        self.escape_samples_gridsweep['O'] = [0.1, 0.5]#[0, 1e27, 1e29]#[0, 1e27, 1e28, 1e29] #[1e28, 1e29, 1e30] #[0, 1e26, 1e27] #[0, 1e23, 5e23, 1e24, 5e24, 1e25, 5e25, 1e26]
-        self.escape_samples_gridsweep['O2'] = [0.05, 0.1]#[1e26, 5e26, 1e27]
-        self.escape_samples_gridsweep['O3'] = [0.02, 0.4] 
-        self.escape_samples_gridsweep['H2O2'] = [0.02]
-        self.escape_samples_gridsweep['CO2'] = [0.02]
-        self.escape_samples_gridsweep['CO'] = [0.001]
+        #self.escape_samples_gridsweep['O'] = [0.1, 0.5]#[0, 1e27, 1e29]#[0, 1e27, 1e28, 1e29] #[1e28, 1e29, 1e30] #[0, 1e26, 1e27] #[0, 1e23, 5e23, 1e24, 5e24, 1e25, 5e25, 1e26]
+        #self.escape_samples_gridsweep['O2'] = [0.05, 0.1]#[1e26, 5e26, 1e27]
+        #self.escape_samples_gridsweep['O3'] = [0.02, 0.4] 
+        #self.escape_samples_gridsweep['H2O2'] = [0.02]
+        #self.escape_samples_gridsweep['CO2'] = [0.02]
+        #self.escape_samples_gridsweep['CO'] = [0.001]
         
 
 
@@ -913,7 +914,7 @@ class Generate_Atmosphere_Parameter_Sweep:
             # Expand indist
             self.expand_indist(currmodel, climate_starting_point)
             #self.update_indist_T_EDD_Profiles(currmodel, climate_starting_point)
-        else:
+        elif self.multinest_fit_data == True and climate_starting_point == use_starting_point:
             print('Model '+str(modelID)+' has the same climate and photochem starting points ('+climate_starting_point+')')
 
         # If this is multinest, probably need to make sure S and C daughter species dont have deposition velocities default set 
