@@ -3,7 +3,7 @@ import subprocess
 
 
 #'/gscratch/vsm/gialluca/VPLModelingTools_Dev/SensTestH2O/RunNumber175/
-test_object = Generate_Atmosphere_Parameter_Sweep('TuGJ12bH2O', 
+test_object = Generate_Atmosphere_Parameter_Sweep('TG12bH2O', 
                                   '/gscratch/vsm/gialluca/VPLModelingTools_Dev/GJ12b_Starts/O2Dom_Updated_Turner/', 
                                 restart_run= False, 
                                 starting_point='Exact',
