@@ -1143,7 +1143,7 @@ class VPLModelingPipeline:
         # Host Star Specs
         if self.planet == 'GJ12b_Brady' or self.planet == 'GJ12b_Turner':
             self.c_StellarSpectrum = '/gscratch/vsm/gialluca/StellarSpectra/gj12.dat'
-            self.c_StellarSpect_SkipLines = 5
+            self.c_StellarSpect_SkipLines = 10
         else:
             self.c_StellarSpectrum = '/gscratch/vsm/gialluca/StellarSpectra/TRAPPIST-1_2020.dat'
             self.c_StellarSpect_SkipLines = 10
