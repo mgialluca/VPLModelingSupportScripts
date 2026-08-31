@@ -1126,7 +1126,7 @@ class Generate_Atmosphere_Parameter_Sweep:
             rate_cols.append(species+'_EscapeRate')
             escape_rates.append([])
 
-        for i in range(1,Num_of_Models+1):
+        for i in range(Num_of_Models):
 
             # Get the model ID ('RunNumber#')
             model_ID_hold = 'RunNumber'+str(i)
