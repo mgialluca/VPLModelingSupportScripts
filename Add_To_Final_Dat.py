@@ -23,6 +23,11 @@ def add_spectra(planet='T1b', atm_type='H2O-O2', sweep_dir=None):
     elif planet == 'T1h':
         Rp = 0.755*u.Rearth
 
+    elif planet == 'GJ12b_Brady':
+        Rp = 0.96*u.Rearth
+    elif planet == 'GJ12b_Turner':
+        Rp = 0.93*u.Rearth
+
     if atm_type in ['SO2-H2O', 'SO2-CO2']:
         fso2 = open('/gscratch/vsm/gialluca/VPLModelingTools_Dev/AdjSO2/'+planet+'_Tracking.json', 'r')
         fjso2 = json.load(fso2)
