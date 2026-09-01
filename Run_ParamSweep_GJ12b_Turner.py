@@ -14,7 +14,7 @@ test_object = Generate_Atmosphere_Parameter_Sweep('Tu12bCO2',
 
 # Outgassing rate for T1c
 test_object.outgass_species_gridsweep = ['H2O', 'CO2']
-test_object.outgass_species_MinMax_gridsweep['H2O'] = [0, 4.8779e11]#[34208000000.0, 9.47899801e11]
+test_object.outgass_species_MinMax_gridsweep['H2O'] = [1e2, 4.8779e11]#[34208000000.0, 9.47899801e11]
 test_object.outgass_species_MinMax_gridsweep['CO2'] = [88539.0, 5.5e10]#[34208000000.0, 9.47899801e11]
 test_object.outgass_sample_type_gridsweep = ['Log', 'Log']
 test_object.outgass_species_sourcetype = ['Flx', 'Flx']
