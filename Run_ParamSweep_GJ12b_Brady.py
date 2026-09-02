@@ -8,7 +8,7 @@ test_object = Generate_Atmosphere_Parameter_Sweep('GJ12bCO2',
                                 restart_run= False, 
                                 starting_point='Exact',
                                 hitran_year='2020',
-                                climate2col=True,
+                                climate2col=False,
                                 spectra=True,
                                 planet='GJ12b_Brady')
 
